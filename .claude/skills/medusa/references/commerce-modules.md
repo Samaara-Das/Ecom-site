@@ -1,540 +1,598 @@
-# Medusa Commerce Modules
+# Commerce Modules Reference
 
-Core commerce functionality split into modular, replaceable modules.
-
-## Contents
-
-- Module Overview
-- Product Module
-- Pricing Module
-- Cart Module
-- Order Module
-- Payment Module
-- Fulfillment Module
-- Customer Module
-- Inventory Module
-- Region Module
-- Promotion Module
-- Module Linking
-
-## Module Overview
-
-| Module | Purpose | Key Entities |
-|--------|---------|--------------|
-| Product | Products, variants, categories | Product, ProductVariant, ProductCategory |
-| Pricing | Price sets, price rules | PriceSet, Price, PriceRule |
-| Cart | Shopping cart, line items | Cart, LineItem |
-| Order | Orders, fulfillments, returns | Order, OrderItem, Return, Exchange |
-| Payment | Payment sessions, captures | PaymentCollection, PaymentSession |
-| Fulfillment | Shipping options, providers | FulfillmentSet, ShippingOption |
-| Customer | Customer accounts, groups | Customer, CustomerGroup, Address |
-| Inventory | Stock levels, reservations | InventoryItem, InventoryLevel |
-| Region | Multi-region support | Region, Currency |
-| Promotion | Discounts, campaigns | Promotion, Campaign, PromotionRule |
-| Sales Channel | Multiple storefronts | SalesChannel |
-| Tax | Tax rates, providers | TaxRate, TaxRegion |
-| Stock Location | Warehouse management | StockLocation |
+Core modules for product catalog, shopping cart, orders, pricing, and inventory management.
 
 ## Product Module
+
+### Data Model Hierarchy
+
+```
+Product
+├── ProductVariant (size, color combinations)
+│   ├── ProductVariantPrice
+│   └── ProductVariantInventory (link)
+├── ProductOption (Size, Color)
+│   └── ProductOptionValue (S, M, L, Red, Blue)
+├── ProductCategory
+├── ProductCollection
+├── ProductType
+└── ProductTag
+```
 
 ### Creating Products
 
 ```typescript
-import { Modules } from "@medusajs/framework/utils"
+const productService = container.resolve("product")
 
-const productService = container.resolve(Modules.PRODUCT)
-
+// Simple product
 const product = await productService.createProducts({
+  title: "Classic T-Shirt",
+  description: "Comfortable cotton t-shirt",
+  handle: "classic-tshirt", // URL-friendly slug
+  status: "published", // draft, published, rejected
+  weight: 200,
+  metadata: { brand: "MyBrand" }
+})
+
+// With options and variants
+const productWithVariants = await productService.createProducts({
   title: "Premium T-Shirt",
-  description: "High-quality cotton t-shirt",
-  status: "published",
   options: [
     { title: "Size", values: ["S", "M", "L", "XL"] },
-    { title: "Color", values: ["Black", "White", "Navy"] },
+    { title: "Color", values: ["Black", "White", "Navy"] }
   ],
   variants: [
     {
-      title: "Small / Black",
+      title: "Small Black",
       sku: "TSHIRT-S-BLK",
       options: { Size: "S", Color: "Black" },
+      manage_inventory: true,
+      prices: [
+        { amount: 2500, currency_code: "usd" },
+        { amount: 2000, currency_code: "eur" }
+      ]
     },
-  ],
+    {
+      title: "Medium White",
+      sku: "TSHIRT-M-WHT",
+      options: { Size: "M", Color: "White" },
+      prices: [{ amount: 2500, currency_code: "usd" }]
+    }
+  ]
 })
 ```
 
-### Querying Products with Variants
+### Querying Products
 
 ```typescript
+const query = container.resolve("query")
+
+// List with filters
 const { data: products } = await query.graph({
   entity: "product",
-  fields: [
-    "id",
-    "title",
-    "description",
-    "status",
-    "variants.*",
-    "variants.prices.*",
-    "categories.*",
-    "tags.*",
-  ],
+  fields: ["id", "title", "handle", "status", "variants.*"],
   filters: {
     status: "published",
+    collection_id: collectionId
   },
+  pagination: { skip: 0, take: 20 }
+})
+
+// Single product with all relations
+const { data: [product] } = await query.graph({
+  entity: "product",
+  fields: [
+    "*",
+    "variants.*",
+    "variants.prices.*",
+    "options.*",
+    "options.values.*",
+    "categories.*",
+    "images.*"
+  ],
+  filters: { handle: "classic-tshirt" }
 })
 ```
 
 ### Product Categories
 
 ```typescript
-const category = await productService.createProductCategories({
+// Create category hierarchy
+const parentCategory = await productService.createProductCategories({
   name: "Clothing",
-  description: "All clothing items",
+  handle: "clothing",
   is_active: true,
-  parent_category_id: null, // Top-level category
+  is_internal: false // visible to storefront
+})
+
+const childCategory = await productService.createProductCategories({
+  name: "T-Shirts",
+  handle: "t-shirts",
+  parent_category_id: parentCategory.id,
+  is_active: true
+})
+
+// Assign products to categories
+await productService.updateProducts(productId, {
+  category_ids: [childCategory.id]
 })
 ```
 
-## Pricing Module
-
-### Creating Price Sets
+### Product Collections
 
 ```typescript
-import { Modules } from "@medusajs/framework/utils"
+// Create collection
+const collection = await productService.createProductCollections({
+  title: "Summer 2024",
+  handle: "summer-2024"
+})
 
-const pricingService = container.resolve(Modules.PRICING)
-
-const priceSet = await pricingService.createPriceSets({
-  prices: [
-    {
-      amount: 4000, // $40.00 in cents
-      currency_code: "usd",
-    },
-    {
-      amount: 3500, // EUR 35.00
-      currency_code: "eur",
-    },
-  ],
+// Add products
+await productService.updateProducts(productId, {
+  collection_id: collection.id
 })
 ```
 
-### Linking Variant to Price Set
-
-```typescript
-import { Modules } from "@medusajs/framework/utils"
-
-await link.create({
-  [Modules.PRODUCT]: {
-    variant_id: "variant_123",
-  },
-  [Modules.PRICING]: {
-    price_set_id: "pset_123",
-  },
-})
-```
-
-### Customer Group Pricing
-
-Set different prices based on customer groups:
-
-```typescript
-const priceSet = await pricingService.createPriceSets({
-  prices: [
-    // Default price
-    { amount: 4000, currency_code: "usd" },
-    // VIP customer price
-    {
-      amount: 3000,
-      currency_code: "usd",
-      rules: { "customer.groups.id": "cusgrp_vip" },
-    },
-    // Wholesale price
-    {
-      amount: 2000,
-      currency_code: "usd",
-      rules: { "customer.groups.id": "cusgrp_wholesale" },
-    },
-  ],
-})
-```
-
-### Price Rules
-
-```typescript
-// Region-based pricing
-{
-  amount: 3500,
-  currency_code: "eur",
-  rules: { region_id: "reg_europe" }
-}
-
-// Quantity-based pricing
-{
-  amount: 3500,
-  currency_code: "usd",
-  rules: { quantity: { $gte: 10 } }
-}
-```
+---
 
 ## Cart Module
 
-### Creating a Cart
+### Cart Structure
 
-```typescript
-import { Modules } from "@medusajs/framework/utils"
-
-const cartService = container.resolve(Modules.CART)
-
-const cart = await cartService.createCarts({
-  region_id: "reg_123",
-  currency_code: "usd",
-  customer_id: "cus_123", // Optional
-  email: "customer@example.com",
-})
+```
+Cart
+├── LineItem (products in cart)
+│   ├── adjustments (discounts)
+│   └── tax_lines
+├── ShippingMethod
+│   ├── adjustments
+│   └── tax_lines
+├── Address (shipping, billing)
+└── PaymentCollection (link)
 ```
 
-### Adding Line Items
+### Cart Operations
 
 ```typescript
+const cartService = container.resolve("cart")
+
+// Create cart
+const cart = await cartService.createCarts({
+  region_id: regionId,
+  currency_code: "usd",
+  customer_id: customerId, // optional
+  email: "customer@example.com",
+  metadata: { source: "storefront" }
+})
+
+// Add line items
 await cartService.addLineItems(cart.id, [
   {
-    variant_id: "variant_123",
+    variant_id: variantId,
     quantity: 2,
-  },
+    metadata: { gift_wrap: true }
+  }
 ])
-```
 
-### Updating Line Items
-
-```typescript
+// Update line item quantity
 await cartService.updateLineItems(cart.id, [
-  {
-    id: "item_123",
-    quantity: 3,
-  },
+  { id: lineItemId, quantity: 3 }
 ])
-```
 
-### Cart Totals
+// Remove line item
+await cartService.deleteLineItems(cart.id, [lineItemId])
 
-Cart includes calculated totals:
-
-- `subtotal` - Sum of line items before discounts/taxes
-- `discount_total` - Total discounts applied
-- `shipping_total` - Shipping cost
-- `tax_total` - Total taxes
-- `total` - Final amount
-
-## Order Module
-
-### Creating an Order
-
-```typescript
-import { Modules } from "@medusajs/framework/utils"
-
-const orderService = container.resolve(Modules.ORDER)
-
-const order = await orderService.createOrders({
-  region_id: "reg_123",
-  currency_code: "usd",
-  customer_id: "cus_123",
-  email: "customer@example.com",
-  items: [
-    {
-      title: "Premium T-Shirt",
-      quantity: 2,
-      unit_price: 4000,
-      variant_id: "variant_123",
-    },
-  ],
+// Set addresses
+await cartService.updateCarts(cart.id, {
   shipping_address: {
     first_name: "John",
     last_name: "Doe",
     address_1: "123 Main St",
     city: "New York",
-    country_code: "us",
+    province: "NY",
     postal_code: "10001",
+    country_code: "us"
   },
+  billing_address: { /* same structure */ }
+})
+
+// Add shipping method
+await cartService.addShippingMethods(cart.id, [
+  { shipping_option_id: shippingOptionId }
+])
+```
+
+### Cart Promotions
+
+```typescript
+// Apply promo code
+await cartService.updateCarts(cart.id, {
+  promo_codes: ["SUMMER20"]
+})
+
+// Cart automatically calculates:
+// - item.adjustments (line item discounts)
+// - shipping_methods[].adjustments (shipping discounts)
+// - subtotal, discount_total, shipping_total, tax_total, total
+```
+
+### Retrieve Cart with Totals
+
+```typescript
+const { data: [cart] } = await query.graph({
+  entity: "cart",
+  fields: [
+    "*",
+    "items.*",
+    "items.variant.*",
+    "items.variant.product.*",
+    "items.adjustments.*",
+    "shipping_methods.*",
+    "shipping_address.*",
+    "payment_collection.*"
+  ],
+  filters: { id: cartId }
+})
+
+// Access calculated totals
+console.log({
+  subtotal: cart.subtotal,
+  discount_total: cart.discount_total,
+  shipping_total: cart.shipping_total,
+  tax_total: cart.tax_total,
+  total: cart.total
 })
 ```
 
-### Order Statuses
+---
 
-| Status | Description |
-|--------|-------------|
-| `pending` | Order created, not yet processed |
-| `completed` | Order fulfilled and completed |
-| `canceled` | Order canceled |
-| `requires_action` | Needs manual intervention |
+## Order Module
 
-### Order Items
+### Order Structure
+
+```
+Order
+├── OrderItem
+│   └── OrderItemChange (modifications)
+├── ShippingMethod
+├── Transaction
+├── Fulfillment
+├── Return
+├── Exchange
+└── Claim
+```
+
+### Order Lifecycle
+
+```
+cart.completed → order.placed → order.fulfillment_created → order.shipped → order.delivered
+                     ↓
+              order.payment_captured
+                     ↓
+              (optional) return.requested → return.received → order.refunded
+```
+
+### Creating Orders (via Workflow)
+
+```typescript
+import { completeCartWorkflow } from "@medusajs/medusa/core-flows"
+
+// Complete checkout - creates order from cart
+const { result } = await completeCartWorkflow(container).run({
+  input: { id: cartId }
+})
+
+const order = result.order
+```
+
+### Querying Orders
 
 ```typescript
 const { data: orders } = await query.graph({
   entity: "order",
   fields: [
-    "id",
-    "status",
-    "total",
+    "*",
     "items.*",
     "items.variant.*",
-    "shipping_address.*",
+    "items.variant.product.*",
+    "shipping_methods.*",
     "fulfillments.*",
+    "fulfillments.items.*",
+    "transactions.*",
+    "shipping_address.*",
+    "customer.*"
   ],
-})
-```
-
-## Payment Module
-
-### Creating Payment Collection
-
-```typescript
-import { Modules } from "@medusajs/framework/utils"
-
-const paymentService = container.resolve(Modules.PAYMENT)
-
-const paymentCollection = await paymentService.createPaymentCollections({
-  region_id: "reg_123",
-  currency_code: "usd",
-  amount: 5000,
-})
-```
-
-### Payment Sessions
-
-```typescript
-// Initialize payment session
-const session = await paymentService.createPaymentSessions(
-  paymentCollection.id,
-  [{ provider_id: "stripe" }]
-)
-
-// Authorize payment
-await paymentService.authorizePaymentSession(session.id, {})
-
-// Capture payment
-await paymentService.capturePayment({ payment_id: payment.id })
-```
-
-### Payment Providers
-
-Configure in `medusa-config.ts`:
-
-```typescript
-module.exports = {
-  modules: [
-    {
-      resolve: "@medusajs/medusa/payment",
-      options: {
-        providers: [
-          {
-            resolve: "@medusajs/medusa/payment-stripe",
-            id: "stripe",
-            options: {
-              apiKey: process.env.STRIPE_API_KEY,
-            },
-          },
-        ],
-      },
-    },
-  ],
-}
-```
-
-## Fulfillment Module
-
-### Fulfillment Sets
-
-```typescript
-import { Modules } from "@medusajs/framework/utils"
-
-const fulfillmentService = container.resolve(Modules.FULFILLMENT)
-
-const fulfillmentSet = await fulfillmentService.createFulfillmentSets({
-  name: "US Warehouse",
-  type: "shipping",
-})
-```
-
-### Shipping Options
-
-```typescript
-const shippingOption = await fulfillmentService.createShippingOptions({
-  name: "Standard Shipping",
-  price_type: "flat",
-  service_zone_id: "sz_123",
-  shipping_profile_id: "sp_123",
-  provider_id: "manual",
-  type: {
-    code: "standard",
-    label: "Standard Shipping",
-    description: "5-7 business days",
+  filters: {
+    customer_id: customerId,
+    status: ["pending", "completed"]
   },
+  pagination: { skip: 0, take: 10, order: { created_at: "DESC" } }
 })
 ```
 
-### Calculate Shipping Price
+### Order Fulfillment
 
 ```typescript
-// In storefront
-sdk.store.fulfillment.calculate("so_123", {
-  cart_id: "cart_123",
-}).then(({ shipping_option }) => {
-  console.log(shipping_option.calculated_price)
+import { createFulfillmentWorkflow } from "@medusajs/medusa/core-flows"
+
+await createFulfillmentWorkflow(container).run({
+  input: {
+    order_id: orderId,
+    items: [
+      { id: orderItemId, quantity: 1 }
+    ],
+    labels: [
+      { tracking_number: "1Z999AA10123456784", tracking_url: "https://..." }
+    ]
+  }
 })
 ```
 
-## Customer Module
-
-### Creating Customers
+### Returns
 
 ```typescript
-import { Modules } from "@medusajs/framework/utils"
+import { createReturnWorkflow } from "@medusajs/medusa/core-flows"
 
-const customerService = container.resolve(Modules.CUSTOMER)
+// Request return
+const { result } = await createReturnWorkflow(container).run({
+  input: {
+    order_id: orderId,
+    items: [
+      { id: orderItemId, quantity: 1, reason: "damaged" }
+    ],
+    return_shipping: {
+      option_id: returnShippingOptionId
+    }
+  }
+})
 
-const customer = await customerService.createCustomers({
-  email: "john@example.com",
-  first_name: "John",
-  last_name: "Doe",
+// Process return (when items received)
+import { confirmReturnReceiveWorkflow } from "@medusajs/medusa/core-flows"
+
+await confirmReturnReceiveWorkflow(container).run({
+  input: {
+    return_id: returnId,
+    items: [{ id: returnItemId, quantity: 1 }]
+  }
 })
 ```
 
-### Customer Groups
+---
+
+## Pricing Module
+
+### Price Structure
+
+```
+PriceSet
+├── Price
+│   ├── currency_code
+│   ├── amount (in smallest unit, e.g., cents)
+│   └── PriceRule (conditions)
+│       ├── region_id
+│       ├── customer_group_id
+│       └── min_quantity / max_quantity
+└── PriceList (sales, VIP pricing)
+    └── Price (with rules)
+```
+
+### Setting Prices
 
 ```typescript
-// Create group
-const group = await customerService.createCustomerGroups({
-  name: "VIP Customers",
+const pricingService = container.resolve("pricing")
+
+// Basic pricing
+await productService.updateProductVariants(variantId, {
+  prices: [
+    { amount: 2500, currency_code: "usd" },
+    { amount: 2200, currency_code: "eur" },
+    { amount: 2000, currency_code: "gbp" }
+  ]
 })
 
-// Add customer to group
-await customerService.addCustomerToGroup(customer.id, group.id)
+// Region-specific pricing
+await pricingService.addPrices({
+  priceSetId: variant.price_set_id,
+  prices: [
+    {
+      amount: 2000,
+      currency_code: "usd",
+      rules: { region_id: usRegionId }
+    },
+    {
+      amount: 2500,
+      currency_code: "usd",
+      rules: { region_id: caRegionId }
+    }
+  ]
+})
 ```
 
-### Customer Addresses
+### Price Lists (Sales)
 
 ```typescript
-const address = await customerService.createAddresses({
-  customer_id: "cus_123",
-  first_name: "John",
-  last_name: "Doe",
-  address_1: "123 Main St",
-  city: "New York",
-  country_code: "us",
-  postal_code: "10001",
-  is_default_shipping: true,
+// Create sale price list
+const priceList = await pricingService.createPriceLists({
+  title: "Summer Sale",
+  type: "sale", // sale or override
+  status: "active",
+  starts_at: new Date("2024-06-01"),
+  ends_at: new Date("2024-08-31")
+})
+
+// Add sale prices
+await pricingService.addPriceListPrices({
+  priceListId: priceList.id,
+  prices: [
+    {
+      price_set_id: variant.price_set_id,
+      amount: 1999, // sale price
+      currency_code: "usd"
+    }
+  ]
 })
 ```
+
+### Calculating Prices
+
+```typescript
+// Get calculated price for context
+const prices = await pricingService.calculatePrices({
+  id: [variant.price_set_id],
+  context: {
+    currency_code: "usd",
+    region_id: regionId,
+    customer_group_id: customerGroupId
+  }
+})
+
+// Result includes original and calculated amounts
+// { calculated_amount, original_amount, currency_code }
+```
+
+---
 
 ## Inventory Module
 
-### Inventory Items
+### Inventory Structure
 
-```typescript
-import { Modules } from "@medusajs/framework/utils"
-
-const inventoryService = container.resolve(Modules.INVENTORY)
-
-const inventoryItem = await inventoryService.createInventoryItems({
-  sku: "TSHIRT-S-BLK",
-  requires_shipping: true,
-})
+```
+InventoryItem
+├── InventoryLevel (per location)
+│   ├── stocked_quantity
+│   ├── reserved_quantity
+│   └── available_quantity (computed)
+└── ReservationItem (held for orders)
 ```
 
-### Inventory Levels
+### Managing Inventory
 
 ```typescript
+const inventoryService = container.resolve("inventory")
+
+// Create inventory item
+const item = await inventoryService.createInventoryItems({
+  sku: "TSHIRT-S-BLK",
+  requires_shipping: true
+})
+
+// Link to variant (via module link)
+import { Modules } from "@medusajs/framework/utils"
+
+await remoteLink.create({
+  [Modules.PRODUCT]: { variant_id: variantId },
+  [Modules.INVENTORY]: { inventory_item_id: item.id }
+})
+
+// Set stock levels per location
 await inventoryService.createInventoryLevels({
-  inventory_item_id: "iitem_123",
-  location_id: "sloc_123",
-  stocked_quantity: 100,
+  inventory_item_id: item.id,
+  location_id: warehouseId,
+  stocked_quantity: 100
+})
+
+// Adjust stock
+await inventoryService.adjustInventory({
+  inventoryItemId: item.id,
+  locationId: warehouseId,
+  adjustment: -5 // reduce by 5
 })
 ```
 
 ### Reservations
 
 ```typescript
-await inventoryService.createReservationItems({
-  inventory_item_id: "iitem_123",
-  location_id: "sloc_123",
-  quantity: 5,
-  line_item_id: "item_123",
+// Reserve for order
+const reservation = await inventoryService.createReservationItems({
+  inventory_item_id: itemId,
+  location_id: warehouseId,
+  quantity: 2,
+  line_item_id: orderLineItemId
+})
+
+// Check availability
+const levels = await inventoryService.listInventoryLevels({
+  inventory_item_id: itemId,
+  location_id: warehouseId
+})
+
+// available = stocked_quantity - reserved_quantity
+const available = levels[0].stocked_quantity - levels[0].reserved_quantity
+```
+
+---
+
+## Customer Module
+
+### Customer Structure
+
+```
+Customer
+├── CustomerAddress
+├── CustomerGroup
+└── (links to Orders, Carts)
+```
+
+### Customer Operations
+
+```typescript
+const customerService = container.resolve("customer")
+
+// Create customer
+const customer = await customerService.createCustomers({
+  email: "john@example.com",
+  first_name: "John",
+  last_name: "Doe",
+  phone: "+1234567890",
+  metadata: { loyalty_tier: "gold" }
+})
+
+// Add address
+await customerService.createCustomerAddresses({
+  customer_id: customer.id,
+  first_name: "John",
+  last_name: "Doe",
+  address_1: "123 Main St",
+  city: "New York",
+  province: "NY",
+  postal_code: "10001",
+  country_code: "us",
+  is_default_shipping: true,
+  is_default_billing: true
+})
+
+// Customer groups
+const group = await customerService.createCustomerGroups({
+  name: "VIP Customers"
+})
+
+await customerService.addCustomerToGroup({
+  customer_id: customer.id,
+  customer_group_id: group.id
 })
 ```
 
-## Region Module
-
-### Creating Regions
+### Querying Customers
 
 ```typescript
-import { Modules } from "@medusajs/framework/utils"
-
-const regionService = container.resolve(Modules.REGION)
-
-const region = await regionService.createRegions({
-  name: "North America",
-  currency_code: "usd",
-  countries: ["us", "ca"],
-  payment_providers: ["stripe"],
-})
-```
-
-### Region-Specific Settings
-
-Each region can have:
-- Currency code
-- Countries included
-- Tax settings
-- Payment providers
-- Fulfillment providers
-
-## Promotion Module
-
-### Creating Promotions
-
-```typescript
-import { Modules } from "@medusajs/framework/utils"
-
-const promotionService = container.resolve(Modules.PROMOTION)
-
-const promotion = await promotionService.createPromotions({
-  code: "SUMMER20",
-  type: "standard",
-  application_method: {
-    type: "percentage",
-    value: 20,
-    target_type: "items",
-  },
-})
-```
-
-### Promotion Rules
-
-```typescript
-const promotion = await promotionService.createPromotions({
-  code: "VIP50",
-  type: "standard",
-  rules: [
-    {
-      attribute: "customer.groups.id",
-      operator: "in",
-      values: ["cusgrp_vip"],
-    },
+const { data: customers } = await query.graph({
+  entity: "customer",
+  fields: [
+    "*",
+    "addresses.*",
+    "groups.*",
+    "orders.*",
+    "orders.items.*"
   ],
-  application_method: {
-    type: "percentage",
-    value: 50,
-  },
+  filters: {
+    email: "john@example.com"
+  }
 })
-```
 
-### Campaigns
-
-```typescript
-const campaign = await promotionService.createCampaigns({
-  name: "Summer Sale 2024",
-  campaign_identifier: "summer-2024",
-  starts_at: "2024-06-01",
-  ends_at: "2024-08-31",
+// Get customer with order history
+const { data: [customer] } = await query.graph({
+  entity: "customer",
+  fields: ["*", "orders.*"],
+  filters: { id: customerId }
 })
 ```
