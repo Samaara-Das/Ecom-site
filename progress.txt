@@ -83,3 +83,132 @@ Tests:       4 passed, 4 total
 - ESLint requires a fresh npm install on non-worktree setup due to symlink issues
 - TypeScript type checking will work once proper Medusa Cloud environment is configured
 - Redis modules are commented out in medusa-config.ts - uncomment when REDIS_URL is available
+
+---
+
+# Task 6: Implement Customer Email/Password Auth - Backend
+Date: 2026-01-25
+
+## Completed Work
+
+### Customer Authentication Implementation
+Implemented customer email/password authentication using Medusa v2's built-in auth system. The implementation follows Medusa v2 best practices and leverages the built-in auth routes.
+
+### Authentication Flow
+The customer authentication flow works as follows:
+
+1. **Register Auth Identity**: `POST /auth/customer/emailpass/register`
+   - Client sends `{ email, password }`
+   - Returns registration JWT token
+
+2. **Create Customer**: `POST /store/customers`
+   - Client sends customer data with registration token in Authorization header
+   - Creates customer profile linked to auth identity
+
+3. **Login**: `POST /auth/customer/emailpass`
+   - Client sends `{ email, password }`
+   - Returns session JWT token
+
+4. **Access Protected Routes**: Use token in `Authorization: Bearer {token}` header
+
+5. **Password Reset**: `POST /auth/customer/emailpass/reset-password`
+   - Triggers password reset flow via event system
+
+### API Routes Created
+
+#### POST /store/customers
+- Creates new customer after registration token validation
+- Validates input with Zod schema (email, first_name, last_name, phone, metadata)
+- Checks for existing customer with same email
+- Returns customer profile (without sensitive data)
+
+#### GET /store/customers/me
+- Protected route requiring customer authentication
+- Returns authenticated customer's profile with addresses
+
+#### POST /store/customers/me
+- Protected route requiring customer authentication
+- Updates customer profile (first_name, last_name, phone, metadata)
+- Returns updated customer profile with addresses
+
+### Middleware Configuration
+- Protected `/store/customers/me` and `/store/customers/me/*` with customer authentication
+- Configured `/store/customers` POST to accept registration tokens (allowUnregistered: true)
+- Uses both `bearer` and `session` authentication methods
+
+### Input Validation
+- Used Zod schemas for request validation
+- CreateCustomerSchema: email (valid format), first_name (required), last_name (required), phone (optional), metadata (optional)
+- UpdateCustomerSchema: first_name, last_name, phone (nullable), metadata (all optional)
+
+### Tests
+Created comprehensive unit tests covering:
+
+**Customer Registration Tests:**
+- Returns 400 for validation failures (missing required fields)
+- Returns 400 for invalid email format
+- Returns 401 when no auth token provided
+- Returns 409 when customer with email already exists
+- Returns 201 and creates customer on success
+- Accepts optional metadata field
+- Logs customer creation
+- Returns 500 when creation fails
+
+**Customer Profile Tests (GET /store/customers/me):**
+- Returns 401 when not authenticated
+- Returns 404 when customer not found
+- Returns customer profile with addresses
+- Queries with correct customer ID
+- Returns empty addresses array when no addresses
+
+**Customer Profile Tests (POST /store/customers/me):**
+- Returns 401 when not authenticated
+- Returns 400 when no update data provided
+- Updates first_name, last_name successfully
+- Updates multiple fields at once
+- Allows updating metadata
+- Allows setting phone to null
+- Returns updated customer profile
+- Logs customer update
+- Returns 500 when update fails
+- Returns 400 for validation errors
+
+## Files Created
+- backend/src/api/store/customers/route.ts
+- backend/src/api/store/customers/me/route.ts
+- backend/src/api/store/customers/__tests__/route.test.ts
+- backend/src/api/store/customers/me/__tests__/route.test.ts
+
+## Files Modified
+- backend/src/api/middlewares.ts (added customer authentication middleware)
+- backend/package.json (added zod dependency)
+
+## Dependencies Added
+- zod: ^3.23.0 (input validation)
+
+## JWT Configuration
+JWT authentication is already configured in medusa-config.ts:
+- jwtSecret: from JWT_SECRET env variable
+- cookieSecret: from COOKIE_SECRET env variable
+- authCors: configured for both store and admin origins
+
+## Test Instructions
+To run tests after npm install:
+```bash
+cd backend
+npm install
+npm test
+```
+
+## Next Steps
+1. Configure actual Medusa Cloud environment for integration testing
+2. Implement frontend auth UI (Task 7: Login Form)
+3. Implement frontend auth UI (Task 8: Register Form)
+4. Add social login (Task 9: Google OAuth)
+5. Add phone OTP auth (Task 10)
+
+## Notes
+- Medusa v2 provides built-in auth routes at `/auth/{actor_type}/{provider}`
+- Customer auth uses the "emailpass" provider
+- JWT tokens should be passed in Authorization header as Bearer tokens
+- The middleware uses both "bearer" and "session" auth methods for flexibility
