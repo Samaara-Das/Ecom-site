@@ -5,5 +5,8 @@
       "mcp__context7__resolve-library-id",
       "mcp__context7__query-docs"
     ]
+  },
+  "env": {
+    "CLAUDE_CODE_TASK_LIST_ID": "ecom-site-bharat"
   }
 }
