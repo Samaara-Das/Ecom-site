@@ -212,3 +212,212 @@ npm test
 - Customer auth uses the "emailpass" provider
 - JWT tokens should be passed in Authorization header as Bearer tokens
 - The middleware uses both "bearer" and "session" auth methods for flexibility
+
+---
+
+# Task 10: Implement Phone OTP Auth - Backend
+Date: 2026-01-25
+
+## Completed Work
+
+### Phone OTP Authentication Implementation
+Implemented phone-based OTP (One-Time Password) authentication system using Twilio for SMS delivery. The implementation provides an alternative authentication method for customers who prefer phone-based login.
+
+### Authentication Flow
+The phone OTP authentication flow works as follows:
+
+1. **Request OTP**: `POST /store/auth/otp/send`
+   - Client sends `{ phone: "+96512345678" }`
+   - Server generates 6-digit OTP
+   - Server stores OTP with 5-minute expiry
+   - Server sends OTP via Twilio SMS
+   - Returns success/failure response
+
+2. **Verify OTP**: `POST /store/auth/otp/verify`
+   - Client sends `{ phone: "+96512345678", code: "123456" }`
+   - Server validates OTP code
+   - On success, creates customer if not exists or updates existing customer
+   - Returns customer profile with verification status
+
+### OTP Service Features
+- **OTP Generation**: Generates cryptographically random 6-digit codes
+- **OTP Storage**: In-memory store (development) with TTL support
+- **Phone Normalization**: Supports international formats (+, 00, with/without country code)
+- **Rate Limiting**: Max 5 OTP requests per phone per hour
+- **Attempt Limiting**: Max 3 verification attempts per OTP
+- **Expiry**: OTPs expire after 5 minutes
+- **SMS Integration**: Uses existing Twilio SMS notification service
+
+### API Routes Created
+
+#### POST /store/auth/otp/send
+- Validates phone number format
+- Checks rate limits (5 requests/hour)
+- Generates and stores OTP
+- Sends OTP via Twilio SMS
+- Returns 200 on success, 429 on rate limit, 400 on invalid phone
+
+#### POST /store/auth/otp/verify
+- Validates phone and code format
+- Verifies OTP code against stored value
+- Handles expiry, invalid codes, max attempts
+- Creates new customer or updates existing
+- Returns customer profile with `is_new` flag
+- Returns 200 on success, 400 on invalid, 410 on expired, 429 on max attempts
+
+### Input Validation
+- Used Zod schemas for request validation
+- SendOTPSchema: phone (8-20 chars, valid format)
+- VerifyOTPSchema: phone (8-20 chars), code (exactly 6 digits)
+
+### Tests Created
+
+**OTP Service Tests (src/services/__tests__/otp.test.ts):**
+- OTP generation (correct length, randomness)
+- OTP sending (storage, SMS delivery)
+- Phone normalization (various formats, invalid numbers)
+- OTP verification (correct code, incorrect code, expired, max attempts)
+- Rate limiting (hourly request limits)
+- In-memory store functionality
+
+**Send OTP Endpoint Tests (src/api/store/auth/otp/__tests__/send.test.ts):**
+- Schema validation (valid phones, invalid formats)
+- Success response (200)
+- Rate limit response (429)
+- Validation errors (400)
+- SMS failure handling (500)
+- Logging behavior
+
+**Verify OTP Endpoint Tests (src/api/store/auth/otp/__tests__/verify.test.ts):**
+- Schema validation (valid input, invalid codes)
+- New customer creation
+- Existing customer update
+- Invalid OTP (400)
+- Expired OTP (410)
+- Max attempts exceeded (429)
+- OTP not found (400)
+- Error handling (500)
+
+## Files Created
+- backend/src/services/otp.ts (OTP service with store interface)
+- backend/src/services/otp-instance.ts (Shared OTP service singleton)
+- backend/src/services/__tests__/otp.test.ts (OTP service tests)
+- backend/src/api/store/auth/otp/send/route.ts (Send OTP endpoint)
+- backend/src/api/store/auth/otp/verify/route.ts (Verify OTP endpoint)
+- backend/src/api/store/auth/otp/__tests__/send.test.ts (Send endpoint tests)
+- backend/src/api/store/auth/otp/__tests__/verify.test.ts (Verify endpoint tests)
+
+## Files Modified
+- backend/.env.template (added Twilio and OTP configuration)
+- backend/vitest.config.ts (updated test patterns)
+- backend/package.json (merged dependencies)
+- backend/tsconfig.json (merged configurations)
+
+## Environment Configuration
+Added to .env.template:
+```
+# Twilio SMS
+TWILIO_ACCOUNT_SID=your_twilio_account_sid
+TWILIO_AUTH_TOKEN=your_twilio_auth_token
+TWILIO_FROM_NUMBER=+1234567890
+
+# OTP Configuration (Optional)
+OTP_LENGTH=6
+OTP_EXPIRY_SECONDS=300
+OTP_MAX_ATTEMPTS=3
+OTP_MAX_REQUESTS_PER_HOUR=5
+```
+
+## Architecture
+
+### OTP Service Layer
+```
+OTPService
+├── generateOTP() - Random numeric code
+├── normalizePhoneNumber() - E.164 format
+├── sendOTP() - Store + SMS
+└── verifyOTP() - Validate + cleanup
+```
+
+### OTP Store Interface
+```typescript
+interface OTPStore {
+  set(key, value, ttl): Promise<void>
+  get(key): Promise<OTPRecord | null>
+  delete(key): Promise<void>
+  incrementAttempts(key): Promise<number>
+  getAttempts(key): Promise<number>
+}
+```
+
+### Development Mode
+- When Twilio is not configured, OTPs are logged to console
+- InMemoryOTPStore for local development
+- For production, implement RedisOTPStore for distributed systems
+
+## Test Instructions
+```bash
+cd backend
+npm install
+npm test
+```
+
+## API Usage Examples
+
+### Request OTP
+```bash
+curl -X POST http://localhost:9000/store/auth/otp/send \
+  -H "Content-Type: application/json" \
+  -d '{"phone": "+96512345678"}'
+```
+
+Response:
+```json
+{
+  "success": true,
+  "message": "OTP sent successfully. Please check your phone."
+}
+```
+
+### Verify OTP
+```bash
+curl -X POST http://localhost:9000/store/auth/otp/verify \
+  -H "Content-Type: application/json" \
+  -d '{"phone": "+96512345678", "code": "123456"}'
+```
+
+Response:
+```json
+{
+  "verified": true,
+  "message": "Phone number verified successfully",
+  "customer": {
+    "id": "cust_123",
+    "email": "phone_96512345678@placeholder.local",
+    "phone": "+96512345678",
+    "first_name": "",
+    "last_name": "",
+    "has_account": true,
+    "is_new": true
+  }
+}
+```
+
+## Security Considerations
+- OTPs are stored in memory (use Redis for production)
+- Rate limiting prevents brute force attacks
+- Max attempts limit prevents code guessing
+- Phone numbers are normalized for consistent storage
+- Placeholder emails used for customers without email
+
+## Next Steps
+1. Implement Redis-backed OTPStore for production
+2. Add phone number to existing customer flow
+3. Implement frontend OTP UI (Task 11)
+4. Consider additional phone verification for profile updates
+
+## Notes
+- Twilio requires a verified account and phone number
+- Development mode logs OTPs to console when Twilio not configured
+- The verify endpoint creates customers with placeholder emails
+- Customers authenticated via phone should update their email later
