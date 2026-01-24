@@ -1,0 +1,423 @@
+# Task 1: Set Up Medusa Starter Template with Medusa Cloud
+Date: 2026-01-24
+
+## Completed Work
+
+### Backend Project Structure Created
+- Created `backend/` directory with Medusa v2 project structure
+- Directory structure:
+  - `src/api/` - API routes including health check endpoint
+  - `src/modules/` - Custom modules placeholder
+  - `src/workflows/` - Custom workflows placeholder
+  - `src/subscribers/` - Event subscribers placeholder
+  - `src/links/` - Module links placeholder
+  - `src/admin/` - Admin UI extensions placeholder
+
+### Configuration Files
+- `package.json` - Project dependencies including @medusajs/framework and @medusajs/medusa
+- `medusa-config.ts` - Medusa configuration with environment variable support for:
+  - Database URL (PostgreSQL)
+  - Redis URL (optional for development)
+  - CORS settings (store, admin, auth)
+  - JWT and Cookie secrets
+  - Worker mode configuration
+  - Admin dashboard settings
+- `tsconfig.json` - TypeScript configuration with proper module resolution
+- `.env.template` - Template with all required environment variables documented
+- `.eslintrc.js` - ESLint configuration
+- `jest.config.js` - Jest test configuration
+
+### Health Check API
+- Created GET /health endpoint at `src/api/health/route.ts`
+- Checks database connectivity by querying regions
+- Returns healthy/unhealthy status with timestamp
+
+### Tests
+- Created comprehensive tests for health check API
+- Tests cover:
+  - Healthy response (200) when database is connected
+  - Database query verification
+  - Unhealthy response (503) when database fails
+  - Timestamp format validation
+- All 4 tests passing
+
+## Files Created
+- backend/package.json
+- backend/medusa-config.ts
+- backend/tsconfig.json
+- backend/jest.config.js
+- backend/.env.template
+- backend/.eslintrc.js
+- backend/.gitignore
+- backend/src/api/health/route.ts
+- backend/src/api/health/__tests__/route.test.ts
+- backend/src/api/middlewares.ts
+- backend/src/modules/.gitkeep
+- backend/src/workflows/.gitkeep
+- backend/src/subscribers/.gitkeep
+- backend/src/links/.gitkeep
+- backend/src/admin/.gitkeep
+
+## Test Results
+```
+PASS src/api/health/__tests__/route.test.ts
+  Health Check API
+    GET /health
+      √ should return 200 with healthy status when database is connected
+      √ should query the database to verify connection
+      √ should return 503 with unhealthy status when database connection fails
+      √ should include timestamp in ISO format
+
+Test Suites: 1 passed, 1 total
+Tests:       4 passed, 4 total
+```
+
+## Next Steps
+1. Set up Medusa Cloud account at cloud.medusa.com
+2. Create a new project in Medusa Cloud dashboard
+3. Copy cloud credentials to .env file
+4. Run npm install and npm run dev to start the server
+5. Verify connection to Medusa Cloud
+
+## Notes
+- ESLint requires a fresh npm install on non-worktree setup due to symlink issues
+- TypeScript type checking will work once proper Medusa Cloud environment is configured
+- Redis modules are commented out in medusa-config.ts - uncomment when REDIS_URL is available
+
+---
+
+# Task 6: Implement Customer Email/Password Auth - Backend
+Date: 2026-01-25
+
+## Completed Work
+
+### Customer Authentication Implementation
+Implemented customer email/password authentication using Medusa v2's built-in auth system. The implementation follows Medusa v2 best practices and leverages the built-in auth routes.
+
+### Authentication Flow
+The customer authentication flow works as follows:
+
+1. **Register Auth Identity**: `POST /auth/customer/emailpass/register`
+   - Client sends `{ email, password }`
+   - Returns registration JWT token
+
+2. **Create Customer**: `POST /store/customers`
+   - Client sends customer data with registration token in Authorization header
+   - Creates customer profile linked to auth identity
+
+3. **Login**: `POST /auth/customer/emailpass`
+   - Client sends `{ email, password }`
+   - Returns session JWT token
+
+4. **Access Protected Routes**: Use token in `Authorization: Bearer {token}` header
+
+5. **Password Reset**: `POST /auth/customer/emailpass/reset-password`
+   - Triggers password reset flow via event system
+
+### API Routes Created
+
+#### POST /store/customers
+- Creates new customer after registration token validation
+- Validates input with Zod schema (email, first_name, last_name, phone, metadata)
+- Checks for existing customer with same email
+- Returns customer profile (without sensitive data)
+
+#### GET /store/customers/me
+- Protected route requiring customer authentication
+- Returns authenticated customer's profile with addresses
+
+#### POST /store/customers/me
+- Protected route requiring customer authentication
+- Updates customer profile (first_name, last_name, phone, metadata)
+- Returns updated customer profile with addresses
+
+### Middleware Configuration
+- Protected `/store/customers/me` and `/store/customers/me/*` with customer authentication
+- Configured `/store/customers` POST to accept registration tokens (allowUnregistered: true)
+- Uses both `bearer` and `session` authentication methods
+
+### Input Validation
+- Used Zod schemas for request validation
+- CreateCustomerSchema: email (valid format), first_name (required), last_name (required), phone (optional), metadata (optional)
+- UpdateCustomerSchema: first_name, last_name, phone (nullable), metadata (all optional)
+
+### Tests
+Created comprehensive unit tests covering:
+
+**Customer Registration Tests:**
+- Returns 400 for validation failures (missing required fields)
+- Returns 400 for invalid email format
+- Returns 401 when no auth token provided
+- Returns 409 when customer with email already exists
+- Returns 201 and creates customer on success
+- Accepts optional metadata field
+- Logs customer creation
+- Returns 500 when creation fails
+
+**Customer Profile Tests (GET /store/customers/me):**
+- Returns 401 when not authenticated
+- Returns 404 when customer not found
+- Returns customer profile with addresses
+- Queries with correct customer ID
+- Returns empty addresses array when no addresses
+
+**Customer Profile Tests (POST /store/customers/me):**
+- Returns 401 when not authenticated
+- Returns 400 when no update data provided
+- Updates first_name, last_name successfully
+- Updates multiple fields at once
+- Allows updating metadata
+- Allows setting phone to null
+- Returns updated customer profile
+- Logs customer update
+- Returns 500 when update fails
+- Returns 400 for validation errors
+
+## Files Created
+- backend/src/api/store/customers/route.ts
+- backend/src/api/store/customers/me/route.ts
+- backend/src/api/store/customers/__tests__/route.test.ts
+- backend/src/api/store/customers/me/__tests__/route.test.ts
+
+## Files Modified
+- backend/src/api/middlewares.ts (added customer authentication middleware)
+- backend/package.json (added zod dependency)
+
+## Dependencies Added
+- zod: ^3.23.0 (input validation)
+
+## JWT Configuration
+JWT authentication is already configured in medusa-config.ts:
+- jwtSecret: from JWT_SECRET env variable
+- cookieSecret: from COOKIE_SECRET env variable
+- authCors: configured for both store and admin origins
+
+## Test Instructions
+To run tests after npm install:
+```bash
+cd backend
+npm install
+npm test
+```
+
+## Next Steps
+1. Configure actual Medusa Cloud environment for integration testing
+2. Implement frontend auth UI (Task 7: Login Form)
+3. Implement frontend auth UI (Task 8: Register Form)
+4. Add social login (Task 9: Google OAuth)
+5. Add phone OTP auth (Task 10)
+
+## Notes
+- Medusa v2 provides built-in auth routes at `/auth/{actor_type}/{provider}`
+- Customer auth uses the "emailpass" provider
+- JWT tokens should be passed in Authorization header as Bearer tokens
+- The middleware uses both "bearer" and "session" auth methods for flexibility
+
+---
+
+# Task 10: Implement Phone OTP Auth - Backend
+Date: 2026-01-25
+
+## Completed Work
+
+### Phone OTP Authentication Implementation
+Implemented phone-based OTP (One-Time Password) authentication system using Twilio for SMS delivery. The implementation provides an alternative authentication method for customers who prefer phone-based login.
+
+### Authentication Flow
+The phone OTP authentication flow works as follows:
+
+1. **Request OTP**: `POST /store/auth/otp/send`
+   - Client sends `{ phone: "+96512345678" }`
+   - Server generates 6-digit OTP
+   - Server stores OTP with 5-minute expiry
+   - Server sends OTP via Twilio SMS
+   - Returns success/failure response
+
+2. **Verify OTP**: `POST /store/auth/otp/verify`
+   - Client sends `{ phone: "+96512345678", code: "123456" }`
+   - Server validates OTP code
+   - On success, creates customer if not exists or updates existing customer
+   - Returns customer profile with verification status
+
+### OTP Service Features
+- **OTP Generation**: Generates cryptographically random 6-digit codes
+- **OTP Storage**: In-memory store (development) with TTL support
+- **Phone Normalization**: Supports international formats (+, 00, with/without country code)
+- **Rate Limiting**: Max 5 OTP requests per phone per hour
+- **Attempt Limiting**: Max 3 verification attempts per OTP
+- **Expiry**: OTPs expire after 5 minutes
+- **SMS Integration**: Uses existing Twilio SMS notification service
+
+### API Routes Created
+
+#### POST /store/auth/otp/send
+- Validates phone number format
+- Checks rate limits (5 requests/hour)
+- Generates and stores OTP
+- Sends OTP via Twilio SMS
+- Returns 200 on success, 429 on rate limit, 400 on invalid phone
+
+#### POST /store/auth/otp/verify
+- Validates phone and code format
+- Verifies OTP code against stored value
+- Handles expiry, invalid codes, max attempts
+- Creates new customer or updates existing
+- Returns customer profile with `is_new` flag
+- Returns 200 on success, 400 on invalid, 410 on expired, 429 on max attempts
+
+### Input Validation
+- Used Zod schemas for request validation
+- SendOTPSchema: phone (8-20 chars, valid format)
+- VerifyOTPSchema: phone (8-20 chars), code (exactly 6 digits)
+
+### Tests Created
+
+**OTP Service Tests (src/services/__tests__/otp.test.ts):**
+- OTP generation (correct length, randomness)
+- OTP sending (storage, SMS delivery)
+- Phone normalization (various formats, invalid numbers)
+- OTP verification (correct code, incorrect code, expired, max attempts)
+- Rate limiting (hourly request limits)
+- In-memory store functionality
+
+**Send OTP Endpoint Tests (src/api/store/auth/otp/__tests__/send.test.ts):**
+- Schema validation (valid phones, invalid formats)
+- Success response (200)
+- Rate limit response (429)
+- Validation errors (400)
+- SMS failure handling (500)
+- Logging behavior
+
+**Verify OTP Endpoint Tests (src/api/store/auth/otp/__tests__/verify.test.ts):**
+- Schema validation (valid input, invalid codes)
+- New customer creation
+- Existing customer update
+- Invalid OTP (400)
+- Expired OTP (410)
+- Max attempts exceeded (429)
+- OTP not found (400)
+- Error handling (500)
+
+## Files Created
+- backend/src/services/otp.ts (OTP service with store interface)
+- backend/src/services/otp-instance.ts (Shared OTP service singleton)
+- backend/src/services/__tests__/otp.test.ts (OTP service tests)
+- backend/src/api/store/auth/otp/send/route.ts (Send OTP endpoint)
+- backend/src/api/store/auth/otp/verify/route.ts (Verify OTP endpoint)
+- backend/src/api/store/auth/otp/__tests__/send.test.ts (Send endpoint tests)
+- backend/src/api/store/auth/otp/__tests__/verify.test.ts (Verify endpoint tests)
+
+## Files Modified
+- backend/.env.template (added Twilio and OTP configuration)
+- backend/vitest.config.ts (updated test patterns)
+- backend/package.json (merged dependencies)
+- backend/tsconfig.json (merged configurations)
+
+## Environment Configuration
+Added to .env.template:
+```
+# Twilio SMS
+TWILIO_ACCOUNT_SID=your_twilio_account_sid
+TWILIO_AUTH_TOKEN=your_twilio_auth_token
+TWILIO_FROM_NUMBER=+1234567890
+
+# OTP Configuration (Optional)
+OTP_LENGTH=6
+OTP_EXPIRY_SECONDS=300
+OTP_MAX_ATTEMPTS=3
+OTP_MAX_REQUESTS_PER_HOUR=5
+```
+
+## Architecture
+
+### OTP Service Layer
+```
+OTPService
+├── generateOTP() - Random numeric code
+├── normalizePhoneNumber() - E.164 format
+├── sendOTP() - Store + SMS
+└── verifyOTP() - Validate + cleanup
+```
+
+### OTP Store Interface
+```typescript
+interface OTPStore {
+  set(key, value, ttl): Promise<void>
+  get(key): Promise<OTPRecord | null>
+  delete(key): Promise<void>
+  incrementAttempts(key): Promise<number>
+  getAttempts(key): Promise<number>
+}
+```
+
+### Development Mode
+- When Twilio is not configured, OTPs are logged to console
+- InMemoryOTPStore for local development
+- For production, implement RedisOTPStore for distributed systems
+
+## Test Instructions
+```bash
+cd backend
+npm install
+npm test
+```
+
+## API Usage Examples
+
+### Request OTP
+```bash
+curl -X POST http://localhost:9000/store/auth/otp/send \
+  -H "Content-Type: application/json" \
+  -d '{"phone": "+96512345678"}'
+```
+
+Response:
+```json
+{
+  "success": true,
+  "message": "OTP sent successfully. Please check your phone."
+}
+```
+
+### Verify OTP
+```bash
+curl -X POST http://localhost:9000/store/auth/otp/verify \
+  -H "Content-Type: application/json" \
+  -d '{"phone": "+96512345678", "code": "123456"}'
+```
+
+Response:
+```json
+{
+  "verified": true,
+  "message": "Phone number verified successfully",
+  "customer": {
+    "id": "cust_123",
+    "email": "phone_96512345678@placeholder.local",
+    "phone": "+96512345678",
+    "first_name": "",
+    "last_name": "",
+    "has_account": true,
+    "is_new": true
+  }
+}
+```
+
+## Security Considerations
+- OTPs are stored in memory (use Redis for production)
+- Rate limiting prevents brute force attacks
+- Max attempts limit prevents code guessing
+- Phone numbers are normalized for consistent storage
+- Placeholder emails used for customers without email
+
+## Next Steps
+1. Implement Redis-backed OTPStore for production
+2. Add phone number to existing customer flow
+3. Implement frontend OTP UI (Task 11)
+4. Consider additional phone verification for profile updates
+
+## Notes
+- Twilio requires a verified account and phone number
+- Development mode logs OTPs to console when Twilio not configured
+- The verify endpoint creates customers with placeholder emails
+- Customers authenticated via phone should update their email later
