@@ -1,0 +1,960 @@
+{
+  "master": {
+    "tasks": [
+      {
+        "id": "1",
+        "title": "Set Up Medusa Starter Template with Medusa Cloud",
+        "description": "Clone and configure Medusa v2 starter template, connect to Medusa Cloud for managed backend services.",
+        "details": "Framework Context:\n- Use /medusa skill for project structure\n- Docs: mcp-cli call context7/query-docs '{\"libraryId\": \"/websites/medusajs_learn\", \"topic\": \"medusa cloud quickstart\"}'\n\nImplementation Steps:\n1. Clone Medusa v2 starter template\n2. Sign up/login to Medusa Cloud (cloud.medusa.com)\n3. Create new project in Medusa Cloud dashboard\n4. Copy cloud credentials to .env (MEDUSA_CLOUD_*)\n5. Configure medusa-config.ts for cloud connection\n6. Run: npm install && npm run dev\n7. Verify connection to Medusa Cloud\n\nFiles:\n- backend/medusa-config.ts\n- backend/tsconfig.json\n- backend/.env (MEDUSA_CLOUD_* credentials)",
+        "testStrategy": "TDD: Write test expecting GET /health returns 200\n\nPlaywright Verification:\n- mcp-cli call playwright/browser_navigate '{\"url\": \"http://localhost:9000/health\"}'\n- mcp-cli call playwright/browser_snapshot '{}'\n\nAcceptance:\n- [ ] npm run dev starts without errors\n- [ ] Connected to Medusa Cloud\n- [ ] Admin dashboard accessible via cloud\n\nAuto-Commit: /auto-commit",
+        "status": "in-progress",
+        "dependencies": [],
+        "priority": "high",
+        "subtasks": [],
+        "updatedAt": "2026-01-24T15:38:54.858Z"
+      },
+      {
+        "id": "2",
+        "title": "Configure Medusa Cloud Database",
+        "description": "Configure managed PostgreSQL database via Medusa Cloud, run migrations.",
+        "details": "Framework Context:\n- Use /medusa skill for database setup\n- Medusa Cloud provides managed PostgreSQL\n\nImplementation Steps:\n1. Verify Medusa Cloud database provisioned\n2. Database URL auto-configured via cloud credentials\n3. Run: npx medusa db:migrate (against cloud DB)\n4. Verify tables created in cloud dashboard\n5. Seed initial data if needed\n\nFiles:\n- backend/.env (inherited from Medusa Cloud)\n- backend/src/migrations/",
+        "testStrategy": "TDD: Write test connecting to DB and querying health\n\nPlaywright Verification:\n- mcp-cli call playwright/browser_navigate '{\"url\": \"http://localhost:9000/admin\"}'\n- Verify admin loads (DB connected)\n\nAcceptance:\n- [ ] Cloud database connected\n- [ ] Migrations complete\n- [ ] Admin dashboard accessible\n\nAuto-Commit: /auto-commit",
+        "status": "pending",
+        "dependencies": [
+          "1"
+        ],
+        "priority": "high",
+        "subtasks": []
+      },
+      {
+        "id": "3",
+        "title": "Configure Medusa Cloud Redis",
+        "description": "Configure managed Redis via Medusa Cloud for sessions, caching, and queues.",
+        "details": "Framework Context:\n- Use /medusa skill for Redis configuration\n- Medusa Cloud provides managed Redis\n\nImplementation Steps:\n1. Verify Medusa Cloud Redis provisioned\n2. Redis URL auto-configured via cloud credentials\n3. Configure medusa-config.ts to use cloud Redis\n4. Test session persistence\n5. Verify cache operations\n\nFiles:\n- backend/.env (inherited from Medusa Cloud)\n- backend/medusa-config.ts",
+        "testStrategy": "TDD: Write test verifying Redis connection and session storage\n\nAcceptance:\n- [ ] Cloud Redis connected\n- [ ] Sessions persist\n- [ ] Cache operations work\n\nAuto-Commit: /auto-commit",
+        "status": "pending",
+        "dependencies": [
+          "1"
+        ],
+        "priority": "high",
+        "subtasks": []
+      },
+      {
+        "id": "4",
+        "title": "Create Next.js 14 Storefront Project",
+        "description": "Scaffold Next.js 14 storefront with App Router, TypeScript, Tailwind CSS, and shadcn/ui.",
+        "details": "Framework Context:\n- Use /senior-developer skill for frontend setup\n- Docs: mcp-cli call context7/query-docs '{\"libraryId\": \"/websites/medusajs_learn\", \"topic\": \"nextjs storefront\"}'\n\nImplementation Steps:\n1. Run: npx create-next-app@latest storefront --typescript --tailwind --app\n2. Install shadcn/ui: npx shadcn-ui@latest init\n3. Configure path aliases in tsconfig.json\n4. Set up Medusa JS SDK\n5. Create lib/medusa.ts client\n6. Add environment variables\n\nFiles:\n- storefront/app/layout.tsx\n- storefront/lib/medusa.ts\n- storefront/tailwind.config.ts\n- storefront/.env.local",
+        "testStrategy": "TDD: Write test for homepage rendering\n\nPlaywright Verification:\n- mcp-cli call playwright/browser_navigate '{\"url\": \"http://localhost:3000\"}'\n- mcp-cli call playwright/browser_snapshot '{}'\n- mcp-cli call playwright/browser_take_screenshot '{\"type\": \"png\", \"filename\": \"storefront-init.png\"}'\n\nAcceptance:\n- [ ] npm run dev starts storefront\n- [ ] Tailwind styles working\n- [ ] Medusa SDK configured\n\nAuto-Commit: /auto-commit",
+        "status": "pending",
+        "dependencies": [
+          "1"
+        ],
+        "priority": "high",
+        "subtasks": []
+      },
+      {
+        "id": "5",
+        "title": "Set Up Base UI Component Library",
+        "description": "Install and configure shadcn/ui components: Button, Input, Card, Dialog, Form, Select, Toast.",
+        "details": "Framework Context:\n- Use /senior-developer skill for component setup\n\nImplementation Steps:\n1. npx shadcn-ui@latest add button input card dialog form select toast\n2. Create components/ui/ structure\n3. Configure theme colors for marketplace brand\n4. Set up dark mode support (optional)\n5. Create Storybook for component docs\n\nFiles:\n- storefront/components/ui/*.tsx\n- storefront/lib/utils.ts\n- storefront/.storybook/ (if using)",
+        "testStrategy": "TDD: Write tests for each UI component rendering\n\nPlaywright Verification:\n- Navigate to Storybook or test page\n- Verify components render correctly\n\nAcceptance:\n- [ ] All shadcn components installed\n- [ ] Theme colors configured\n- [ ] Components render without errors\n\nAuto-Commit: /auto-commit",
+        "status": "pending",
+        "dependencies": [
+          "4"
+        ],
+        "priority": "high",
+        "subtasks": []
+      },
+      {
+        "id": "6",
+        "title": "Implement Customer Email/Password Auth - Backend",
+        "description": "Configure Medusa customer authentication with email/password, JWT tokens, and session management.",
+        "details": "Framework Context:\n- Use /medusa skill for auth configuration\n- Docs: mcp-cli call context7/query-docs '{\"libraryId\": \"/websites/medusajs_learn\", \"topic\": \"customer authentication\"}'\n\nImplementation Steps:\n1. Verify Customer module enabled in medusa-config.ts\n2. Configure JWT secret in .env\n3. Test POST /store/customers endpoint\n4. Test POST /store/auth endpoint\n5. Verify token validation\n\nFiles:\n- backend/medusa-config.ts\n- backend/.env (JWT_SECRET)",
+        "testStrategy": "TDD: Write tests for register, login, logout flows\n\nAcceptance:\n- [ ] Customer registration works\n- [ ] Login returns valid JWT\n- [ ] Protected routes require auth\n\nAuto-Commit: /auto-commit",
+        "status": "pending",
+        "dependencies": [
+          "2"
+        ],
+        "priority": "high",
+        "subtasks": []
+      },
+      {
+        "id": "7",
+        "title": "Build Customer Auth UI - Login Form",
+        "description": "Create login form component with email/password fields, validation, error handling using TDD.",
+        "details": "Framework Context:\n- Use /senior-developer skill with TDD (RED → GREEN → REFACTOR)\n- Use React Hook Form + Zod validation\n- Use accessible queries for testing\n\nImplementation Steps (TDD):\n1. RED: Write test for form rendering with email/password fields\n2. GREEN: Create basic form with inputs\n3. RED: Write test for validation error on invalid email\n4. GREEN: Add Zod validation schema\n5. RED: Write test for API error handling\n6. GREEN: Add error display\n7. RED: Write test for loading state during submission\n8. GREEN: Add loading spinner and disabled state\n9. REFACTOR: Add Tailwind styling\n\nCode Pattern:\n// storefront/components/auth/LoginForm.test.tsx\nimport { render, screen, waitFor } from '@testing-library/react'\nimport userEvent from '@testing-library/user-event'\nimport { LoginForm } from './LoginForm'\n\nconst user = userEvent.setup()\n\ndescribe('LoginForm', () => {\n  it('renders email and password fields', () => {\n    render(<LoginForm onSubmit={vi.fn()} />)\n    expect(screen.getByLabelText(/email/i)).toBeInTheDocument()\n    expect(screen.getByLabelText(/password/i)).toBeInTheDocument()\n    expect(screen.getByRole('button', { name: /sign in/i })).toBeInTheDocument()\n  })\n})\n\nFiles:\n- storefront/components/auth/LoginForm.tsx\n- storefront/components/auth/LoginForm.test.tsx\n- storefront/components/auth/schemas.ts (Zod schemas)\n- storefront/app/(auth)/login/page.tsx",
+        "testStrategy": "TDD Cycle:\n1. npm test -- LoginForm (RED - tests fail)\n2. Implement each feature to pass tests (GREEN)\n3. Clean up and style (REFACTOR)\n\nTest Commands:\nnpm test -- LoginForm.test.tsx\nnpm test -- --coverage LoginForm.test.tsx\n\nPlaywright Verification:\n- mcp-cli call playwright/browser_navigate '{\"url\": \"http://localhost:3000/login\"}'\n- mcp-cli call playwright/browser_snapshot '{}'\n- Fill form, submit, verify behavior\n\nAcceptance:\n- [ ] All 5 TDD tests pass\n- [ ] Form has proper labels (accessible)\n- [ ] Validation errors show with aria-invalid\n- [ ] Loading state prevents double submission\n\nAuto-Commit: /auto-commit",
+        "status": "pending",
+        "dependencies": [
+          "5",
+          "6"
+        ],
+        "priority": "high",
+        "subtasks": []
+      },
+      {
+        "id": "8",
+        "title": "Build Customer Auth UI - Register Form",
+        "description": "Create registration form with name, email, password, confirm password, and terms acceptance.",
+        "details": "Framework Context:\n- Use /senior-developer skill with TDD\n\nImplementation Steps (TDD):\n1. Write tests for form fields\n2. Write test for password match validation\n3. Write test for successful registration\n4. Implement RegisterForm component\n5. Add password strength indicator\n\nFiles:\n- storefront/components/auth/RegisterForm.tsx\n- storefront/components/auth/RegisterForm.test.tsx\n- storefront/app/(auth)/register/page.tsx",
+        "testStrategy": "TDD Test Cases:\n- renders all required fields\n- validates password match\n- validates email format\n- shows success message on registration\n\nPlaywright Verification:\n- mcp-cli call playwright/browser_navigate '{\"url\": \"http://localhost:3000/register\"}'\n- mcp-cli call playwright/browser_snapshot '{}'\n\nAcceptance:\n- [ ] All fields validate correctly\n- [ ] Registration creates account\n- [ ] Auto-login after registration\n\nAuto-Commit: /auto-commit",
+        "status": "pending",
+        "dependencies": [
+          "7"
+        ],
+        "priority": "high",
+        "subtasks": []
+      },
+      {
+        "id": "9",
+        "title": "Implement Social Login - Google OAuth",
+        "description": "Add Google OAuth login option using NextAuth.js or Medusa auth provider.",
+        "details": "Framework Context:\n- Use /medusa skill for OAuth setup\n\nImplementation Steps:\n1. Create Google OAuth credentials\n2. Configure auth provider in Medusa\n3. Add Google login button to UI\n4. Handle OAuth callback\n5. Link social account to customer\n\nFiles:\n- backend/src/api/auth/google/route.ts\n- storefront/components/auth/SocialLogin.tsx\n- backend/.env (GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET)",
+        "testStrategy": "TDD: Write test for OAuth redirect flow\n\nPlaywright Verification:\n- Verify Google button renders\n- Test OAuth flow (manual)\n\nAcceptance:\n- [ ] Google button visible\n- [ ] OAuth redirect works\n- [ ] Account created/linked\n\nAuto-Commit: /auto-commit",
+        "status": "pending",
+        "dependencies": [
+          "6"
+        ],
+        "priority": "medium",
+        "subtasks": []
+      },
+      {
+        "id": "10",
+        "title": "Implement Phone OTP Auth - Backend",
+        "description": "Set up SMS OTP verification using Twilio for phone-based authentication.",
+        "details": "Framework Context:\n- Use /medusa skill for notification setup\n\nImplementation Steps:\n1. Configure Twilio credentials in .env\n2. Create OTP generation service\n3. Create POST /store/auth/otp/send endpoint\n4. Create POST /store/auth/otp/verify endpoint\n5. Rate limit OTP requests\n\nFiles:\n- backend/src/services/otp.ts\n- backend/src/api/store/auth/otp/route.ts\n- backend/.env (TWILIO_*)",
+        "testStrategy": "TDD: Write tests for OTP generation, validation, expiry\n\nAcceptance:\n- [ ] OTP sent via SMS\n- [ ] OTP validates correctly\n- [ ] Expired OTP rejected\n\nAuto-Commit: /auto-commit",
+        "status": "pending",
+        "dependencies": [
+          "6"
+        ],
+        "priority": "medium",
+        "subtasks": []
+      },
+      {
+        "id": "11",
+        "title": "Implement Phone OTP Auth - Frontend UI",
+        "description": "Create phone input and OTP verification UI with countdown timer.",
+        "details": "Framework Context:\n- Use /senior-developer skill with TDD\n\nImplementation Steps (TDD):\n1. Write test for phone input\n2. Write test for OTP input (6 digits)\n3. Write test for countdown timer\n4. Implement PhoneLogin component\n5. Implement OTPInput component\n\nFiles:\n- storefront/components/auth/PhoneLogin.tsx\n- storefront/components/auth/OTPInput.tsx\n- storefront/components/auth/PhoneLogin.test.tsx",
+        "testStrategy": "TDD Test Cases:\n- validates phone number format\n- shows OTP input after sending\n- countdown timer works\n- resend button enabled after timeout\n\nPlaywright Verification:\n- Navigate to phone login\n- Verify UI flow\n\nAcceptance:\n- [ ] Phone validation works\n- [ ] OTP input accepts 6 digits\n- [ ] Timer counts down\n\nAuto-Commit: /auto-commit",
+        "status": "pending",
+        "dependencies": [
+          "10"
+        ],
+        "priority": "medium",
+        "subtasks": []
+      },
+      {
+        "id": "12",
+        "title": "Configure Medusa Product Module",
+        "description": "Set up Product module with categories, variants, options, and pricing.",
+        "details": "Framework Context:\n- Use /medusa skill for Product module\n- Docs: mcp-cli call context7/query-docs '{\"libraryId\": \"/websites/medusajs_learn\", \"topic\": \"product module\"}'\n\nImplementation Steps:\n1. Verify Product module in medusa-config.ts\n2. Create product categories via admin\n3. Test product creation API\n4. Configure variant options (size, color)\n5. Set up pricing module link\n\nFiles:\n- backend/medusa-config.ts\n- backend/src/modules/product/",
+        "testStrategy": "TDD: Write tests for product CRUD operations\n\nAcceptance:\n- [ ] Products can be created\n- [ ] Variants work correctly\n- [ ] Categories assignable\n\nAuto-Commit: /auto-commit",
+        "status": "pending",
+        "dependencies": [
+          "2"
+        ],
+        "priority": "high",
+        "subtasks": []
+      },
+      {
+        "id": "13",
+        "title": "Create Product Seeder Script",
+        "description": "Create script to seed sample products, categories, and variants for development.",
+        "details": "Framework Context:\n- Use /medusa skill for seeding\n\nImplementation Steps:\n1. Create seed script in backend/src/scripts/\n2. Add 5 categories (Electronics, Fashion, Home, etc.)\n3. Add 20 sample products with images\n4. Add variants for applicable products\n5. Set multi-currency prices\n\nFiles:\n- backend/src/scripts/seed-products.ts\n- backend/package.json (add seed script)",
+        "testStrategy": "Run seed script and verify data in admin\n\nAcceptance:\n- [ ] Categories created\n- [ ] Products with images\n- [ ] Variants and prices set\n\nAuto-Commit: /auto-commit",
+        "status": "pending",
+        "dependencies": [
+          "12"
+        ],
+        "priority": "medium",
+        "subtasks": []
+      },
+      {
+        "id": "14",
+        "title": "Configure AWS S3 for File Storage",
+        "description": "Set up S3 bucket for product images and digital downloads.",
+        "details": "Framework Context:\n- Use /medusa skill for file storage\n\nImplementation Steps:\n1. Create S3 bucket with proper permissions\n2. Configure CORS for bucket\n3. Add S3 credentials to .env\n4. Configure File module in medusa-config.ts\n5. Test file upload via admin\n\nFiles:\n- backend/.env (AWS_*)\n- backend/medusa-config.ts",
+        "testStrategy": "TDD: Write test for file upload and retrieval\n\nAcceptance:\n- [ ] Files upload to S3\n- [ ] URLs accessible\n- [ ] Images display correctly\n\nAuto-Commit: /auto-commit",
+        "status": "pending",
+        "dependencies": [
+          "1"
+        ],
+        "priority": "high",
+        "subtasks": []
+      },
+      {
+        "id": "15",
+        "title": "Configure Region and Currency Settings",
+        "description": "Set up Kuwait region with KWD as primary currency, add USD/EUR/GBP support.",
+        "details": "Framework Context:\n- Use /medusa skill for Region module\n- Docs: mcp-cli call context7/query-docs '{\"libraryId\": \"/websites/medusajs_learn\", \"topic\": \"regions currencies\"}'\n\nImplementation Steps:\n1. Create Kuwait region via admin\n2. Set KWD as default currency\n3. Add USD, EUR, GBP currencies\n4. Configure exchange rates\n5. Set tax rate (5% VAT)\n\nFiles:\n- backend/src/scripts/seed-regions.ts",
+        "testStrategy": "Verify prices display in all currencies\n\nAcceptance:\n- [ ] Kuwait region created\n- [ ] 4 currencies configured\n- [ ] Tax rate applied\n\nAuto-Commit: /auto-commit",
+        "status": "pending",
+        "dependencies": [
+          "2"
+        ],
+        "priority": "high",
+        "subtasks": []
+      },
+      {
+        "id": "16",
+        "title": "Create Sales Channel Configuration",
+        "description": "Set up web storefront sales channel with proper product visibility.",
+        "details": "Framework Context:\n- Use /medusa skill for Sales Channel\n\nImplementation Steps:\n1. Create \"Web Store\" sales channel\n2. Link products to sales channel\n3. Configure channel-specific settings\n4. Test product visibility\n\nFiles:\n- backend/src/scripts/seed-sales-channel.ts",
+        "testStrategy": "Verify products only visible in correct channel\n\nAcceptance:\n- [ ] Sales channel created\n- [ ] Products linked\n- [ ] Visibility correct\n\nAuto-Commit: /auto-commit",
+        "status": "pending",
+        "dependencies": [
+          "15"
+        ],
+        "priority": "medium",
+        "subtasks": []
+      },
+      {
+        "id": "17",
+        "title": "Configure Inventory Module",
+        "description": "Set up inventory tracking with stock levels and reservation system.",
+        "details": "Framework Context:\n- Use /medusa skill for Inventory module\n- Docs: mcp-cli call context7/query-docs '{\"libraryId\": \"/websites/medusajs_learn\", \"topic\": \"inventory module\"}'\n\nImplementation Steps:\n1. Enable Inventory module\n2. Create stock location\n3. Link inventory to products\n4. Set initial stock levels\n5. Test reservation on cart add\n\nFiles:\n- backend/medusa-config.ts\n- backend/src/scripts/seed-inventory.ts",
+        "testStrategy": "TDD: Write tests for stock check and reservation\n\nAcceptance:\n- [ ] Stock levels tracked\n- [ ] Reservations work\n- [ ] Out of stock handled\n\nAuto-Commit: /auto-commit",
+        "status": "pending",
+        "dependencies": [
+          "12"
+        ],
+        "priority": "high",
+        "subtasks": []
+      },
+      {
+        "id": "18",
+        "title": "Set Up Development Environment Scripts",
+        "description": "Create npm scripts for common development tasks, Docker compose for local services.",
+        "details": "Implementation Steps:\n1. Create docker-compose.yml for Postgres + Redis\n2. Add npm scripts: dev, build, seed, test\n3. Create .env.example files\n4. Add README with setup instructions\n\nFiles:\n- docker-compose.yml\n- backend/package.json\n- storefront/package.json\n- README.md",
+        "testStrategy": "Verify all scripts work on clean checkout\n\nAcceptance:\n- [ ] docker-compose up works\n- [ ] npm run dev starts both services\n- [ ] README complete\n\nAuto-Commit: /auto-commit",
+        "status": "pending",
+        "dependencies": [
+          "1",
+          "2",
+          "3",
+          "4",
+          "5",
+          "6",
+          "7",
+          "8",
+          "9",
+          "10",
+          "11",
+          "12",
+          "13",
+          "14",
+          "15",
+          "16",
+          "17"
+        ],
+        "priority": "low",
+        "subtasks": []
+      },
+      {
+        "id": "19",
+        "title": "Create ProductCard Component",
+        "description": "Build reusable ProductCard with image, title, price, vendor badge using TDD approach.",
+        "details": "Framework Context:\n- Use /senior-developer skill with TDD (RED → GREEN → REFACTOR)\n- Follow atomic design (molecule component)\n- Use accessible queries for testing\n\nImplementation Steps (TDD):\n1. RED: Write failing test for renders product image with alt text\n2. GREEN: Implement minimal ProductCard with image\n3. RED: Write test for displays formatted price with currency\n4. GREEN: Add price display\n5. RED: Write test for shows vendor name\n6. GREEN: Add vendor badge\n7. RED: Write test for links to product page\n8. GREEN: Wrap in Next.js Link\n9. REFACTOR: Add Tailwind styling, hover effects\n\nCode Pattern:\n// storefront/components/products/ProductCard.test.tsx\nimport { render, screen } from '@testing-library/react'\nimport { ProductCard } from './ProductCard'\n\nconst mockProduct = {\n  id: '1',\n  title: 'Test Product',\n  handle: 'test-product',\n  thumbnail: '/images/product.jpg',\n  price: { amount: 2999, currency_code: 'KWD' },\n  vendor: { name: 'Test Vendor' }\n}\n\ndescribe('ProductCard', () => {\n  it('renders product image with alt text', () => {\n    render(<ProductCard product={mockProduct} />)\n    const image = screen.getByRole('img', { name: /test product/i })\n    expect(image).toBeInTheDocument()\n  })\n})\n\nFiles:\n- storefront/components/products/ProductCard.tsx\n- storefront/components/products/ProductCard.test.tsx\n- storefront/components/products/types.ts",
+        "testStrategy": "TDD Cycle:\n1. RED: npm test -- ProductCard (tests fail - component doesn't exist)\n2. GREEN: Create minimal component to pass each test\n3. REFACTOR: Add styling while keeping tests green\n\nTest Commands:\nnpm test -- ProductCard.test.tsx\nnpm test -- --coverage ProductCard.test.tsx\n\nPlaywright Verification:\n- mcp-cli call playwright/browser_navigate '{\"url\": \"http://localhost:3000\"}'\n- mcp-cli call playwright/browser_snapshot '{}'\n- Verify ProductCards render in grid with images, prices, vendors\n\nAcceptance:\n- [ ] All 5 TDD tests pass\n- [ ] Accessible (keyboard navigable, screen reader friendly)\n- [ ] Responsive (1-4 columns based on viewport)\n- [ ] No console errors\n\nAuto-Commit: /auto-commit",
+        "status": "pending",
+        "dependencies": [
+          "5",
+          "12"
+        ],
+        "priority": "high",
+        "subtasks": []
+      },
+      {
+        "id": "20",
+        "title": "Build Product Grid Component",
+        "description": "Create responsive product grid with pagination support.",
+        "details": "Framework Context:\n- Use /senior-developer skill with TDD\n\nImplementation Steps (TDD):\n1. Write test for grid layout\n2. Write test for pagination\n3. Write test for empty state\n4. Implement ProductGrid component\n5. Add loading skeleton\n\nFiles:\n- storefront/components/products/ProductGrid.tsx\n- storefront/components/products/ProductGrid.test.tsx\n- storefront/components/products/ProductSkeleton.tsx",
+        "testStrategy": "TDD Test Cases:\n- renders products in grid\n- shows pagination when > 12 items\n- shows empty state message\n- displays loading skeleton\n\nPlaywright Verification:\n- Navigate to category page\n- Verify grid layout\n\nAcceptance:\n- [ ] Responsive grid (1-4 columns)\n- [ ] Pagination works\n- [ ] Loading states shown\n\nAuto-Commit: /auto-commit",
+        "status": "pending",
+        "dependencies": [
+          "19"
+        ],
+        "priority": "high",
+        "subtasks": []
+      },
+      {
+        "id": "21",
+        "title": "Build Product Filters Sidebar",
+        "description": "Create filters for category, price range, vendor, availability.",
+        "details": "Framework Context:\n- Use /senior-developer skill with TDD\n\nImplementation Steps (TDD):\n1. Write test for category filter\n2. Write test for price range slider\n3. Write test for vendor checkboxes\n4. Write test for URL sync\n5. Implement FiltersSidebar\n6. Add mobile drawer\n\nFiles:\n- storefront/components/products/FiltersSidebar.tsx\n- storefront/components/products/FiltersSidebar.test.tsx\n- storefront/components/products/PriceRangeSlider.tsx",
+        "testStrategy": "TDD Test Cases:\n- category filter updates URL\n- price range filters products\n- multiple vendors selectable\n- clear all resets filters\n\nPlaywright Verification:\n- Apply filters, verify URL changes\n- Verify products filtered\n\nAcceptance:\n- [ ] Filters update URL params\n- [ ] Products filter correctly\n- [ ] Mobile drawer works\n\nAuto-Commit: /auto-commit",
+        "status": "pending",
+        "dependencies": [
+          "20"
+        ],
+        "priority": "high",
+        "subtasks": []
+      },
+      {
+        "id": "22",
+        "title": "Build Category Page",
+        "description": "Create category page with grid, filters, sorting, and breadcrumbs.",
+        "details": "Framework Context:\n- Use /senior-developer skill\n\nImplementation Steps:\n1. Create app/(shop)/category/[handle]/page.tsx\n2. Fetch products by category from Medusa\n3. Add FiltersSidebar\n4. Add sort dropdown\n5. Add breadcrumb navigation\n\nFiles:\n- storefront/app/(shop)/category/[handle]/page.tsx\n- storefront/components/navigation/Breadcrumbs.tsx",
+        "testStrategy": "Playwright Verification:\n- mcp-cli call playwright/browser_navigate '{\"url\": \"http://localhost:3000/category/electronics\"}'\n- mcp-cli call playwright/browser_snapshot '{}'\n\nAcceptance:\n- [ ] Products load for category\n- [ ] Filters work\n- [ ] Sort works\n- [ ] Breadcrumbs correct\n\nAuto-Commit: /auto-commit",
+        "status": "pending",
+        "dependencies": [
+          "20",
+          "21"
+        ],
+        "priority": "high",
+        "subtasks": []
+      },
+      {
+        "id": "23",
+        "title": "Build Product Detail Page - Image Gallery",
+        "description": "Create product image gallery with thumbnails, zoom, and swipe on mobile.",
+        "details": "Framework Context:\n- Use /senior-developer skill with TDD\n\nImplementation Steps (TDD):\n1. Write test for main image display\n2. Write test for thumbnail click\n3. Write test for zoom on hover\n4. Implement ImageGallery component\n5. Add mobile swipe support\n\nFiles:\n- storefront/components/products/ImageGallery.tsx\n- storefront/components/products/ImageGallery.test.tsx",
+        "testStrategy": "TDD Test Cases:\n- displays main image\n- clicking thumbnail changes main\n- zoom works on desktop\n- swipe works on mobile\n\nPlaywright Verification:\n- Navigate to product page\n- Click thumbnails, verify main changes\n\nAcceptance:\n- [ ] Gallery renders images\n- [ ] Thumbnails work\n- [ ] Mobile swipe works\n\nAuto-Commit: /auto-commit",
+        "status": "pending",
+        "dependencies": [
+          "4"
+        ],
+        "priority": "high",
+        "subtasks": []
+      },
+      {
+        "id": "24",
+        "title": "Build Product Detail Page - Variant Selector",
+        "description": "Create variant selection UI for size, color with stock availability.",
+        "details": "Framework Context:\n- Use /senior-developer skill with TDD\n\nImplementation Steps (TDD):\n1. Write test for option buttons render\n2. Write test for selection updates\n3. Write test for out of stock disable\n4. Implement VariantSelector\n5. Update price on selection\n\nFiles:\n- storefront/components/products/VariantSelector.tsx\n- storefront/components/products/VariantSelector.test.tsx",
+        "testStrategy": "TDD Test Cases:\n- renders all options\n- clicking selects variant\n- out of stock shows disabled\n- price updates on selection\n\nPlaywright Verification:\n- Select variants, verify price change\n\nAcceptance:\n- [ ] All variants selectable\n- [ ] Stock status shown\n- [ ] Price updates\n\nAuto-Commit: /auto-commit",
+        "status": "pending",
+        "dependencies": [
+          "12"
+        ],
+        "priority": "high",
+        "subtasks": []
+      },
+      {
+        "id": "25",
+        "title": "Build Product Detail Page - Full Page",
+        "description": "Assemble full product detail page with gallery, info, variants, add to cart.",
+        "details": "Framework Context:\n- Use /senior-developer skill\n\nImplementation Steps:\n1. Create app/(shop)/products/[handle]/page.tsx\n2. Fetch product data from Medusa\n3. Assemble ImageGallery + VariantSelector\n4. Add product description\n5. Add vendor info section\n6. Add Add to Cart button\n\nFiles:\n- storefront/app/(shop)/products/[handle]/page.tsx\n- storefront/components/products/ProductInfo.tsx\n- storefront/components/products/AddToCartButton.tsx",
+        "testStrategy": "Playwright Verification:\n- mcp-cli call playwright/browser_navigate '{\"url\": \"http://localhost:3000/products/sample-product\"}'\n- mcp-cli call playwright/browser_snapshot '{}'\n- mcp-cli call playwright/browser_take_screenshot '{\"type\": \"png\", \"filename\": \"product-detail.png\"}'\n\nAcceptance:\n- [ ] All sections render\n- [ ] Variants selectable\n- [ ] Add to cart works\n\nAuto-Commit: /auto-commit",
+        "status": "pending",
+        "dependencies": [
+          "23",
+          "24"
+        ],
+        "priority": "high",
+        "subtasks": []
+      },
+      {
+        "id": "26",
+        "title": "Implement Multi-Vendor Cart - Backend",
+        "description": "Configure Medusa cart with vendor grouping for line items.",
+        "details": "Framework Context:\n- Use /medusa skill\n- Docs: mcp-cli call context7/query-docs '{\"libraryId\": \"/websites/medusajs_learn\", \"topic\": \"cart module\"}'\n\nImplementation Steps:\n1. Create custom cart service extending Medusa\n2. Add vendor_id to line items metadata\n3. Create endpoint to get cart grouped by vendor\n4. Handle multi-vendor shipping calculation\n\nFiles:\n- backend/src/services/marketplace-cart.ts\n- backend/src/api/store/cart/grouped/route.ts",
+        "testStrategy": "TDD: Write tests for vendor grouping logic\n\nAcceptance:\n- [ ] Line items track vendor\n- [ ] Grouped response works\n- [ ] Subtotals per vendor\n\nAuto-Commit: /auto-commit",
+        "status": "pending",
+        "dependencies": [
+          "12",
+          "17"
+        ],
+        "priority": "high",
+        "subtasks": []
+      },
+      {
+        "id": "27",
+        "title": "Build Cart UI - Cart Drawer",
+        "description": "Create slide-out cart drawer with items grouped by vendor.",
+        "details": "Framework Context:\n- Use /senior-developer skill with TDD\n\nImplementation Steps (TDD):\n1. Write test for drawer open/close\n2. Write test for vendor grouping display\n3. Write test for quantity update\n4. Write test for remove item\n5. Implement CartDrawer component\n\nFiles:\n- storefront/components/cart/CartDrawer.tsx\n- storefront/components/cart/CartDrawer.test.tsx\n- storefront/components/cart/CartItem.tsx\n- storefront/components/cart/VendorGroup.tsx",
+        "testStrategy": "TDD Test Cases:\n- opens on cart icon click\n- groups items by vendor\n- quantity +/- works\n- remove item works\n- shows subtotals\n\nPlaywright Verification:\n- Add item to cart\n- Open drawer, verify grouping\n\nAcceptance:\n- [ ] Drawer slides in\n- [ ] Vendor groups shown\n- [ ] Quantity controls work\n\nAuto-Commit: /auto-commit",
+        "status": "pending",
+        "dependencies": [
+          "26"
+        ],
+        "priority": "high",
+        "subtasks": []
+      },
+      {
+        "id": "28",
+        "title": "Build Cart Page",
+        "description": "Create full cart page with detailed view, vendor groups, and checkout button.",
+        "details": "Framework Context:\n- Use /senior-developer skill\n\nImplementation Steps:\n1. Create app/(shop)/cart/page.tsx\n2. Display full cart with vendor groups\n3. Add order summary sidebar\n4. Add promo code input\n5. Add Proceed to Checkout button\n\nFiles:\n- storefront/app/(shop)/cart/page.tsx\n- storefront/components/cart/OrderSummary.tsx\n- storefront/components/cart/PromoCodeInput.tsx",
+        "testStrategy": "Playwright Verification:\n- mcp-cli call playwright/browser_navigate '{\"url\": \"http://localhost:3000/cart\"}'\n- mcp-cli call playwright/browser_snapshot '{}'\n\nAcceptance:\n- [ ] Full cart displays\n- [ ] Summary calculates correctly\n- [ ] Checkout button works\n\nAuto-Commit: /auto-commit",
+        "status": "pending",
+        "dependencies": [
+          "27"
+        ],
+        "priority": "high",
+        "subtasks": []
+      },
+      {
+        "id": "29",
+        "title": "Build Checkout - Address Step",
+        "description": "Create checkout address form with saved addresses for logged-in users.",
+        "details": "Framework Context:\n- Use /senior-developer skill with TDD\n\nImplementation Steps (TDD):\n1. Write test for address form fields\n2. Write test for saved address selection\n3. Write test for new address save\n4. Implement AddressStep component\n5. Add address validation\n\nFiles:\n- storefront/components/checkout/AddressStep.tsx\n- storefront/components/checkout/AddressStep.test.tsx\n- storefront/components/checkout/AddressForm.tsx\n- storefront/components/checkout/SavedAddresses.tsx",
+        "testStrategy": "TDD Test Cases:\n- renders all address fields\n- validates required fields\n- shows saved addresses for logged user\n- saves new address option\n\nPlaywright Verification:\n- Navigate to checkout\n- Fill address form\n\nAcceptance:\n- [ ] Form validates\n- [ ] Saved addresses work\n- [ ] Guest checkout works\n\nAuto-Commit: /auto-commit",
+        "status": "pending",
+        "dependencies": [
+          "28"
+        ],
+        "priority": "high",
+        "subtasks": []
+      },
+      {
+        "id": "30",
+        "title": "Build Checkout - Shipping Step",
+        "description": "Create shipping options selection with per-vendor options.",
+        "details": "Framework Context:\n- Use /senior-developer skill\n\nImplementation Steps:\n1. Fetch shipping options from Medusa\n2. Display options per vendor\n3. Calculate total shipping\n4. Store selection in cart\n\nFiles:\n- storefront/components/checkout/ShippingStep.tsx\n- storefront/components/checkout/ShippingOption.tsx",
+        "testStrategy": "Playwright Verification:\n- Select shipping options\n- Verify totals update\n\nAcceptance:\n- [ ] Options load per vendor\n- [ ] Selection updates total\n- [ ] Can proceed to payment\n\nAuto-Commit: /auto-commit",
+        "status": "pending",
+        "dependencies": [
+          "29"
+        ],
+        "priority": "high",
+        "subtasks": []
+      },
+      {
+        "id": "31",
+        "title": "Integrate Stripe Payment Provider - Backend",
+        "description": "Configure Stripe payment provider in Medusa backend.",
+        "details": "Framework Context:\n- Use /medusa skill\n- Docs: mcp-cli call context7/query-docs '{\"libraryId\": \"/websites/medusajs_learn\", \"topic\": \"stripe payment\"}'\n\nImplementation Steps:\n1. Install @medusajs/payment-stripe\n2. Add Stripe credentials to .env\n3. Configure payment module in medusa-config.ts\n4. Enable Stripe for Kuwait region\n5. Test payment session creation\n\nFiles:\n- backend/medusa-config.ts\n- backend/.env (STRIPE_API_KEY)",
+        "testStrategy": "TDD: Write test for payment session creation\n\nAcceptance:\n- [ ] Stripe provider configured\n- [ ] Payment sessions create\n- [ ] Test mode working\n\nAuto-Commit: /auto-commit",
+        "status": "pending",
+        "dependencies": [
+          "15"
+        ],
+        "priority": "high",
+        "subtasks": []
+      },
+      {
+        "id": "32",
+        "title": "Build Checkout - Payment Step with Stripe",
+        "description": "Create payment step with Stripe Elements for card input.",
+        "details": "Framework Context:\n- Use /senior-developer skill\n\nImplementation Steps:\n1. Install @stripe/stripe-js and @stripe/react-stripe-js\n2. Create PaymentStep component\n3. Integrate Stripe Elements (CardElement)\n4. Handle payment confirmation\n5. Show payment errors\n\nFiles:\n- storefront/components/checkout/PaymentStep.tsx\n- storefront/components/checkout/StripePayment.tsx\n- storefront/lib/stripe.ts",
+        "testStrategy": "Playwright Verification:\n- Navigate to payment step\n- Verify Stripe Elements load\n- Use test card: 4242 4242 4242 4242\n\nAcceptance:\n- [ ] Stripe Elements render\n- [ ] Test payment succeeds\n- [ ] Errors display clearly\n\nAuto-Commit: /auto-commit",
+        "status": "pending",
+        "dependencies": [
+          "30",
+          "31"
+        ],
+        "priority": "high",
+        "subtasks": []
+      },
+      {
+        "id": "33",
+        "title": "Integrate Razorpay Payment Provider",
+        "description": "Add Razorpay as alternative payment option.",
+        "details": "Framework Context:\n- Use /medusa skill\n\nImplementation Steps:\n1. Install medusa-payment-razorpay\n2. Configure Razorpay credentials\n3. Add to payment module\n4. Create RazorpayPayment component\n5. Test payment flow\n\nFiles:\n- backend/medusa-config.ts\n- backend/.env (RAZORPAY_*)\n- storefront/components/checkout/RazorpayPayment.tsx",
+        "testStrategy": "Test in Razorpay test mode\n\nAcceptance:\n- [ ] Razorpay option shows\n- [ ] Payment flow works\n- [ ] Order created on success\n\nAuto-Commit: /auto-commit",
+        "status": "pending",
+        "dependencies": [
+          "31"
+        ],
+        "priority": "medium",
+        "subtasks": []
+      },
+      {
+        "id": "34",
+        "title": "Integrate PayPal Payment Provider",
+        "description": "Add PayPal as alternative payment option.",
+        "details": "Framework Context:\n- Use /medusa skill\n\nImplementation Steps:\n1. Install @medusajs/payment-paypal\n2. Configure PayPal credentials\n3. Add PayPal buttons to checkout\n4. Handle payment capture\n\nFiles:\n- backend/medusa-config.ts\n- backend/.env (PAYPAL_*)\n- storefront/components/checkout/PayPalPayment.tsx",
+        "testStrategy": "Test in PayPal sandbox\n\nAcceptance:\n- [ ] PayPal button shows\n- [ ] Sandbox payment works\n- [ ] Order created\n\nAuto-Commit: /auto-commit",
+        "status": "pending",
+        "dependencies": [
+          "31"
+        ],
+        "priority": "medium",
+        "subtasks": []
+      },
+      {
+        "id": "35",
+        "title": "Build Payment Method Selector",
+        "description": "Create unified payment method selector with all providers.",
+        "details": "Framework Context:\n- Use /senior-developer skill with TDD\n\nImplementation Steps (TDD):\n1. Write test for method tabs\n2. Write test for provider switching\n3. Implement PaymentMethodSelector\n4. Show appropriate form per selection\n\nFiles:\n- storefront/components/checkout/PaymentMethodSelector.tsx\n- storefront/components/checkout/PaymentMethodSelector.test.tsx",
+        "testStrategy": "TDD Test Cases:\n- renders all available methods\n- switching shows correct form\n- remembers selection\n\nPlaywright Verification:\n- Switch between methods\n- Verify forms change\n\nAcceptance:\n- [ ] All methods shown\n- [ ] Switching works\n- [ ] Forms render correctly\n\nAuto-Commit: /auto-commit",
+        "status": "pending",
+        "dependencies": [
+          "32",
+          "33",
+          "34"
+        ],
+        "priority": "high",
+        "subtasks": []
+      },
+      {
+        "id": "36",
+        "title": "Build Order Confirmation Page",
+        "description": "Create order confirmation page with order details and next steps.",
+        "details": "Framework Context:\n- Use /senior-developer skill\n\nImplementation Steps:\n1. Create app/(shop)/order/confirmed/[id]/page.tsx\n2. Fetch order details\n3. Display order summary\n4. Show vendor breakdown\n5. Add tracking info placeholder\n\nFiles:\n- storefront/app/(shop)/order/confirmed/[id]/page.tsx\n- storefront/components/orders/OrderConfirmation.tsx\n- storefront/components/orders/OrderItems.tsx",
+        "testStrategy": "Playwright Verification:\n- Complete checkout\n- Verify confirmation page\n\nAcceptance:\n- [ ] Order number displayed\n- [ ] Items listed\n- [ ] Email confirmation mention\n\nAuto-Commit: /auto-commit",
+        "status": "pending",
+        "dependencies": [
+          "32"
+        ],
+        "priority": "high",
+        "subtasks": []
+      },
+      {
+        "id": "37",
+        "title": "Build Complete Checkout Flow",
+        "description": "Assemble full checkout with steps, progress indicator, and state management.",
+        "details": "Framework Context:\n- Use /senior-developer skill\n\nImplementation Steps:\n1. Create app/(shop)/checkout/page.tsx\n2. Add step progress indicator\n3. Manage checkout state\n4. Handle step navigation\n5. Complete order workflow\n\nFiles:\n- storefront/app/(shop)/checkout/page.tsx\n- storefront/components/checkout/CheckoutProgress.tsx\n- storefront/hooks/useCheckout.ts",
+        "testStrategy": "Playwright Verification:\n- mcp-cli call playwright/browser_navigate '{\"url\": \"http://localhost:3000/checkout\"}'\n- Complete full flow\n- mcp-cli call playwright/browser_take_screenshot '{\"type\": \"png\", \"filename\": \"checkout-complete.png\"}'\n\nAcceptance:\n- [ ] Full flow works\n- [ ] Steps navigate correctly\n- [ ] Order creates successfully\n\nAuto-Commit: /auto-commit",
+        "status": "pending",
+        "dependencies": [
+          "29",
+          "30",
+          "35",
+          "36"
+        ],
+        "priority": "high",
+        "subtasks": []
+      },
+      {
+        "id": "38",
+        "title": "Build Customer Order History",
+        "description": "Create customer account order history page.",
+        "details": "Framework Context:\n- Use /senior-developer skill\n\nImplementation Steps:\n1. Create app/(account)/orders/page.tsx\n2. Fetch customer orders\n3. Display order list with status\n4. Add order detail view\n5. Add tracking links\n\nFiles:\n- storefront/app/(account)/orders/page.tsx\n- storefront/app/(account)/orders/[id]/page.tsx\n- storefront/components/orders/OrderList.tsx\n- storefront/components/orders/OrderStatus.tsx",
+        "testStrategy": "Playwright Verification:\n- Login, navigate to orders\n- Verify order history displays\n\nAcceptance:\n- [ ] Orders list shows\n- [ ] Status indicators work\n- [ ] Detail page accessible\n\nAuto-Commit: /auto-commit",
+        "status": "pending",
+        "dependencies": [
+          "36"
+        ],
+        "priority": "medium",
+        "subtasks": []
+      },
+      {
+        "id": "39",
+        "title": "Create Vendor Module - Backend",
+        "description": "Create custom Medusa module for vendor management with data model, service, and API routes.",
+        "details": "Framework Context:\n- Use /medusa skill for custom modules\n- Docs: mcp-cli call context7/query-docs '{\"libraryId\": \"/websites/medusajs_learn\", \"topic\": \"custom modules\"}'\n\nImplementation Steps:\n1. Create src/modules/vendor/ directory structure\n2. Define Vendor data model with fields: id, name, email, status, tier, metadata\n3. Create VendorModuleService extending MedusaService\n4. Register module in medusa-config.ts\n5. Run migrations: npx medusa db:generate vendor && npx medusa db:migrate\n\nCode Pattern:\n// src/modules/vendor/models/vendor.ts\nimport { model } from \"@medusajs/framework/utils\"\n\nconst Vendor = model.define(\"vendor\", {\n  id: model.id().primaryKey(),\n  name: model.text(),\n  email: model.text().unique(),\n  status: model.enum([\"pending\", \"approved\", \"rejected\", \"suspended\"]).default(\"pending\"),\n  tier: model.enum([\"basic\", \"verified\", \"premium\"]).default(\"basic\"),\n  business_name: model.text().nullable(),\n  metadata: model.json().nullable(),\n  created_at: model.dateTime(),\n  updated_at: model.dateTime(),\n})\n\n// src/modules/vendor/service.ts\nimport { MedusaService } from \"@medusajs/framework/utils\"\nimport Vendor from \"./models/vendor\"\n\nclass VendorModuleService extends MedusaService({ Vendor }) {\n  async getApprovedVendors() {\n    return await this.listVendors({ status: \"approved\" })\n  }\n}\n\nFiles:\n- backend/src/modules/vendor/index.ts\n- backend/src/modules/vendor/service.ts\n- backend/src/modules/vendor/models/vendor.ts",
+        "testStrategy": "TDD: Write tests for vendor CRUD operations\n- Test vendor creation with required fields\n- Test vendor retrieval by ID\n- Test vendor status update (approve/reject)\n- Test listing vendors by status\n\nTest File: backend/src/modules/vendor/__tests__/service.test.ts\n\nAcceptance:\n- [ ] Vendor model created in database\n- [ ] createVendors(), retrieveVendor(), updateVendors() work\n- [ ] Module registered in medusa-config.ts\n- [ ] npx medusa db:migrate runs without errors\n\nAuto-Commit: /auto-commit",
+        "status": "pending",
+        "dependencies": [
+          "2"
+        ],
+        "priority": "high",
+        "subtasks": []
+      },
+      {
+        "id": "40",
+        "title": "Create Vendor-Product Link",
+        "description": "Link vendors to products using Medusa module links.",
+        "details": "Framework Context:\n- Use /medusa skill for module links\n\nImplementation Steps:\n1. Create src/links/vendor-product.ts\n2. Define link between Vendor and Product\n3. Run db:sync-links\n4. Update product queries to include vendor\n\nFiles:\n- backend/src/links/vendor-product.ts",
+        "testStrategy": "TDD: Write test for linked data retrieval\n\nAcceptance:\n- [ ] Link defined\n- [ ] Products return vendor info\n- [ ] Vendor returns products\n\nAuto-Commit: /auto-commit",
+        "status": "pending",
+        "dependencies": [
+          "39",
+          "12"
+        ],
+        "priority": "high",
+        "subtasks": []
+      },
+      {
+        "id": "41",
+        "title": "Build Vendor Registration API",
+        "description": "Create vendor registration and application endpoints.",
+        "details": "Framework Context:\n- Use /medusa skill for API routes\n\nImplementation Steps:\n1. Create POST /store/vendors/apply\n2. Create vendor application model\n3. Add document upload support\n4. Create verification tiers logic\n5. Send notification on submission\n\nFiles:\n- backend/src/api/store/vendors/apply/route.ts\n- backend/src/modules/vendor/models/application.ts",
+        "testStrategy": "TDD: Write tests for application submission\n\nAcceptance:\n- [ ] Application submits\n- [ ] Documents upload\n- [ ] Status tracking works\n\nAuto-Commit: /auto-commit",
+        "status": "pending",
+        "dependencies": [
+          "39"
+        ],
+        "priority": "high",
+        "subtasks": []
+      },
+      {
+        "id": "42",
+        "title": "Build Vendor Registration Form UI",
+        "description": "Create vendor registration form with business info and documents.",
+        "details": "Framework Context:\n- Use /senior-developer skill with TDD\n\nImplementation Steps (TDD):\n1. Write test for form fields\n2. Write test for document upload\n3. Write test for submission\n4. Implement VendorRegistrationForm\n5. Add multi-step wizard\n\nFiles:\n- storefront/app/(vendor)/apply/page.tsx\n- storefront/components/vendor/RegistrationForm.tsx\n- storefront/components/vendor/DocumentUpload.tsx",
+        "testStrategy": "TDD Test Cases:\n- renders business info fields\n- validates required fields\n- document upload works\n- submission shows confirmation\n\nPlaywright Verification:\n- mcp-cli call playwright/browser_navigate '{\"url\": \"http://localhost:3000/vendor/apply\"}'\n- Fill form, verify flow\n\nAcceptance:\n- [ ] Form validates\n- [ ] Documents upload\n- [ ] Confirmation shown\n\nAuto-Commit: /auto-commit",
+        "status": "pending",
+        "dependencies": [
+          "41"
+        ],
+        "priority": "high",
+        "subtasks": []
+      },
+      {
+        "id": "43",
+        "title": "Build Vendor Dashboard Layout",
+        "description": "Create vendor dashboard layout with sidebar navigation.",
+        "details": "Framework Context:\n- Use /senior-developer skill\n\nImplementation Steps:\n1. Create app/(vendor)/dashboard/layout.tsx\n2. Add sidebar with navigation\n3. Add header with vendor info\n4. Create dashboard home with stats\n\nFiles:\n- storefront/app/(vendor)/dashboard/layout.tsx\n- storefront/components/vendor/DashboardSidebar.tsx\n- storefront/components/vendor/DashboardHeader.tsx\n- storefront/app/(vendor)/dashboard/page.tsx",
+        "testStrategy": "Playwright Verification:\n- mcp-cli call playwright/browser_navigate '{\"url\": \"http://localhost:3000/vendor/dashboard\"}'\n- mcp-cli call playwright/browser_snapshot '{}'\n\nAcceptance:\n- [ ] Layout renders\n- [ ] Navigation works\n- [ ] Stats display\n\nAuto-Commit: /auto-commit",
+        "status": "pending",
+        "dependencies": [
+          "39"
+        ],
+        "priority": "high",
+        "subtasks": []
+      },
+      {
+        "id": "44",
+        "title": "Build Vendor Product List",
+        "description": "Create vendor's product management list with CRUD actions.",
+        "details": "Framework Context:\n- Use /senior-developer skill\n\nImplementation Steps:\n1. Create app/(vendor)/dashboard/products/page.tsx\n2. Fetch vendor's products\n3. Add data table with columns\n4. Add search and filters\n5. Add bulk actions\n\nFiles:\n- storefront/app/(vendor)/dashboard/products/page.tsx\n- storefront/components/vendor/ProductsTable.tsx",
+        "testStrategy": "Playwright Verification:\n- Navigate to vendor products\n- Verify table renders\n\nAcceptance:\n- [ ] Products list shows\n- [ ] Search works\n- [ ] Actions available\n\nAuto-Commit: /auto-commit",
+        "status": "pending",
+        "dependencies": [
+          "43",
+          "40"
+        ],
+        "priority": "high",
+        "subtasks": []
+      },
+      {
+        "id": "45",
+        "title": "Build Vendor Product Form",
+        "description": "Create product creation/edit form for vendors.",
+        "details": "Framework Context:\n- Use /senior-developer skill with TDD\n\nImplementation Steps (TDD):\n1. Write test for form fields\n2. Write test for image upload\n3. Write test for variant creation\n4. Implement ProductForm\n5. Add category selector\n\nFiles:\n- storefront/app/(vendor)/dashboard/products/new/page.tsx\n- storefront/app/(vendor)/dashboard/products/[id]/edit/page.tsx\n- storefront/components/vendor/ProductForm.tsx\n- storefront/components/vendor/VariantsEditor.tsx",
+        "testStrategy": "TDD Test Cases:\n- renders all product fields\n- image upload works\n- variants can be added\n- saves to backend\n\nPlaywright Verification:\n- Create new product\n- Verify appears in list\n\nAcceptance:\n- [ ] Form creates product\n- [ ] Images upload\n- [ ] Variants work\n\nAuto-Commit: /auto-commit",
+        "status": "pending",
+        "dependencies": [
+          "44"
+        ],
+        "priority": "high",
+        "subtasks": []
+      },
+      {
+        "id": "46",
+        "title": "Build Vendor Order List",
+        "description": "Create vendor's order management interface.",
+        "details": "Framework Context:\n- Use /senior-developer skill\n\nImplementation Steps:\n1. Create app/(vendor)/dashboard/orders/page.tsx\n2. Fetch orders for vendor's products\n3. Display order table with status\n4. Add status filters\n5. Add order detail modal\n\nFiles:\n- storefront/app/(vendor)/dashboard/orders/page.tsx\n- storefront/components/vendor/OrdersTable.tsx\n- storefront/components/vendor/OrderDetailModal.tsx",
+        "testStrategy": "Playwright Verification:\n- Navigate to vendor orders\n- Verify orders display\n\nAcceptance:\n- [ ] Orders list shows\n- [ ] Status filters work\n- [ ] Details accessible\n\nAuto-Commit: /auto-commit",
+        "status": "pending",
+        "dependencies": [
+          "43"
+        ],
+        "priority": "high",
+        "subtasks": []
+      },
+      {
+        "id": "47",
+        "title": "Build Vendor Order Processing",
+        "description": "Enable vendors to update order status and add tracking.",
+        "details": "Framework Context:\n- Use /senior-developer skill\n\nImplementation Steps:\n1. Add status update buttons\n2. Create tracking number input\n3. Send customer notification on update\n4. Update fulfillment in Medusa\n\nFiles:\n- storefront/components/vendor/OrderActions.tsx\n- storefront/components/vendor/TrackingInput.tsx",
+        "testStrategy": "Playwright Verification:\n- Update order status\n- Add tracking number\n- Verify updates\n\nAcceptance:\n- [ ] Status updates work\n- [ ] Tracking saves\n- [ ] Notifications sent\n\nAuto-Commit: /auto-commit",
+        "status": "pending",
+        "dependencies": [
+          "46"
+        ],
+        "priority": "high",
+        "subtasks": []
+      },
+      {
+        "id": "48",
+        "title": "Build Vendor Analytics Dashboard",
+        "description": "Create vendor analytics with sales metrics and charts.",
+        "details": "Framework Context:\n- Use /senior-developer skill\n\nImplementation Steps:\n1. Create analytics API endpoint\n2. Display key metrics cards\n3. Add sales chart (recharts)\n4. Add top products list\n5. Add date range selector\n\nFiles:\n- storefront/app/(vendor)/dashboard/analytics/page.tsx\n- storefront/components/vendor/MetricsCards.tsx\n- storefront/components/vendor/SalesChart.tsx\n- backend/src/api/store/vendors/[id]/analytics/route.ts",
+        "testStrategy": "Playwright Verification:\n- Navigate to analytics\n- Verify charts render\n\nAcceptance:\n- [ ] Metrics display\n- [ ] Charts render\n- [ ] Date filter works\n\nAuto-Commit: /auto-commit",
+        "status": "pending",
+        "dependencies": [
+          "43"
+        ],
+        "priority": "medium",
+        "subtasks": []
+      },
+      {
+        "id": "49",
+        "title": "Build Vendor Payout System - Backend",
+        "description": "Create payout tracking and request system for vendors.",
+        "details": "Framework Context:\n- Use /medusa skill\n\nImplementation Steps:\n1. Create Payout model in vendor module\n2. Calculate vendor earnings from orders\n3. Track commission deductions\n4. Create payout request endpoint\n5. Track payout status\n\nFiles:\n- backend/src/modules/vendor/models/payout.ts\n- backend/src/api/store/vendors/[id]/payouts/route.ts\n- backend/src/services/payout-calculator.ts",
+        "testStrategy": "TDD: Write tests for payout calculation\n\nAcceptance:\n- [ ] Earnings tracked\n- [ ] Commission calculated\n- [ ] Payout requests work\n\nAuto-Commit: /auto-commit",
+        "status": "pending",
+        "dependencies": [
+          "39"
+        ],
+        "priority": "high",
+        "subtasks": []
+      },
+      {
+        "id": "50",
+        "title": "Build Vendor Payout UI",
+        "description": "Create vendor payout management interface.",
+        "details": "Framework Context:\n- Use /senior-developer skill\n\nImplementation Steps:\n1. Create app/(vendor)/dashboard/payouts/page.tsx\n2. Display earnings balance\n3. Add payout request button\n4. Show payout history\n5. Add bank details form\n\nFiles:\n- storefront/app/(vendor)/dashboard/payouts/page.tsx\n- storefront/components/vendor/PayoutBalance.tsx\n- storefront/components/vendor/PayoutHistory.tsx\n- storefront/components/vendor/BankDetailsForm.tsx",
+        "testStrategy": "Playwright Verification:\n- Navigate to payouts\n- Verify balance displays\n\nAcceptance:\n- [ ] Balance shows\n- [ ] Request works\n- [ ] History displays\n\nAuto-Commit: /auto-commit",
+        "status": "pending",
+        "dependencies": [
+          "49"
+        ],
+        "priority": "high",
+        "subtasks": []
+      },
+      {
+        "id": "51",
+        "title": "Build Admin Dashboard Layout",
+        "description": "Create admin dashboard layout with navigation.",
+        "details": "Framework Context:\n- Use /senior-developer skill\n\nImplementation Steps:\n1. Create app/(admin)/layout.tsx\n2. Add admin sidebar\n3. Add admin header\n4. Create dashboard home\n\nFiles:\n- storefront/app/(admin)/layout.tsx\n- storefront/components/admin/AdminSidebar.tsx\n- storefront/components/admin/AdminHeader.tsx\n- storefront/app/(admin)/page.tsx",
+        "testStrategy": "Playwright Verification:\n- mcp-cli call playwright/browser_navigate '{\"url\": \"http://localhost:3000/admin\"}'\n- mcp-cli call playwright/browser_snapshot '{}'\n\nAcceptance:\n- [ ] Layout renders\n- [ ] Navigation works\n- [ ] Requires admin auth\n\nAuto-Commit: /auto-commit",
+        "status": "pending",
+        "dependencies": [
+          "2"
+        ],
+        "priority": "high",
+        "subtasks": []
+      },
+      {
+        "id": "52",
+        "title": "Build Admin Vendor Approval",
+        "description": "Create admin interface for vendor application review.",
+        "details": "Framework Context:\n- Use /senior-developer skill\n\nImplementation Steps:\n1. Create app/(admin)/vendors/page.tsx\n2. Display pending applications\n3. Add review modal\n4. Add approve/reject actions\n5. Add tier assignment\n\nFiles:\n- storefront/app/(admin)/vendors/page.tsx\n- storefront/app/(admin)/vendors/[id]/page.tsx\n- storefront/components/admin/VendorReviewModal.tsx\n- storefront/components/admin/TierSelector.tsx",
+        "testStrategy": "Playwright Verification:\n- View pending vendors\n- Approve/reject application\n\nAcceptance:\n- [ ] Applications list\n- [ ] Review works\n- [ ] Status updates\n\nAuto-Commit: /auto-commit",
+        "status": "pending",
+        "dependencies": [
+          "51",
+          "41"
+        ],
+        "priority": "high",
+        "subtasks": []
+      },
+      {
+        "id": "53",
+        "title": "Build Admin Marketplace Settings",
+        "description": "Create admin interface for marketplace configuration.",
+        "details": "Framework Context:\n- Use /senior-developer skill\n\nImplementation Steps:\n1. Create app/(admin)/settings/page.tsx\n2. Add commission rate settings\n3. Add category management\n4. Add shipping zone config\n5. Add tax settings\n\nFiles:\n- storefront/app/(admin)/settings/page.tsx\n- storefront/components/admin/CommissionSettings.tsx\n- storefront/components/admin/CategoryManager.tsx",
+        "testStrategy": "Playwright Verification:\n- Navigate to settings\n- Update configuration\n\nAcceptance:\n- [ ] Settings save\n- [ ] Commission updates\n- [ ] Categories manageable\n\nAuto-Commit: /auto-commit",
+        "status": "pending",
+        "dependencies": [
+          "51"
+        ],
+        "priority": "medium",
+        "subtasks": []
+      },
+      {
+        "id": "54",
+        "title": "Build Admin Analytics Dashboard",
+        "description": "Create marketplace-wide analytics for admins.",
+        "details": "Framework Context:\n- Use /senior-developer skill\n\nImplementation Steps:\n1. Create app/(admin)/analytics/page.tsx\n2. Display GMV metrics\n3. Add vendor performance table\n4. Add order volume charts\n5. Add export functionality\n\nFiles:\n- storefront/app/(admin)/analytics/page.tsx\n- storefront/components/admin/GMVMetrics.tsx\n- storefront/components/admin/VendorPerformance.tsx",
+        "testStrategy": "Playwright Verification:\n- Navigate to admin analytics\n- Verify metrics display\n\nAcceptance:\n- [ ] GMV displays\n- [ ] Charts render\n- [ ] Export works\n\nAuto-Commit: /auto-commit",
+        "status": "pending",
+        "dependencies": [
+          "51"
+        ],
+        "priority": "medium",
+        "subtasks": []
+      },
+      {
+        "id": "55",
+        "title": "Implement i18n Setup",
+        "description": "Set up internationalization with next-intl for English/Arabic.",
+        "details": "Framework Context:\n- Use /senior-developer skill\n\nImplementation Steps:\n1. Install next-intl\n2. Configure middleware for locale detection\n3. Create messages/en.json and messages/ar.json\n4. Set up translation provider\n5. Add language switcher\n\nFiles:\n- storefront/middleware.ts\n- storefront/i18n.ts\n- storefront/messages/en.json\n- storefront/messages/ar.json\n- storefront/components/LanguageSwitcher.tsx",
+        "testStrategy": "Playwright Verification:\n- Switch to Arabic\n- Verify text changes\n\nAcceptance:\n- [ ] English works\n- [ ] Arabic works\n- [ ] Switcher persists choice\n\nAuto-Commit: /auto-commit",
+        "status": "pending",
+        "dependencies": [
+          "4"
+        ],
+        "priority": "high",
+        "subtasks": []
+      },
+      {
+        "id": "56",
+        "title": "Implement RTL Layout Support",
+        "description": "Add right-to-left CSS support for Arabic language.",
+        "details": "Framework Context:\n- Use /senior-developer skill\n\nImplementation Steps:\n1. Configure Tailwind RTL plugin\n2. Add dir=\"rtl\" to html when Arabic\n3. Update layout components for RTL\n4. Fix RTL-specific issues\n5. Test all pages in RTL\n\nFiles:\n- storefront/tailwind.config.ts\n- storefront/app/layout.tsx\n- storefront/styles/rtl.css",
+        "testStrategy": "Playwright Verification:\n- Switch to Arabic\n- mcp-cli call playwright/browser_take_screenshot '{\"type\": \"png\", \"filename\": \"rtl-layout.png\"}'\n\nAcceptance:\n- [ ] RTL layout correct\n- [ ] No visual bugs\n- [ ] Mirrors properly\n\nAuto-Commit: /auto-commit",
+        "status": "pending",
+        "dependencies": [
+          "55"
+        ],
+        "priority": "high",
+        "subtasks": []
+      },
+      {
+        "id": "57",
+        "title": "Translate UI Strings - English",
+        "description": "Extract and organize all English UI strings.",
+        "details": "Implementation Steps:\n1. Extract strings from all components\n2. Organize by feature in en.json\n3. Replace hardcoded strings with t()\n4. Review for consistency\n\nFiles:\n- storefront/messages/en.json\n- Update all components",
+        "testStrategy": "Verify no hardcoded English strings\n\nAcceptance:\n- [ ] All strings extracted\n- [ ] t() used everywhere\n- [ ] Organized structure\n\nAuto-Commit: /auto-commit",
+        "status": "pending",
+        "dependencies": [
+          "55"
+        ],
+        "priority": "high",
+        "subtasks": []
+      },
+      {
+        "id": "58",
+        "title": "Translate UI Strings - Arabic",
+        "description": "Translate all UI strings to Arabic.",
+        "details": "Implementation Steps:\n1. Translate en.json to ar.json\n2. Review translations for accuracy\n3. Handle pluralization rules\n4. Test in context\n\nFiles:\n- storefront/messages/ar.json",
+        "testStrategy": "Playwright Verification:\n- Test all pages in Arabic\n- Verify translations display\n\nAcceptance:\n- [ ] All strings translated\n- [ ] Proper Arabic grammar\n- [ ] Numbers format correctly\n\nAuto-Commit: /auto-commit",
+        "status": "pending",
+        "dependencies": [
+          "57"
+        ],
+        "priority": "high",
+        "subtasks": []
+      },
+      {
+        "id": "59",
+        "title": "Implement Multi-Currency Display",
+        "description": "Show prices in user's selected currency with proper formatting.",
+        "details": "Framework Context:\n- Use /senior-developer skill\n\nImplementation Steps:\n1. Create currency context/hook\n2. Fetch exchange rates\n3. Format prices per currency\n4. Add currency selector\n5. Persist selection\n\nFiles:\n- storefront/hooks/useCurrency.ts\n- storefront/lib/currency.ts\n- storefront/components/CurrencySelector.tsx",
+        "testStrategy": "Playwright Verification:\n- Switch currencies\n- Verify prices update\n\nAcceptance:\n- [ ] All currencies work\n- [ ] Formatting correct\n- [ ] Persists selection\n\nAuto-Commit: /auto-commit",
+        "status": "pending",
+        "dependencies": [
+          "15"
+        ],
+        "priority": "high",
+        "subtasks": []
+      },
+      {
+        "id": "60",
+        "title": "Integrate Meilisearch - Backend",
+        "description": "Set up Meilisearch and index products.",
+        "details": "Framework Context:\n- Use /medusa skill\n\nImplementation Steps:\n1. Install Meilisearch (Docker or cloud)\n2. Install medusa-plugin-meilisearch\n3. Configure indexing settings\n4. Index products with attributes\n5. Enable search endpoint\n\nFiles:\n- backend/medusa-config.ts\n- backend/.env (MEILISEARCH_*)\n- docker-compose.yml (add meilisearch)",
+        "testStrategy": "TDD: Write test for search results\n\nAcceptance:\n- [ ] Meilisearch running\n- [ ] Products indexed\n- [ ] Search returns results\n\nAuto-Commit: /auto-commit",
+        "status": "pending",
+        "dependencies": [
+          "12"
+        ],
+        "priority": "high",
+        "subtasks": []
+      },
+      {
+        "id": "61",
+        "title": "Build Search Autocomplete UI",
+        "description": "Create search bar with instant autocomplete suggestions.",
+        "details": "Framework Context:\n- Use /senior-developer skill with TDD\n\nImplementation Steps (TDD):\n1. Write test for search input\n2. Write test for suggestions dropdown\n3. Write test for keyboard navigation\n4. Implement SearchBar component\n5. Add recent searches\n\nFiles:\n- storefront/components/search/SearchBar.tsx\n- storefront/components/search/SearchBar.test.tsx\n- storefront/components/search/SearchSuggestions.tsx",
+        "testStrategy": "TDD Test Cases:\n- shows suggestions on type\n- keyboard navigation works\n- clicking suggestion navigates\n- escape closes dropdown\n\nPlaywright Verification:\n- Type in search\n- Verify suggestions appear\n\nAcceptance:\n- [ ] Autocomplete works\n- [ ] Fast response\n- [ ] Keyboard accessible\n\nAuto-Commit: /auto-commit",
+        "status": "pending",
+        "dependencies": [
+          "60"
+        ],
+        "priority": "high",
+        "subtasks": []
+      },
+      {
+        "id": "62",
+        "title": "Build Search Results Page",
+        "description": "Create search results page with faceted filtering.",
+        "details": "Framework Context:\n- Use /senior-developer skill\n\nImplementation Steps:\n1. Create app/(shop)/search/page.tsx\n2. Fetch search results from Meilisearch\n3. Display with ProductGrid\n4. Add faceted filters\n5. Add sort options\n\nFiles:\n- storefront/app/(shop)/search/page.tsx\n- storefront/components/search/FacetedFilters.tsx",
+        "testStrategy": "Playwright Verification:\n- mcp-cli call playwright/browser_navigate '{\"url\": \"http://localhost:3000/search?q=shirt\"}'\n- mcp-cli call playwright/browser_snapshot '{}'\n\nAcceptance:\n- [ ] Results display\n- [ ] Filters work\n- [ ] Arabic search works\n\nAuto-Commit: /auto-commit",
+        "status": "pending",
+        "dependencies": [
+          "61"
+        ],
+        "priority": "high",
+        "subtasks": []
+      },
+      {
+        "id": "63",
+        "title": "Configure SendGrid Email Notifications",
+        "description": "Set up SendGrid for transactional emails.",
+        "details": "Framework Context:\n- Use /medusa skill\n\nImplementation Steps:\n1. Install medusa-plugin-sendgrid\n2. Add SendGrid credentials\n3. Create email templates\n4. Configure notification events\n5. Test order confirmation email\n\nFiles:\n- backend/medusa-config.ts\n- backend/.env (SENDGRID_*)\n- backend/src/templates/",
+        "testStrategy": "Send test emails, verify delivery\n\nAcceptance:\n- [ ] Emails send\n- [ ] Templates render\n- [ ] Order confirmation works\n\nAuto-Commit: /auto-commit",
+        "status": "pending",
+        "dependencies": [
+          "1"
+        ],
+        "priority": "high",
+        "subtasks": []
+      },
+      {
+        "id": "64",
+        "title": "Configure Twilio SMS Notifications",
+        "description": "Set up Twilio for SMS order notifications.",
+        "details": "Framework Context:\n- Use /medusa skill\n\nImplementation Steps:\n1. Install twilio package\n2. Create SMS notification service\n3. Add order placed subscriber\n4. Add shipping update subscriber\n5. Configure message templates\n\nFiles:\n- backend/src/services/sms-notification.ts\n- backend/src/subscribers/order-sms.ts\n- backend/.env (TWILIO_*)",
+        "testStrategy": "Test SMS delivery in sandbox\n\nAcceptance:\n- [ ] SMS sends\n- [ ] Templates work\n- [ ] Order notifications work\n\nAuto-Commit: /auto-commit",
+        "status": "pending",
+        "dependencies": [
+          "1"
+        ],
+        "priority": "medium",
+        "subtasks": []
+      },
+      {
+        "id": "65",
+        "title": "Build Site Header Component",
+        "description": "Create main site header with logo, search, nav, cart, language.",
+        "details": "Framework Context:\n- Use /senior-developer skill\n\nImplementation Steps:\n1. Create Header component\n2. Add logo and navigation\n3. Add SearchBar\n4. Add cart icon with count\n5. Add language/currency selectors\n6. Add mobile menu\n\nFiles:\n- storefront/components/layout/Header.tsx\n- storefront/components/layout/MobileMenu.tsx\n- storefront/components/layout/Navigation.tsx",
+        "testStrategy": "Playwright Verification:\n- mcp-cli call playwright/browser_navigate '{\"url\": \"http://localhost:3000\"}'\n- mcp-cli call playwright/browser_snapshot '{}'\n\nAcceptance:\n- [ ] All elements render\n- [ ] Mobile menu works\n- [ ] Cart updates\n\nAuto-Commit: /auto-commit",
+        "status": "pending",
+        "dependencies": [
+          "5",
+          "27",
+          "61"
+        ],
+        "priority": "high",
+        "subtasks": []
+      },
+      {
+        "id": "66",
+        "title": "Build Site Footer Component",
+        "description": "Create site footer with links, newsletter, social.",
+        "details": "Framework Context:\n- Use /senior-developer skill\n\nImplementation Steps:\n1. Create Footer component\n2. Add link sections\n3. Add newsletter signup\n4. Add social media icons\n5. Add copyright\n\nFiles:\n- storefront/components/layout/Footer.tsx\n- storefront/components/layout/NewsletterForm.tsx",
+        "testStrategy": "Playwright Verification:\n- Verify footer renders on all pages\n\nAcceptance:\n- [ ] Links work\n- [ ] Newsletter submits\n- [ ] Responsive design\n\nAuto-Commit: /auto-commit",
+        "status": "pending",
+        "dependencies": [
+          "5"
+        ],
+        "priority": "medium",
+        "subtasks": []
+      },
+      {
+        "id": "67",
+        "title": "Build Homepage",
+        "description": "Create marketplace homepage with hero, categories, featured products.",
+        "details": "Framework Context:\n- Use /senior-developer skill\n\nImplementation Steps:\n1. Create app/page.tsx\n2. Add hero banner section\n3. Add category cards\n4. Add featured products grid\n5. Add promotional sections\n\nFiles:\n- storefront/app/page.tsx\n- storefront/components/home/HeroBanner.tsx\n- storefront/components/home/CategoryCards.tsx\n- storefront/components/home/FeaturedProducts.tsx",
+        "testStrategy": "Playwright Verification:\n- mcp-cli call playwright/browser_navigate '{\"url\": \"http://localhost:3000\"}'\n- mcp-cli call playwright/browser_take_screenshot '{\"type\": \"png\", \"filename\": \"homepage.png\"}'\n\nAcceptance:\n- [ ] All sections render\n- [ ] Images optimized\n- [ ] Links work\n\nAuto-Commit: /auto-commit",
+        "status": "pending",
+        "dependencies": [
+          "65",
+          "66",
+          "19"
+        ],
+        "priority": "high",
+        "subtasks": []
+      },
+      {
+        "id": "68",
+        "title": "Performance Optimization",
+        "description": "Optimize Core Web Vitals: LCP, FID, CLS.",
+        "details": "Framework Context:\n- Use /senior-developer skill\n\nImplementation Steps:\n1. Run Lighthouse audit\n2. Optimize images (next/image, WebP)\n3. Add font optimization\n4. Implement code splitting\n5. Add loading skeletons\n\nFiles:\n- storefront/next.config.js\n- Various components",
+        "testStrategy": "Run Lighthouse, target:\n- LCP < 2.5s\n- FID < 100ms\n- CLS < 0.1\n\nAcceptance:\n- [ ] Lighthouse score > 90\n- [ ] Core Web Vitals pass\n- [ ] Fast initial load\n\nAuto-Commit: /auto-commit",
+        "status": "pending",
+        "dependencies": [
+          "67"
+        ],
+        "priority": "high",
+        "subtasks": []
+      },
+      {
+        "id": "69",
+        "title": "Security Audit",
+        "description": "Perform security review and implement hardening.",
+        "details": "Implementation Steps:\n1. Review auth flows\n2. Add rate limiting\n3. Configure CORS\n4. Add CSP headers\n5. Audit dependencies\n6. Review API permissions\n\nFiles:\n- backend/src/api/middlewares.ts\n- storefront/next.config.js",
+        "testStrategy": "Run security scan tools\n\nAcceptance:\n- [ ] No critical vulnerabilities\n- [ ] Rate limiting works\n- [ ] Headers configured\n\nAuto-Commit: /auto-commit",
+        "status": "pending",
+        "dependencies": [
+          "37",
+          "52"
+        ],
+        "priority": "high",
+        "subtasks": []
+      },
+      {
+        "id": "70",
+        "title": "Production Deployment with Medusa Cloud",
+        "description": "Deploy to production using Medusa Cloud for backend, Vercel for storefront.",
+        "details": "Implementation Steps:\n1. Promote Medusa Cloud project to production tier\n2. Configure production environment variables in Medusa Cloud\n3. Set up Vercel project for storefront\n4. Connect Vercel to GitHub repository\n5. Configure production environment variables in Vercel\n6. Set up custom domain in both Medusa Cloud and Vercel\n7. Configure SSL (automatic via both platforms)\n8. Set up Medusa Cloud monitoring and alerts\n9. Configure Vercel Analytics\n\nFiles:\n- vercel.json\n- storefront/.env.production\n- Medusa Cloud dashboard configuration",
+        "testStrategy": "Playwright Verification:\n- mcp-cli call playwright/browser_navigate '{\"url\": \"https://your-domain.com\"}'\n- Test full checkout flow in production\n- Verify all features work\n\nAcceptance:\n- [ ] Medusa Cloud production live\n- [ ] Vercel storefront deployed\n- [ ] Custom domains configured\n- [ ] SSL active\n- [ ] Monitoring configured\n\nAuto-Commit: /auto-commit",
+        "status": "pending",
+        "dependencies": [
+          "68",
+          "69"
+        ],
+        "priority": "high",
+        "subtasks": []
+      }
+    ],
+    "metadata": {
+      "version": "1.0.0",
+      "lastModified": "2026-01-24T15:38:54.860Z",
+      "taskCount": 70,
+      "completedCount": 0,
+      "tags": [
+        "master"
+      ]
+    }
+  }
+}

@@ -48,3 +48,7 @@ Use Claude's native task tools:
 - Quick one-off questions
 - Simple single-file edits
 - Anything you'll finish in one shot
+
+## Task Master AI Instructions
+**Import Task Master's development workflow commands and guidelines, treat as if import is in the main CLAUDE.md file.**
+@./.taskmaster/CLAUDE.md

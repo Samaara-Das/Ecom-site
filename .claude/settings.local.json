@@ -1,12 +1,14 @@
 {
+  "env": {
+    "CLAUDE_CODE_TASK_LIST_ID": "ecom-site-bharat"
+  },
   "permissions": {
     "allow": [
       "Bash(find:*)",
       "mcp__context7__resolve-library-id",
-      "mcp__context7__query-docs"
+      "mcp__context7__query-docs",
+      "WebFetch(domain:medusajs.com)",
+      "WebFetch(domain:docs.medusajs.com)"
     ]
-  },
-  "env": {
-    "CLAUDE_CODE_TASK_LIST_ID": "ecom-site-bharat"
   }
 }
