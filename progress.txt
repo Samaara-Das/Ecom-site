@@ -421,3 +421,178 @@ Response:
 - Development mode logs OTPs to console when Twilio not configured
 - The verify endpoint creates customers with placeholder emails
 - Customers authenticated via phone should update their email later
+
+---
+
+# Task 4: Create Next.js 14 Storefront Project
+Date: 2026-01-25
+
+## Completed Work
+
+### Storefront Project Enhancement
+The storefront project was already scaffolded with Next.js 14, TypeScript, and Tailwind CSS. This task completed the remaining setup:
+
+### shadcn/ui Integration
+- Initialized shadcn/ui with default configuration
+- Installed base UI components:
+  - `Button` - Versatile button with multiple variants (default, destructive, outline, secondary, ghost, link) and sizes
+  - `Input` - Form input component
+  - `Card` - Card container component
+- Components installed in `src/components/ui/`
+- CSS variables configured for theming in `globals.css`
+
+### Medusa JS SDK Configuration
+- Installed `@medusajs/js-sdk` package (v2.13.0)
+- Created `src/lib/medusa.ts` with:
+  - Medusa SDK instance configured with environment variable support
+  - `getMedusaClient()` helper function for accessing SDK
+  - Currency configuration (KWD, USD, EUR, GBP support)
+  - Default currency set to KWD (Kuwaiti Dinar)
+
+### Environment Variables
+- Created `.env.local` with Medusa backend URL configuration
+- Created `.env.example` as template for other developers
+- Variables:
+  - `NEXT_PUBLIC_MEDUSA_URL` - Medusa backend API URL
+  - `NEXT_PUBLIC_DEFAULT_REGION_ID` - Default region for pricing
+
+### ESLint Configuration
+- Created `eslint.config.mjs` with Next.js recommended rules
+- Fixed linting errors in existing code
+
+### Tests Written
+Following TDD principles, created comprehensive tests:
+
+**Homepage Tests (`src/app/page.test.tsx`):**
+- Renders marketplace title
+- Renders coming soon message
+- Has proper layout structure with main element
+
+**Medusa SDK Tests (`src/lib/medusa.test.ts`):**
+- Exports Medusa SDK instance
+- getMedusaClient returns SDK instance
+- SDK has store property for storefront operations
+- SDK has auth property for authentication
+- SDK has client property for raw API calls
+- KWD is default currency
+- Supports KWD, USD, EUR, GBP currencies
+
+**Button Component Tests (`src/components/ui/button.test.tsx`):**
+- Renders with default variant and size
+- Renders with destructive variant
+- Renders with outline variant
+- Renders with secondary variant
+- Renders with ghost variant
+- Renders with small size
+- Renders with large size
+- Renders with icon size
+- Handles click events
+- Can be disabled
+- Accepts custom className
+- Forwards ref correctly
+
+### Existing Test Fixes
+- Fixed `AdminSidebar.test.tsx` to be more specific in element matching
+
+## Files Created
+- storefront/src/lib/medusa.ts
+- storefront/src/lib/medusa.test.ts
+- storefront/src/app/page.test.tsx
+- storefront/src/components/ui/button.tsx (via shadcn)
+- storefront/src/components/ui/button.test.tsx
+- storefront/src/components/ui/input.tsx (via shadcn)
+- storefront/src/components/ui/card.tsx (via shadcn)
+- storefront/.env.local
+- storefront/.env.example
+- storefront/eslint.config.mjs
+- storefront/components.json (shadcn config)
+
+## Files Modified
+- storefront/tailwind.config.ts (shadcn theme extensions)
+- storefront/src/app/globals.css (CSS variables for shadcn)
+- storefront/src/lib/utils.ts (cn utility for class merging)
+- storefront/src/app/(admin)/page.tsx (fixed unescaped entities)
+- storefront/src/components/admin/AdminSidebar.test.tsx (fixed test assertion)
+- storefront/package.json (added dependencies)
+- storefront/package-lock.json (updated)
+
+## Dependencies Added
+- @medusajs/js-sdk: ^2.13.0
+- @radix-ui/react-slot: ^1.1.1 (peer dependency for shadcn)
+- class-variance-authority: ^0.7.1 (shadcn styling)
+
+## Test Results
+```
+Test Files  7 passed (7)
+Tests       43 passed (43)
+
+src/components/admin/AdminLayout.test.tsx (4 tests)
+src/components/ui/button.test.tsx (12 tests)
+src/components/admin/AdminSidebar.test.tsx (9 tests)
+src/app/(admin)/page.test.tsx (4 tests)
+src/components/admin/AdminHeader.test.tsx (4 tests)
+src/lib/medusa.test.ts (7 tests)
+src/app/page.test.tsx (3 tests)
+```
+
+## Project Structure
+```
+storefront/
+├── src/
+│   ├── app/
+│   │   ├── (admin)/
+│   │   │   ├── layout.tsx
+│   │   │   ├── page.tsx
+│   │   │   └── page.test.tsx
+│   │   ├── globals.css
+│   │   ├── layout.tsx
+│   │   ├── page.tsx
+│   │   └── page.test.tsx
+│   ├── components/
+│   │   ├── admin/
+│   │   │   ├── AdminHeader.tsx
+│   │   │   ├── AdminLayout.tsx
+│   │   │   ├── AdminSidebar.tsx
+│   │   │   ├── StatsCard.tsx
+│   │   │   └── index.ts
+│   │   └── ui/
+│   │       ├── button.tsx
+│   │       ├── button.test.tsx
+│   │       ├── card.tsx
+│   │       └── input.tsx
+│   ├── lib/
+│   │   ├── medusa.ts
+│   │   ├── medusa.test.ts
+│   │   └── utils.ts
+│   └── test/
+│       └── setup.ts
+├── .env.local
+├── .env.example
+├── components.json
+├── eslint.config.mjs
+├── next.config.ts
+├── package.json
+├── postcss.config.mjs
+├── tailwind.config.ts
+├── tsconfig.json
+└── vitest.config.ts
+```
+
+## Acceptance Criteria
+- [x] npm run dev starts storefront (scaffolded with Next.js 14)
+- [x] Tailwind styles working (CSS variables configured)
+- [x] Medusa SDK configured (lib/medusa.ts created)
+- [x] shadcn/ui initialized with base components
+- [x] All tests passing (43/43)
+- [x] Linting passing
+
+## Next Steps
+1. Task 5: Set Up Base UI Component Library (add more shadcn components)
+2. Task 55: Implement i18n Setup (next-intl for English/Arabic)
+3. Task 23: Build Product Detail Page - Image Gallery
+
+## Notes
+- The storefront was already partially scaffolded with admin dashboard components
+- npm.cmd must be used directly on Windows (not npm) for commands to work
+- Sourcemap warnings from @medusajs/js-sdk are harmless and don't affect functionality
+- Environment variables use NEXT_PUBLIC_ prefix for client-side access
