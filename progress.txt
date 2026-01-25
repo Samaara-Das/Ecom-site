@@ -797,3 +797,66 @@ All tests pass with exit code 0.
 - Redis modules are commented out by default; they can be enabled when REDIS_URL is configured
 - For production, generate strong secrets using: `openssl rand -base64 32`
 - pgAdmin and Redis Commander are only available in development mode
+
+---
+
+# Task 5: Set Up Base UI Component Library
+Date: 2026-01-25
+
+## Completed Work
+
+### shadcn/ui Installation and Configuration
+Installed and configured shadcn/ui component library with the existing Next.js/Tailwind setup:
+- Installed core dependencies: @radix-ui/react-dialog, @radix-ui/react-label, @radix-ui/react-select, @radix-ui/react-slot, @radix-ui/react-toast
+- Installed supporting packages: class-variance-authority, react-hook-form, @hookform/resolvers, zod, tailwindcss-animate
+- Created components.json configuration file for shadcn/ui
+
+### UI Components Created
+Created the following reusable UI components in `storefront/src/components/ui/`:
+
+1. **Button** (`button.tsx`) - Variants: default, destructive, outline, secondary, ghost, link; Sizes: default, sm, lg, icon
+2. **Input** (`input.tsx`) - Supports all HTML input types with consistent styling
+3. **Label** (`label.tsx`) - Radix UI Label primitive wrapper with proper htmlFor association
+4. **Card** (`card.tsx`) - Card, CardHeader, CardFooter, CardTitle, CardDescription, CardContent
+5. **Dialog** (`dialog.tsx`) - Modal dialog with overlay, close button, accessibility support
+6. **Select** (`select.tsx`) - Dropdown with keyboard navigation, scroll buttons
+7. **Form** (`form.tsx`) - Integration with react-hook-form, automatic error handling
+8. **Toast** (`toast.tsx`, `toaster.tsx`) - Toast notifications with variants and swipe-to-dismiss
+9. **useToast hook** (`hooks/use-toast.ts`) - State management for toasts
+
+### Marketplace Brand Theme Colors
+Updated Tailwind configuration with a teal/emerald color scheme suitable for Kuwait marketplace.
+
+### Tests Created
+Comprehensive test suites for all UI components:
+- button.test.tsx (14 tests)
+- input.test.tsx (14 tests)
+- card.test.tsx (15 tests)
+- label.test.tsx (6 tests)
+- dialog.test.tsx (10 tests)
+- select.test.tsx (12 tests)
+- form.test.tsx (11 tests)
+- toast.test.tsx (15 tests)
+
+## Files Created
+- storefront/components.json
+- storefront/src/components/ui/button.tsx
+- storefront/src/components/ui/input.tsx
+- storefront/src/components/ui/label.tsx
+- storefront/src/components/ui/card.tsx
+- storefront/src/components/ui/dialog.tsx
+- storefront/src/components/ui/select.tsx
+- storefront/src/components/ui/form.tsx
+- storefront/src/components/ui/toast.tsx
+- storefront/src/components/ui/toaster.tsx
+- storefront/src/components/ui/index.ts
+- storefront/src/hooks/use-toast.ts
+- All corresponding test files
+
+## Files Modified
+- storefront/tailwind.config.ts (added shadcn/ui theme)
+- storefront/src/app/globals.css (added CSS variables)
+- storefront/package.json (added dependencies)
+
+## Test Results
+All 97 UI component tests passing
