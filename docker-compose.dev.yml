@@ -1,0 +1,103 @@
+# Docker Compose Development Override
+# Use with: docker-compose -f docker-compose.yml -f docker-compose.dev.yml up
+# Or set COMPOSE_FILE environment variable
+
+services:
+  # ==========================================================
+  # Medusa Backend - Development Configuration
+  # ==========================================================
+  medusa:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+      target: development
+    container_name: medusa-backend-dev
+    environment:
+      # Override for development
+      - NODE_ENV=development
+      - WORKER_MODE=shared
+      # Enable database logging in development
+      - DATABASE_LOGGING=true
+    volumes:
+      # Mount source code for hot reload
+      - ./backend/src:/app/src:delegated
+      # Mount configuration files
+      - ./backend/medusa-config.ts:/app/medusa-config.ts:ro
+      - ./backend/tsconfig.json:/app/tsconfig.json:ro
+      - ./backend/package.json:/app/package.json:ro
+      # Persist node_modules in named volume (avoid host sync issues)
+      - medusa-node-modules:/app/node_modules
+      # Local uploads directory
+      - ./backend/uploads:/app/uploads
+    # Use development command
+    command: npm run dev
+    # Remove health check for development (faster startup)
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:9000/health"]
+      interval: 60s
+      timeout: 10s
+      retries: 5
+      start_period: 120s
+
+  # ==========================================================
+  # PostgreSQL - Development Configuration
+  # ==========================================================
+  db:
+    # Expose port for direct database access during development
+    ports:
+      - "5432:5432"
+    # Enable logging
+    command: postgres -c log_statement=all
+
+  # ==========================================================
+  # Redis - Development Configuration
+  # ==========================================================
+  redis:
+    # Expose port for direct Redis access during development
+    ports:
+      - "6379:6379"
+
+  # ==========================================================
+  # pgAdmin - Database Management UI (Development Only)
+  # ==========================================================
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: medusa-pgadmin
+    restart: unless-stopped
+    environment:
+      - PGADMIN_DEFAULT_EMAIL=${PGADMIN_EMAIL:-admin@admin.com}
+      - PGADMIN_DEFAULT_PASSWORD=${PGADMIN_PASSWORD:-admin}
+      - PGADMIN_CONFIG_SERVER_MODE=False
+    ports:
+      - "5050:80"
+    volumes:
+      - pgadmin-data:/var/lib/pgadmin
+    depends_on:
+      - db
+    networks:
+      - medusa-network
+
+  # ==========================================================
+  # Redis Commander - Redis Management UI (Development Only)
+  # ==========================================================
+  redis-commander:
+    image: rediscommander/redis-commander:latest
+    container_name: medusa-redis-commander
+    restart: unless-stopped
+    environment:
+      - REDIS_HOSTS=local:redis:6379
+    ports:
+      - "8081:8081"
+    depends_on:
+      - redis
+    networks:
+      - medusa-network
+
+# ==========================================================
+# Additional Development Volumes
+# ==========================================================
+volumes:
+  medusa-node-modules:
+    driver: local
+  pgadmin-data:
+    driver: local
