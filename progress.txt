@@ -421,3 +421,337 @@ Response:
 - Development mode logs OTPs to console when Twilio not configured
 - The verify endpoint creates customers with placeholder emails
 - Customers authenticated via phone should update their email later
+
+---
+
+# Task 5: Set Up Base UI Component Library
+Date: 2026-01-25
+
+## Completed Work
+
+### shadcn/ui Installation and Configuration
+Installed and configured shadcn/ui component library with the existing Next.js/Tailwind setup:
+- Installed core dependencies: @radix-ui/react-dialog, @radix-ui/react-label, @radix-ui/react-select, @radix-ui/react-slot, @radix-ui/react-toast
+- Installed supporting packages: class-variance-authority, react-hook-form, @hookform/resolvers, zod, tailwindcss-animate
+- Created components.json configuration file for shadcn/ui
+
+### UI Components Created
+Created the following reusable UI components in `storefront/src/components/ui/`:
+
+1. **Button** (`button.tsx`)
+   - Variants: default, destructive, outline, secondary, ghost, link
+   - Sizes: default, sm, lg, icon
+   - asChild prop for polymorphic rendering
+   - Full accessibility support
+
+2. **Input** (`input.tsx`)
+   - Supports all HTML input types (text, email, password, number)
+   - Consistent styling with theme
+   - Focus states and disabled styles
+
+3. **Label** (`label.tsx`)
+   - Radix UI Label primitive wrapper
+   - Proper htmlFor association
+   - Peer-disabled styling
+
+4. **Card** (`card.tsx`)
+   - Card, CardHeader, CardFooter, CardTitle, CardDescription, CardContent
+   - Composable structure for flexible layouts
+
+5. **Dialog** (`dialog.tsx`)
+   - Dialog, DialogTrigger, DialogContent, DialogHeader, DialogFooter, DialogTitle, DialogDescription
+   - Overlay with backdrop
+   - Close button with accessibility
+   - Animation support
+
+6. **Select** (`select.tsx`)
+   - Select, SelectTrigger, SelectValue, SelectContent, SelectItem, SelectGroup, SelectLabel
+   - Dropdown with keyboard navigation
+   - Scroll buttons for long lists
+   - Disabled state support
+
+7. **Form** (`form.tsx`)
+   - Integration with react-hook-form
+   - FormField, FormItem, FormLabel, FormControl, FormDescription, FormMessage
+   - Automatic error handling and aria-invalid
+
+8. **Toast** (`toast.tsx`, `toaster.tsx`)
+   - Toast, ToastTitle, ToastDescription, ToastClose, ToastAction
+   - Toaster component for rendering toasts
+   - Variants: default, destructive
+   - Swipe to dismiss support
+
+9. **useToast hook** (`hooks/use-toast.ts`)
+   - State management for toasts
+   - toast() function for showing toasts
+   - dismiss() function for clearing toasts
+
+10. **Index export** (`index.ts`)
+    - Barrel export for all components
+
+### Marketplace Brand Theme Colors
+Updated Tailwind configuration with a teal/emerald color scheme suitable for Kuwait marketplace:
+
+**Light mode:**
+- Primary: teal (160 84% 39%) - Professional ecommerce color
+- Background: white
+- Foreground: dark slate
+
+**Dark mode:**
+- Primary: teal (160 84% 45%) - Slightly brighter for dark backgrounds
+- Background: dark slate
+- Foreground: light slate
+
+### CSS Variables
+Updated `globals.css` with comprehensive CSS variable system:
+- Background/Foreground colors
+- Card/Popover colors
+- Primary/Secondary/Accent colors
+- Muted/Destructive colors
+- Border/Input/Ring colors
+- Border radius variable
+
+### Tailwind Configuration Updates
+Updated `tailwind.config.ts`:
+- darkMode: ["class"] for dark mode support
+- Container with centered layout and responsive padding
+- Extended color palette using CSS variables
+- Border radius utilities (lg, md, sm)
+- Accordion animations (accordion-down, accordion-up)
+- tailwindcss-animate plugin
+
+### Tests Created
+Created comprehensive test suites for all UI components:
+
+1. **button.test.tsx** (14 tests)
+   - Renders with children, handles click events
+   - Disabled state, all variants (default, destructive, outline, secondary, ghost, link)
+   - All sizes (default, sm, lg, icon)
+   - Custom className, asChild prop
+
+2. **input.test.tsx** (14 tests)
+   - Renders input element, handles text input
+   - Placeholder, onChange events, disabled state
+   - Various input types (password, email, number)
+   - Custom className, default value, required, aria-label
+
+3. **card.test.tsx** (15 tests)
+   - Card renders with children and applies styles
+   - CardHeader, CardTitle, CardDescription, CardContent, CardFooter
+   - Custom className on all components
+   - Complete card composition
+
+4. **label.test.tsx** (6 tests)
+   - Renders label with text
+   - htmlFor attribute, default styles
+   - Custom className, input association, children elements
+
+5. **dialog.test.tsx** (10 tests)
+   - Renders trigger button, opens on click
+   - Displays title and description
+   - Renders content and footer
+   - Closes on close button click
+   - Controlled open state, accessible close button
+
+6. **select.test.tsx** (12 tests)
+   - Renders trigger, displays placeholder
+   - Opens dropdown, displays options
+   - Selects option, displays selected value
+   - Default value, disabled state
+   - Group with label, custom className, disabled option
+
+7. **form.test.tsx** (11 tests)
+   - Renders form with labels and inputs
+   - Form description, input changes
+   - Validation errors (username, email)
+   - Form submission with valid data
+   - Prevents invalid submission
+   - Error clearing, aria-invalid attribute
+
+8. **toast.test.tsx** (15 tests)
+   - Toast components (title, description, close, action)
+   - Default and destructive variants
+   - Action click handling
+   - useToast hook (show, dismiss, count)
+   - Toaster component integration
+
+## Files Created
+- storefront/components.json (shadcn/ui configuration)
+- storefront/src/components/ui/button.tsx
+- storefront/src/components/ui/button.test.tsx
+- storefront/src/components/ui/input.tsx
+- storefront/src/components/ui/input.test.tsx
+- storefront/src/components/ui/label.tsx
+- storefront/src/components/ui/label.test.tsx
+- storefront/src/components/ui/card.tsx
+- storefront/src/components/ui/card.test.tsx
+- storefront/src/components/ui/dialog.tsx
+- storefront/src/components/ui/dialog.test.tsx
+- storefront/src/components/ui/select.tsx
+- storefront/src/components/ui/select.test.tsx
+- storefront/src/components/ui/form.tsx
+- storefront/src/components/ui/form.test.tsx
+- storefront/src/components/ui/toast.tsx
+- storefront/src/components/ui/toast.test.tsx
+- storefront/src/components/ui/toaster.tsx
+- storefront/src/components/ui/index.ts
+- storefront/src/hooks/use-toast.ts
+
+## Files Modified
+- storefront/tailwind.config.ts (added shadcn/ui theme)
+- storefront/src/app/globals.css (added CSS variables)
+- storefront/package.json (added dependencies)
+
+## Dependencies Added
+- @radix-ui/react-dialog
+- @radix-ui/react-label
+- @radix-ui/react-select
+- @radix-ui/react-slot
+- @radix-ui/react-toast
+- class-variance-authority
+- react-hook-form
+- @hookform/resolvers
+- zod
+- tailwindcss-animate
+
+## Test Results
+All tests pass (exit code 0):
+- UI component tests: 97 tests across 8 test files
+- Existing admin component tests: 11 tests across 4 test files
+- All 108 tests passing
+
+## Build Results
+Build completes successfully with no errors.
+
+## Linting Results
+Linting passes with no errors.
+
+## Usage Examples
+
+### Button
+```tsx
+import { Button } from "@/components/ui"
+
+<Button variant="default">Primary</Button>
+<Button variant="destructive">Delete</Button>
+<Button variant="outline">Outline</Button>
+<Button size="sm">Small</Button>
+<Button asChild><a href="/link">Link</a></Button>
+```
+
+### Input with Label
+```tsx
+import { Input, Label } from "@/components/ui"
+
+<div>
+  <Label htmlFor="email">Email</Label>
+  <Input id="email" type="email" placeholder="Enter email" />
+</div>
+```
+
+### Card
+```tsx
+import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui"
+
+<Card>
+  <CardHeader>
+    <CardTitle>Card Title</CardTitle>
+    <CardDescription>Card description</CardDescription>
+  </CardHeader>
+  <CardContent>Main content</CardContent>
+  <CardFooter>Footer actions</CardFooter>
+</Card>
+```
+
+### Dialog
+```tsx
+import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui"
+
+<Dialog>
+  <DialogTrigger asChild>
+    <Button>Open Dialog</Button>
+  </DialogTrigger>
+  <DialogContent>
+    <DialogHeader>
+      <DialogTitle>Title</DialogTitle>
+      <DialogDescription>Description</DialogDescription>
+    </DialogHeader>
+    Content here
+  </DialogContent>
+</Dialog>
+```
+
+### Form with Validation
+```tsx
+import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui"
+import { useForm } from "react-hook-form"
+import { zodResolver } from "@hookform/resolvers/zod"
+import * as z from "zod"
+
+const schema = z.object({
+  email: z.string().email()
+})
+
+function MyForm() {
+  const form = useForm({
+    resolver: zodResolver(schema)
+  })
+
+  return (
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(onSubmit)}>
+        <FormField
+          control={form.control}
+          name="email"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Email</FormLabel>
+              <FormControl>
+                <Input {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+      </form>
+    </Form>
+  )
+}
+```
+
+### Toast
+```tsx
+import { Toaster, useToast } from "@/components/ui"
+
+function App() {
+  return (
+    <>
+      <YourContent />
+      <Toaster />
+    </>
+  )
+}
+
+function Component() {
+  const { toast } = useToast()
+
+  const showToast = () => {
+    toast({
+      title: "Success",
+      description: "Your action was successful"
+    })
+  }
+}
+```
+
+## Next Steps
+1. Add Toaster to app layout for global toast support
+2. Implement Login Form (Task 7) using these components
+3. Implement Register Form (Task 8) using these components
+4. Build product and cart components using this library
+
+## Notes
+- All components follow shadcn/ui conventions and are fully customizable
+- Components use Radix UI primitives for accessibility
+- Theme colors can be customized by modifying CSS variables in globals.css
+- Dark mode is supported via the "class" strategy (add "dark" class to html/body)
