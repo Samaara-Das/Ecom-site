@@ -576,3 +576,224 @@ All products seeded successfully!
 2. Create product category entities and link products
 3. Add more product variants for comprehensive testing
 4. Consider adding product collections for homepage display
+
+---
+
+# DEMO-0: Set Up Local Docker Development Environment
+Date: 2026-01-25
+
+## Completed Work
+
+### Docker Environment Setup
+Implemented a complete Docker development environment for the Kuwait Marketplace Medusa backend, including multi-stage builds, development and production configurations, and supporting services.
+
+### Files Created
+
+#### backend/Dockerfile
+Multi-stage Dockerfile with:
+- **Base stage**: Node.js 20 Alpine with system dependencies
+- **Dependencies stage**: Installs all node modules
+- **Development stage**: Hot reload with source mounting
+- **Builder stage**: Compiles TypeScript and builds Medusa
+- **Production stage**: Minimal image with non-root user, health checks
+
+Features:
+- Multi-stage build for optimized image sizes
+- Non-root user (medusa:medusa) for security
+- Health check endpoint (/health)
+- Proper caching of dependencies
+- Support for both development and production
+
+#### docker-compose.yml
+Production-ready Docker Compose configuration with:
+- **medusa**: Medusa backend service
+- **db**: PostgreSQL 15 Alpine
+- **redis**: Redis 7 Alpine with persistence
+
+Features:
+- Health checks for all services
+- Dependency ordering (medusa waits for db and redis)
+- Persistent volumes for data
+- Network isolation
+- Environment variable configuration
+
+#### docker-compose.dev.yml
+Development override configuration with:
+- Development build target
+- Source code mounting for hot reload
+- Database logging enabled
+- pgAdmin for database management (port 5050)
+- Redis Commander for Redis management (port 8081)
+- Extended health check timeouts for development
+
+#### backend/.dockerignore
+Optimized Docker context with exclusions for:
+- node_modules
+- .env files
+- Test files
+- IDE and OS files
+- Git files
+- Build artifacts
+
+#### .env.docker
+Environment template for Docker deployment with:
+- JWT and Cookie secrets
+- CORS configuration
+- Worker mode settings
+- Twilio configuration placeholders
+- pgAdmin credentials
+
+#### docker/postgres/init/01-init.sql
+PostgreSQL initialization script:
+- Creates uuid-ossp extension
+- Creates pg_trgm extension
+- Grants privileges to medusa user
+
+### Tests Created
+
+#### backend/src/docker/__tests__/docker-config.test.ts
+Comprehensive test suite validating:
+
+**Dockerfile Tests:**
+- Uses Node.js 20 Alpine base image
+- Multi-stage build targets (development, production, builder)
+- Exposes port 9000
+- Creates non-root user for security
+- Health check configuration
+- Development and production commands
+
+**docker-compose.yml Tests:**
+- Defines medusa, db, and redis services
+- PostgreSQL configuration
+- Redis configuration
+- Service dependencies
+- Port exposures
+- Health checks for all services
+- Persistent volumes
+- Network configuration
+- Environment variables (DATABASE_URL, REDIS_URL)
+
+**docker-compose.dev.yml Tests:**
+- Development build target
+- NODE_ENV=development
+- Source code volume mounting
+- pgAdmin service
+- Redis Commander service
+
+**.dockerignore Tests:**
+- Ignores node_modules
+- Ignores .env files
+- Ignores test files
+- Ignores .git directory
+- Ignores IDE files
+
+**.env.docker Tests:**
+- Includes JWT_SECRET
+- Includes COOKIE_SECRET
+- Includes CORS configuration
+- Includes WORKER_MODE
+- Includes Twilio placeholders
+
+**PostgreSQL Init Script Tests:**
+- uuid-ossp extension
+- Privilege grants
+
+### Dependencies Added
+- yaml: ^2.3.4 (for YAML parsing in tests)
+
+### Architecture
+
+```
+Docker Development Environment
+├── Medusa Backend (port 9000)
+│   ├── Development: Hot reload with source mounting
+│   └── Production: Optimized multi-stage build
+├── PostgreSQL (port 5432)
+│   ├── Volume: postgres-data
+│   └── Init scripts: docker/postgres/init/
+├── Redis (port 6379)
+│   ├── Volume: redis-data
+│   └── AOF persistence enabled
+├── pgAdmin (port 5050) - Dev only
+└── Redis Commander (port 8081) - Dev only
+```
+
+### Usage Instructions
+
+#### Development Mode
+```bash
+# Start all services with development configuration
+docker-compose -f docker-compose.yml -f docker-compose.dev.yml up
+
+# Or use the shorthand
+COMPOSE_FILE=docker-compose.yml:docker-compose.dev.yml docker-compose up
+
+# Access services:
+# - Medusa API: http://localhost:9000
+# - Medusa Admin: http://localhost:9000/app
+# - pgAdmin: http://localhost:5050 (admin@admin.com / admin)
+# - Redis Commander: http://localhost:8081
+```
+
+#### Production Mode
+```bash
+# Copy environment template
+cp .env.docker .env
+
+# Edit .env and set secure values for:
+# - JWT_SECRET (generate with: openssl rand -base64 32)
+# - COOKIE_SECRET (generate with: openssl rand -base64 32)
+
+# Build and start
+docker-compose up -d --build
+
+# Run database migrations
+docker-compose exec medusa npx medusa db:migrate
+```
+
+#### Useful Commands
+```bash
+# View logs
+docker-compose logs -f medusa
+
+# Access backend shell
+docker-compose exec medusa sh
+
+# Rebuild after code changes
+docker-compose up -d --build medusa
+
+# Stop all services
+docker-compose down
+
+# Stop and remove volumes (WARNING: destroys data)
+docker-compose down -v
+```
+
+## Test Results
+All tests pass with exit code 0.
+
+## Files Summary
+
+### Created Files
+- backend/Dockerfile
+- docker-compose.yml
+- docker-compose.dev.yml
+- backend/.dockerignore
+- .env.docker
+- docker/postgres/init/01-init.sql
+- backend/src/docker/__tests__/docker-config.test.ts
+
+### Modified Files
+- backend/package.json (added yaml dependency)
+
+## Next Steps
+1. Run `docker-compose up` to verify the setup works
+2. Configure Twilio credentials for OTP functionality
+3. Set up CI/CD with Docker builds
+4. Consider adding nginx reverse proxy for production
+
+## Notes
+- The medusa-config.ts already supports Docker environment variables
+- Redis modules are commented out by default; they can be enabled when REDIS_URL is configured
+- For production, generate strong secrets using: `openssl rand -base64 32`
+- pgAdmin and Redis Commander are only available in development mode
