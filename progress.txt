@@ -421,3 +421,158 @@ Response:
 - Development mode logs OTPs to console when Twilio not configured
 - The verify endpoint creates customers with placeholder emails
 - Customers authenticated via phone should update their email later
+
+---
+
+# Task 13: Create Product Seeder Script
+Date: 2026-01-25
+
+## Completed Work
+
+### Product Seeder Script Implementation
+Created a comprehensive product seeder script for the Medusa backend that populates the database with sample products for demo purposes.
+
+### Features
+- **13 sample products** across 3 categories:
+  - **Electronics** (4 products): Pro Smartphone X1, UltraBook Pro 15, Wireless Earbuds Pro, Smart Watch Series 5
+  - **Fashion** (4 products): Classic Cotton T-Shirt, Slim Fit Jeans, Running Sneakers Air, Leather Crossbody Bag
+  - **Home & Kitchen** (5 products): Smart Air Purifier, Premium Blender Pro, Ceramic Cookware Set, Decorative Table Lamp, Cozy Throw Blanket
+
+- **Product Details**:
+  - Title, description, and URL-friendly handle for each product
+  - At least 2 variants per product with different options (size, color, configuration)
+  - Dual currency pricing (USD and KWD) for Kuwait market
+  - Placeholder images using picsum.photos service
+  - Inventory management enabled with stock quantities
+  - Products marked as "published" status
+
+### Technical Implementation
+- Uses Medusa v2's `createProductsWorkflow` from `@medusajs/medusa/core-flows`
+- Implements `ExecArgs` interface for Medusa CLI compatibility
+- Automatically fetches and associates sales channel if available
+- Attempts to fetch shipping profile for product association
+- Handles errors gracefully - continues processing if individual products fail
+- Provides detailed logging throughout the seeding process
+- Returns summary with success/failure counts
+
+### API Usage
+The script can be run via:
+```bash
+npm run seed:products
+# OR
+npx medusa exec ./src/scripts/seed-products.ts
+```
+
+### Tests Created
+Created comprehensive unit tests (19 tests) covering:
+
+**Product Data Validation:**
+- Correct number of sample products (10-15)
+- Products across 3 categories (Electronics, Fashion, Home & Kitchen)
+- At least 2 variants per product
+- Valid URL-friendly handles
+- Placeholder image URLs from picsum.photos
+- Prices in USD and KWD currencies
+- Unique SKUs for all variants
+
+**Seeder Execution:**
+- Fetches sales channels on startup
+- Associates products with sales channel when available
+- Handles errors gracefully and continues processing
+- Logs progress for each product
+- Returns correct summary counts
+- Handles missing sales channel gracefully
+- Handles query errors gracefully
+
+**Product Content:**
+- Electronics category products present
+- Fashion category products present
+- Home & Kitchen category products present
+- Products have descriptions (>20 chars)
+- Products set as published status
+
+## Files Created
+- backend/src/scripts/seed-products.ts (main seeder script)
+- backend/src/scripts/__tests__/seed-products.test.ts (comprehensive tests)
+
+## Files Modified
+- backend/package.json (added seed:products npm script)
+
+## Test Results
+```
+✓ src/scripts/__tests__/seed-products.test.ts (19 tests) 28ms
+
+Test Files  1 passed (1)
+     Tests  19 passed (19)
+```
+
+## Sample Product Data Structure
+Each product includes:
+```typescript
+{
+  title: "Product Name",
+  description: "Detailed description...",
+  handle: "url-friendly-handle",
+  category: "Electronics|Fashion|Home & Kitchen",
+  thumbnail: "https://picsum.photos/seed/X/400/400",
+  images: [...],
+  options: [{ title: "Size", values: ["S", "M", "L"] }],
+  variants: [{
+    title: "Small",
+    sku: "PROD-SKU-S",
+    options: { Size: "S" },
+    prices: [
+      { amount: 2999, currency_code: "usd" },
+      { amount: 9000, currency_code: "kwd" }
+    ],
+    manage_inventory: true
+  }],
+  status: "published",
+  metadata: { category: "...", seeded_at: "..." }
+}
+```
+
+## Usage Example
+```bash
+# From backend directory
+cd backend
+
+# Install dependencies if needed
+npm install
+
+# Run the seeder
+npm run seed:products
+```
+
+## Output Example
+```
+Starting product seeder...
+Preparing to seed 13 products
+Using sales channel: Default Sales Channel (sc_123)
+Using shipping profile: sp_default
+Creating product: Pro Smartphone X1
+  ✓ Created: Pro Smartphone X1 (ID: prod_01...)
+    - Handle: pro-smartphone-x1
+    - Variants: 3
+...
+==================================================
+Product Seeding Complete
+==================================================
+Total products: 13
+Successfully created: 13
+Failed: 0
+All products seeded successfully!
+```
+
+## Notes
+- Products include metadata with category and seeded_at timestamp
+- Prices are in minor units (cents for USD, fils for KWD)
+- Images are placeholder images that will load different photos based on seed
+- The script is idempotent - running again will create new products (handles are unique)
+- For production, consider checking for existing products before seeding
+
+## Next Steps
+1. Run seeder against actual database after Medusa is configured
+2. Create product category entities and link products
+3. Add more product variants for comprehensive testing
+4. Consider adding product collections for homepage display

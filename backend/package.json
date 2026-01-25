@@ -13,7 +13,8 @@
     "db:sync-links": "medusa db:sync-links",
     "test": "vitest run",
     "test:watch": "vitest --watch",
-    "lint": "echo 'Linting skipped - ESLint requires reinstall'"
+    "lint": "echo 'Linting skipped - ESLint requires reinstall'",
+    "seed:products": "npx medusa exec ./src/scripts/seed-products.ts"
   },
   "dependencies": {
     "@medusajs/framework": "^2.0.0",
