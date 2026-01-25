@@ -68,6 +68,9 @@ describe('AdminSidebar', () => {
   it('renders marketplace logo/brand', () => {
     render(<AdminSidebar />);
 
-    expect(screen.getByText(/admin/i)).toBeInTheDocument();
+    // Check for the brand link with logo that contains "Admin Panel"
+    expect(screen.getByText(/admin panel/i)).toBeInTheDocument();
+    // Also verify the marketplace name in footer
+    expect(screen.getByText(/kuwait marketplace admin/i)).toBeInTheDocument();
   });
 });
