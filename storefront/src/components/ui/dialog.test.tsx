@@ -9,7 +9,6 @@ import {
   DialogFooter,
   DialogTitle,
   DialogDescription,
-  DialogClose,
 } from "./dialog"
 
 describe("Dialog", () => {
