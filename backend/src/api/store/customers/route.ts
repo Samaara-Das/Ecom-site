@@ -105,7 +105,7 @@ export const POST = async (
     })
   } catch (error) {
     const logger = req.scope.resolve("logger")
-    logger.error("Customer registration failed:", error)
+    logger.error("Customer registration failed:", error instanceof Error ? error : undefined)
 
     res.status(500).json({
       type: "unexpected_error",

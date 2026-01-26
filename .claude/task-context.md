@@ -1,7 +1,7 @@
 # Task Context Tracker
 
-**Last Updated**: 2026-01-24
-**Current Task**: 70 atomic tasks created in Task Master AI - ready to start development with Task 1
+**Last Updated**: 2026-01-26
+**Current Task**: Demo environment running - Backend, Storefront, and seeded products all operational
 
 ---
 
@@ -15,9 +15,10 @@
 - Set up context preservation system (context-preservation-guide.md, slash commands, task-context.md)
 - **Created Senior Frontend Developer skill** (`.claude/skills/senior-developer/`)
 - **Created 70 atomic tasks in Task Master AI** for Kuwait Marketplace implementation
+- **Fixed backend startup errors and got demo running** (2026-01-26)
 
 ### In Progress Tasks
-- None
+- Testing storefront functionality with seeded products
 
 ### Pending Tasks (Task Master AI - 70 tasks)
 - **Phase 1 (1-18)**: Foundation - Medusa Cloud, Next.js, Auth, Products, Regions
@@ -105,45 +106,57 @@
 
 **Task Structure**:
 - **Phase 1 (Tasks 1-18)**: Foundation
-  - Medusa Cloud setup (tasks 1-3)
-  - Next.js storefront (tasks 4-5)
-  - Customer auth (tasks 6-11)
-  - Product module (tasks 12-13)
-  - S3, regions, sales channels, inventory (tasks 14-17)
-  - Dev environment scripts (task 18)
-
 - **Phase 2 (Tasks 19-38)**: Core Commerce
-  - ProductCard, ProductGrid, Filters (tasks 19-21)
-  - Category and Product Detail pages (tasks 22-25)
-  - Multi-vendor cart (tasks 26-28)
-  - Checkout flow: Address, Shipping, Payment (tasks 29-37)
-  - Order history (task 38)
-
 - **Phase 3 (Tasks 39-54)**: Vendor & Admin
-  - Vendor module backend (tasks 39-41)
-  - Vendor registration and dashboard (tasks 42-48)
-  - Vendor payouts (tasks 49-50)
-  - Admin dashboard (tasks 51-54)
-
 - **Phase 4 (Tasks 55-70)**: Polish & Launch
-  - i18n English/Arabic (tasks 55-58)
-  - Multi-currency (task 59)
-  - Meilisearch integration (tasks 60-62)
-  - Email/SMS notifications (tasks 63-64)
-  - Header, Footer, Homepage (tasks 65-67)
-  - Performance, Security, Deployment (tasks 68-70)
-
-**Key Task Features**:
-- TDD approach with test file creation for UI components
-- Playwright MCP verification steps for browser testing
-- `/medusa` and `/senior-developer` skill references
-- Context7 docs references for Medusa v2 documentation
-- `/auto-commit` triggers after verification passes
-- Proper dependency chains linking tasks
 
 **Files created**:
 - `.taskmaster/tasks/tasks.json` - Main task database (70 tasks)
 - `.taskmaster/tasks/task-*.md` - 70 individual task markdown files
+
+---
+
+### 2026-01-26: Fixed Backend Errors and Got Demo Running
+**Goal**: Fix all errors blocking backend startup and get the demo environment running
+
+**Problems Encountered & Fixes Applied**:
+
+1. **ES Module Error**
+   - **Error**: `require() of ES Module ... not supported`
+   - **Cause**: `"type": "module"` in `backend/package.json` conflicted with Medusa's internal `require()` calls
+   - **Fix**: Removed `"type": "module"` from `backend/package.json`
+
+2. **Database Tables Missing**
+   - **Error**: `relation "tax_provider" does not exist`
+   - **Fix**: Ran `npm run db:migrate` to create all required tables
+
+3. **OTP Route Import Path Errors**
+   - **Error**: `Cannot find module '../../../../services/otp-instance'`
+   - **Cause**: Wrong number of `../` in import paths (4 instead of 5)
+   - **Fix**: Changed to `../../../../../services/otp-instance` in both files
+   - **Files**: `backend/src/api/store/auth/otp/send/route.ts`, `backend/src/api/store/auth/otp/verify/route.ts`
+
+4. **TypeScript Logger Type Errors**
+   - **Error**: `Argument of type 'unknown' is not assignable to parameter of type 'Error | undefined'`
+   - **Cause**: Medusa's logger.error() expects `(message: string, error?: Error)` but catch block `error` is typed as `unknown`
+   - **Fix**: Changed `logger.error("...", error)` to `logger.error("...", error instanceof Error ? error : undefined)`
+   - **Files fixed**:
+     - `backend/src/api/store/auth/otp/send/route.ts` (line 82 - string error, line 99 - catch block)
+     - `backend/src/api/store/auth/otp/verify/route.ts` (line 201)
+     - `backend/src/api/store/customers/me/route.ts` (lines 89, 190)
+     - `backend/src/api/store/customers/route.ts` (line 108)
+
+5. **Seed Script Type Error**
+   - **Error**: `'@medusajs/framework/types' does not provide an export named 'ExecArgs'`
+   - **Cause**: `ExecArgs` type doesn't exist in Medusa v2
+   - **Fix**: Removed the import and changed function signature to `{ container }: { container: any }`
+   - **File**: `backend/src/scripts/seed-products.ts`
+
+**Final State**:
+- Backend running on http://localhost:9000
+- Products seeded successfully (13 demo products across Electronics, Fashion, Home & Kitchen)
+- Storefront running on http://localhost:3000
+- Admin panel available at http://localhost:9000/app
 
 ---
 
@@ -155,6 +168,7 @@
 4. **TDD as Core Principle #1 in senior-developer skill**: Test-Driven Development is the default approach, not optional
 5. **Playwright MCP for verification**: Each task includes browser automation steps for visual verification
 6. **4-Phase implementation approach**: Foundation → Core Commerce → Vendor & Admin → Polish & Launch
+7. **Medusa logger pattern**: Always use `error instanceof Error ? error : undefined` for catch block errors
 
 ---
 
@@ -178,16 +192,27 @@
 | context7 MCP | Use for library documentation | `resolve-library-id` then `query-docs` |
 | skill-creator | Use for creating new skills | Fetches best practices, guides through creation |
 | TDD workflow | Red-Green-Refactor | Write failing test → minimal code → refactor |
+| Medusa logger.error | Type-safe error logging | `logger.error("msg", error instanceof Error ? error : undefined)` |
+| Medusa exec scripts | Run with medusa exec | `npm run seed:products` or `npx medusa exec ./src/scripts/file.ts` |
 
 ---
 
 ## Test Commands
 
 ```bash
-# Validate a skill
-python ".claude/skills/skill-creator/scripts/quick_validate.py" ".claude/skills/senior-developer"
+# Start Docker services (PostgreSQL, Redis)
+docker-compose -f docker-compose.yml -f docker-compose.dev.yml up -d db redis
 
-# Note: Windows encoding issues may cause validation errors with Unicode characters
+# Start Backend (from backend/)
+npm run dev
+# Should see: "Medusa server is ready on port 9000"
+
+# Seed Products (after backend is running)
+npm run seed:products
+
+# Start Storefront (from storefront/)
+npm run dev
+# Should be accessible at http://localhost:3000
 
 # Task Master AI Commands
 task-master list                           # Show all 70 tasks with status
@@ -199,10 +224,21 @@ task-master set-status --id=<id> --status=done          # Mark task complete
 
 ---
 
+## Current Environment Status
+
+| Service | URL | Status |
+|---------|-----|--------|
+| Backend API | http://localhost:9000 | Running |
+| Admin Panel | http://localhost:9000/app | Running |
+| Storefront | http://localhost:3000 | Running |
+| PostgreSQL | localhost:5432 | Running (Docker) |
+| Redis | localhost:6379 | Running (Docker) |
+
+---
+
 ## Next Steps
 
-1. Start with **Task 1**: Set Up Medusa Starter Template with Medusa Cloud
-2. Run `task-master next` to get the first available task
-3. Follow TDD approach: write tests first, then implement
-4. Use Playwright MCP for browser verification
-5. Run `/auto-commit` after each task passes verification
+1. Verify products display correctly on storefront
+2. Test cart functionality
+3. Set up regions and shipping in admin panel
+4. Continue with Task Master AI tasks for full implementation

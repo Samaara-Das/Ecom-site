@@ -8,7 +8,7 @@
  */
 import type { MedusaRequest, MedusaResponse } from "@medusajs/framework"
 import { z } from "zod"
-import { getOTPService } from "../../../../services/otp-instance"
+import { getOTPService } from "../../../../../services/otp-instance"
 
 // Validation schema for verify OTP request
 export const VerifyOTPSchema = z.object({
@@ -198,7 +198,7 @@ export const POST = async (
     })
   } catch (error) {
     const logger = req.scope.resolve("logger")
-    logger.error("OTP verification failed:", error)
+    logger.error("OTP verification failed:", error instanceof Error ? error : undefined)
 
     res.status(500).json({
       type: "unexpected_error",

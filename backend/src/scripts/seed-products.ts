@@ -11,7 +11,6 @@
  * Or: npx medusa exec ./src/scripts/seed-products.ts
  */
 
-import { ExecArgs } from "@medusajs/framework/types"
 import { ContainerRegistrationKeys, Modules } from "@medusajs/framework/utils"
 import { createProductsWorkflow } from "@medusajs/medusa/core-flows"
 
@@ -586,7 +585,7 @@ const sampleProducts: ProductData[] = [
 /**
  * Main seed function exported for Medusa CLI
  */
-export default async function seedProducts({ container }: ExecArgs) {
+export default async function seedProducts({ container }: { container: any }) {
   const logger = container.resolve(ContainerRegistrationKeys.LOGGER)
   const query = container.resolve(ContainerRegistrationKeys.QUERY)
 

@@ -8,7 +8,7 @@
  */
 import type { MedusaRequest, MedusaResponse } from "@medusajs/framework"
 import { z } from "zod"
-import { getOTPService } from "../../../../services/otp-instance"
+import { getOTPService } from "../../../../../services/otp-instance"
 
 // Validation schema for send OTP request
 export const SendOTPSchema = z.object({
@@ -79,7 +79,7 @@ export const POST = async (
       }
 
       // Other errors (SMS sending failed)
-      logger.error(`OTP send failed for phone: ${phone.slice(0, 5)}***`, result.error)
+      logger.error(`OTP send failed for phone: ${phone.slice(0, 5)}***: ${result.error}`)
       return res.status(500).json({
         type: "unexpected_error",
         message: result.error || "Failed to send OTP",
@@ -96,7 +96,7 @@ export const POST = async (
     })
   } catch (error) {
     const logger = req.scope.resolve("logger")
-    logger.error("OTP send failed:", error)
+    logger.error("OTP send failed:", error instanceof Error ? error : undefined)
 
     res.status(500).json({
       type: "unexpected_error",

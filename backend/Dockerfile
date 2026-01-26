@@ -23,7 +23,8 @@ FROM base AS deps
 COPY package.json package-lock.json* ./
 
 # Install all dependencies (including devDependencies for build)
-RUN npm ci
+# Use npm install instead of npm ci since lock file may be out of sync
+RUN npm install
 
 # ============================================
 # Development stage - for local development
@@ -68,7 +69,7 @@ FROM base AS production-deps
 COPY package.json package-lock.json* ./
 
 # Install only production dependencies
-RUN npm ci --only=production
+RUN npm install --omit=dev
 
 # ============================================
 # Production stage - minimal image

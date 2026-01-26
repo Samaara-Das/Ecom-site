@@ -3,7 +3,6 @@
   "version": "1.0.0",
   "description": "Kuwait Multi-Vendor Marketplace - Medusa Backend",
   "main": ".medusa/server/index.js",
-  "type": "module",
   "scripts": {
     "dev": "medusa develop",
     "build": "medusa build",
@@ -23,11 +22,13 @@
     "zod": "^3.23.0"
   },
   "devDependencies": {
-    "@types/node": "^22.19.7",
     "@types/jest": "^29.5.11",
+    "@types/node": "^22.19.7",
     "@typescript-eslint/eslint-plugin": "^6.18.0",
     "@typescript-eslint/parser": "^6.18.0",
     "eslint": "^8.56.0",
+    "ts-node": "^10.9.2",
+    "tsx": "^4.21.0",
     "typescript": "^5.9.3",
     "vitest": "^2.1.9",
     "yaml": "^2.3.4"

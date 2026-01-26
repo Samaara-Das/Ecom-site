@@ -86,7 +86,7 @@ export const GET = async (
     })
   } catch (error) {
     const logger = req.scope.resolve("logger")
-    logger.error("Failed to retrieve customer profile:", error)
+    logger.error("Failed to retrieve customer profile:", error instanceof Error ? error : undefined)
 
     res.status(500).json({
       type: "unexpected_error",
@@ -187,7 +187,7 @@ export const POST = async (
     })
   } catch (error) {
     const logger = req.scope.resolve("logger")
-    logger.error("Failed to update customer profile:", error)
+    logger.error("Failed to update customer profile:", error instanceof Error ? error : undefined)
 
     res.status(500).json({
       type: "unexpected_error",

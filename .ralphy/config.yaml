@@ -3,20 +3,24 @@
 
 # Project info (auto-detected, edit if needed)
 project:
-  name: "Ecom Site for Bharat"
-  language: "Unknown"
-  framework: ""
-  description: ""  # Add a brief description
+  name: "Kuwait Multi-Vendor Marketplace"
+  language: "TypeScript"
+  framework: "Medusa v2 + Next.js 14"
+  description: "Multi-vendor ecommerce marketplace for Kuwait with Medusa backend and Next.js storefront"
 
 # Commands (auto-detected from package.json/pyproject.toml)
 commands:
-  test: ""
-  lint: ""
-  build: ""
+  test: "cd backend && npm test"
+  lint: "cd backend && npm run lint"
+  build: "cd backend && npm run build"
 
 # Rules - instructions the AI MUST follow
 # These are injected into every prompt
 rules:
+  - "ALWAYS write tests BEFORE implementation per TDD. Never mark a task complete without tests matching the testStrategy field."
+  - "ALWAYS verify task completion using available tools: Playwright for UI, API calls for endpoints, shell commands for configs, test files for logic. If it can be verified, verify it before marking complete."
+  - "For verification tasks (V-*): NEVER mark complete until ALL checks pass. If any check fails, fix the issue and re-run verification. Keep retrying until SUCCESS CRITERIA is met."
+  - "When using Playwright MCP, always take screenshots as evidence. If a page fails to load or shows errors, troubleshoot (check if services are running, check logs) and retry."
   # Examples:
   # - "Always use TypeScript strict mode"
   # - "Follow the error handling pattern in src/utils/errors.ts"
