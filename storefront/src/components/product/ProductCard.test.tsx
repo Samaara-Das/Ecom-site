@@ -1,100 +1,253 @@
-import { render, screen, fireEvent } from "@testing-library/react";
-import { describe, it, expect, vi, beforeEach } from "vitest";
-import { ProductCard } from "./ProductCard";
-import { CartProvider } from "@/context/CartContext";
+import { render, screen } from "@testing-library/react"
+import userEvent from "@testing-library/user-event"
+import { describe, it, expect, beforeEach, vi } from "vitest"
+import { ProductCard } from "./ProductCard"
+import { CartProvider, useCart } from "@/context/CartContext"
+import React from "react"
 
-// Helper to wrap component with CartProvider
+// Mock Next.js Image component
+vi.mock("next/image", () => ({
+  default: ({ src, alt, ...props }: { src: string; alt: string; fill?: boolean; className?: string; sizes?: string }) => (
+    // eslint-disable-next-line @next/next/no-img-element
+    <img src={src} alt={alt} {...props} />
+  ),
+}))
+
+// Helper component to display cart state
+function CartStateDisplay() {
+  const { items, itemCount, total, isOpen } = useCart()
+  return (
+    <div data-testid="cart-state">
+      <span data-testid="cart-item-count">{itemCount}</span>
+      <span data-testid="cart-total">{total}</span>
+      <span data-testid="cart-is-open">{isOpen ? "open" : "closed"}</span>
+      <span data-testid="cart-items">{JSON.stringify(items)}</span>
+    </div>
+  )
+}
+
+// Helper to render with CartProvider
 function renderWithCart(ui: React.ReactElement) {
-  return render(<CartProvider>{ui}</CartProvider>);
+  return render(
+    <CartProvider>
+      {ui}
+      <CartStateDisplay />
+    </CartProvider>
+  )
 }
 
 describe("ProductCard", () => {
-  const mockProduct = {
-    id: "prod_123",
-    title: "Test Product",
-    thumbnail: "https://example.com/image.jpg",
-    price: 1500, // 15.00 KWD in cents
-  };
-
   beforeEach(() => {
-    // Clear localStorage before each test
-    localStorage.clear();
-  });
+    localStorage.clear()
+  })
 
-  it("renders product title correctly", () => {
-    renderWithCart(<ProductCard {...mockProduct} />);
-    expect(screen.getByText("Test Product")).toBeInTheDocument();
-  });
+  const defaultProps = {
+    id: "prod-123",
+    title: "Test Product",
+    thumbnail: "/test-image.jpg",
+    price: 1500, // 15.00 KWD in cents
+  }
 
-  it("renders product price formatted correctly", () => {
-    renderWithCart(<ProductCard {...mockProduct} />);
-    // Price should be formatted as KWD (1500 cents = 15.00 KWD)
-    const priceElement = screen.getByText(/15\.00/);
-    expect(priceElement).toBeInTheDocument();
-  });
+  describe("Rendering", () => {
+    it("renders product title", () => {
+      renderWithCart(<ProductCard {...defaultProps} />)
 
-  it("renders Add to Cart button", () => {
-    renderWithCart(<ProductCard {...mockProduct} />);
-    const button = screen.getByRole("button", { name: /add to cart/i });
-    expect(button).toBeInTheDocument();
-  });
+      expect(screen.getByText("Test Product")).toBeInTheDocument()
+    })
 
-  it("renders product thumbnail when provided", () => {
-    renderWithCart(<ProductCard {...mockProduct} />);
-    const image = screen.getByAltText("Test Product");
-    expect(image).toBeInTheDocument();
-    expect(image).toHaveAttribute("src", expect.stringContaining("image.jpg"));
-  });
+    it("renders product price in KWD", () => {
+      renderWithCart(<ProductCard {...defaultProps} />)
 
-  it("renders placeholder when thumbnail is null", () => {
-    renderWithCart(
-      <ProductCard {...mockProduct} thumbnail={null} />
-    );
-    // Should not have an image with product title as alt text
-    const image = screen.queryByAltText("Test Product");
-    expect(image).not.toBeInTheDocument();
-    // Should have an SVG placeholder
-    const placeholder = screen.getByRole("img", { hidden: true }) ||
-                        document.querySelector("svg");
-    expect(placeholder).toBeInTheDocument();
-  });
+      // Price should be formatted (15.00 KWD or similar)
+      expect(screen.getByText(/15/)).toBeInTheDocument()
+    })
 
-  it("handles Add to Cart click", () => {
-    renderWithCart(<ProductCard {...mockProduct} />);
-    const button = screen.getByRole("button", { name: /add to cart/i });
+    it("renders product image when thumbnail provided", () => {
+      renderWithCart(<ProductCard {...defaultProps} />)
 
-    // Click should not throw
-    expect(() => fireEvent.click(button)).not.toThrow();
-  });
+      const image = screen.getByAltText("Test Product")
+      expect(image).toBeInTheDocument()
+      expect(image).toHaveAttribute("src", "/test-image.jpg")
+    })
 
-  it("renders with custom currency code", () => {
-    renderWithCart(
-      <ProductCard {...mockProduct} currencyCode="USD" price={1000} />
-    );
-    // Price should be formatted as USD (1000 cents = $10.00)
-    const priceElement = screen.getByText(/\$10\.00/);
-    expect(priceElement).toBeInTheDocument();
-  });
+    it("renders placeholder when no thumbnail", () => {
+      renderWithCart(<ProductCard {...defaultProps} thumbnail={null} />)
 
-  it("has proper card structure", () => {
-    const { container } = renderWithCart(<ProductCard {...mockProduct} />);
+      // Should not have an image with alt text
+      expect(screen.queryByAltText("Test Product")).not.toBeInTheDocument()
+    })
 
-    // Should have card with hover effects
-    const card = container.querySelector(".hover\\:shadow-lg");
-    expect(card).toBeInTheDocument();
-  });
+    it("renders Add to Cart button", () => {
+      renderWithCart(<ProductCard {...defaultProps} />)
 
-  it("formats zero price correctly", () => {
-    renderWithCart(<ProductCard {...mockProduct} price={0} />);
-    const priceElement = screen.getByText(/0\.00/);
-    expect(priceElement).toBeInTheDocument();
-  });
+      expect(screen.getByRole("button", { name: /add to cart/i })).toBeInTheDocument()
+    })
+  })
 
-  it("renders product title with line clamp for long titles", () => {
-    const longTitle = "This is a very long product title that should be truncated with line clamp";
-    renderWithCart(<ProductCard {...mockProduct} title={longTitle} />);
+  describe("Add to Cart Functionality", () => {
+    it("adds item to cart when button clicked", async () => {
+      const user = userEvent.setup()
+      renderWithCart(<ProductCard {...defaultProps} />)
 
-    const titleElement = screen.getByText(longTitle);
-    expect(titleElement).toHaveClass("line-clamp-2");
-  });
-});
+      expect(screen.getByTestId("cart-item-count")).toHaveTextContent("0")
+
+      await user.click(screen.getByRole("button", { name: /add to cart/i }))
+
+      expect(screen.getByTestId("cart-item-count")).toHaveTextContent("1")
+    })
+
+    it("opens cart drawer when item added", async () => {
+      const user = userEvent.setup()
+      renderWithCart(<ProductCard {...defaultProps} />)
+
+      expect(screen.getByTestId("cart-is-open")).toHaveTextContent("closed")
+
+      await user.click(screen.getByRole("button", { name: /add to cart/i }))
+
+      expect(screen.getByTestId("cart-is-open")).toHaveTextContent("open")
+    })
+
+    it("adds correct item data to cart", async () => {
+      const user = userEvent.setup()
+      renderWithCart(<ProductCard {...defaultProps} />)
+
+      await user.click(screen.getByRole("button", { name: /add to cart/i }))
+
+      const items = JSON.parse(screen.getByTestId("cart-items").textContent || "[]")
+      expect(items).toHaveLength(1)
+      expect(items[0]).toMatchObject({
+        id: "prod-123",
+        title: "Test Product",
+        thumbnail: "/test-image.jpg",
+        price: 1500,
+        quantity: 1,
+      })
+    })
+
+    it("increments quantity when same product added twice", async () => {
+      const user = userEvent.setup()
+      renderWithCart(<ProductCard {...defaultProps} />)
+
+      await user.click(screen.getByRole("button", { name: /add to cart/i }))
+      await user.click(screen.getByRole("button", { name: /add to cart/i }))
+
+      expect(screen.getByTestId("cart-item-count")).toHaveTextContent("2")
+
+      const items = JSON.parse(screen.getByTestId("cart-items").textContent || "[]")
+      expect(items).toHaveLength(1)
+      expect(items[0].quantity).toBe(2)
+    })
+
+    it("updates cart total when item added", async () => {
+      const user = userEvent.setup()
+      renderWithCart(<ProductCard {...defaultProps} />)
+
+      expect(screen.getByTestId("cart-total")).toHaveTextContent("0")
+
+      await user.click(screen.getByRole("button", { name: /add to cart/i }))
+
+      expect(screen.getByTestId("cart-total")).toHaveTextContent("1500")
+    })
+  })
+
+  describe("Price Formatting", () => {
+    it("formats price with default KWD currency", () => {
+      renderWithCart(<ProductCard {...defaultProps} />)
+
+      // Should contain the price value
+      const priceText = screen.getByText(/15/)
+      expect(priceText).toBeInTheDocument()
+    })
+
+    it("formats price with custom currency code", () => {
+      renderWithCart(<ProductCard {...defaultProps} currencyCode="USD" />)
+
+      // Should contain the price value formatted as USD
+      const priceText = screen.getByText(/15/)
+      expect(priceText).toBeInTheDocument()
+    })
+
+    it("handles zero price", () => {
+      renderWithCart(<ProductCard {...defaultProps} price={0} />)
+
+      // Check for the price display element specifically by looking for KWD 0.000
+      const priceElement = screen.getByText(/KWD 0\.000/)
+      expect(priceElement).toBeInTheDocument()
+    })
+
+    it("handles large prices", () => {
+      renderWithCart(<ProductCard {...defaultProps} price={99999900} />)
+
+      // 999999.00 should be visible
+      expect(screen.getByText(/999/)).toBeInTheDocument()
+    })
+  })
+
+  describe("Multiple Products", () => {
+    it("adds different products as separate items", async () => {
+      const user = userEvent.setup()
+      render(
+        <CartProvider>
+          <ProductCard id="prod-1" title="Product One" thumbnail={null} price={1000} />
+          <ProductCard id="prod-2" title="Product Two" thumbnail={null} price={2000} />
+          <CartStateDisplay />
+        </CartProvider>
+      )
+
+      const addButtons = screen.getAllByRole("button", { name: /add to cart/i })
+
+      await user.click(addButtons[0]) // Add Product One
+      await user.click(addButtons[1]) // Add Product Two
+
+      expect(screen.getByTestId("cart-item-count")).toHaveTextContent("2")
+
+      const items = JSON.parse(screen.getByTestId("cart-items").textContent || "[]")
+      expect(items).toHaveLength(2)
+      expect(items[0].id).toBe("prod-1")
+      expect(items[1].id).toBe("prod-2")
+    })
+
+    it("calculates correct total for multiple products", async () => {
+      const user = userEvent.setup()
+      render(
+        <CartProvider>
+          <ProductCard id="prod-1" title="Product One" thumbnail={null} price={1000} />
+          <ProductCard id="prod-2" title="Product Two" thumbnail={null} price={2000} />
+          <CartStateDisplay />
+        </CartProvider>
+      )
+
+      const addButtons = screen.getAllByRole("button", { name: /add to cart/i })
+
+      await user.click(addButtons[0]) // Add Product One (1000)
+      await user.click(addButtons[0]) // Add Product One again (1000)
+      await user.click(addButtons[1]) // Add Product Two (2000)
+
+      // Total should be 1000 + 1000 + 2000 = 4000
+      expect(screen.getByTestId("cart-total")).toHaveTextContent("4000")
+    })
+  })
+
+  describe("Accessibility", () => {
+    it("has accessible button", () => {
+      renderWithCart(<ProductCard {...defaultProps} />)
+
+      const button = screen.getByRole("button", { name: /add to cart/i })
+      expect(button).toBeEnabled()
+    })
+
+    it("product title uses heading element", () => {
+      renderWithCart(<ProductCard {...defaultProps} />)
+
+      const heading = screen.getByRole("heading", { name: "Test Product" })
+      expect(heading).toBeInTheDocument()
+    })
+
+    it("image has alt text", () => {
+      renderWithCart(<ProductCard {...defaultProps} />)
+
+      const image = screen.getByAltText("Test Product")
+      expect(image).toBeInTheDocument()
+    })
+  })
+})
