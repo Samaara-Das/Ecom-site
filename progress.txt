@@ -898,3 +898,62 @@ Created Medusa client library for connecting to the Medusa backend:
 - storefront/src/app/(admin)/page.tsx
 - storefront/src/lib/utils.ts
 - storefront/src/components/admin/AdminSidebar.test.tsx
+
+---
+
+# V-1: Verify Docker Services Running
+Date: 2026-01-26
+
+## Verification Results
+
+All Docker infrastructure checks passed successfully.
+
+### 1. Docker Containers Status
+```
+CONTAINER ID   IMAGE                COMMAND                  CREATED        STATUS                 PORTS                                         NAMES
+c843c594baf7   postgres:15-alpine   "docker-entrypoint.s…"   15 hours ago   Up 4 hours (healthy)   0.0.0.0:5432->5432/tcp, [::]:5432->5432/tcp   medusa-db
+8cd879494451   redis:7-alpine       "docker-entrypoint.s…"   15 hours ago   Up 4 hours (healthy)   0.0.0.0:6379->6379/tcp, [::]:6379->6379/tcp   medusa-redis
+```
+
+### 2. PostgreSQL (medusa-db) Health
+- **Container Status**: Running (Up 4 hours)
+- **Health Check**: healthy
+- **Port**: 5432 (exposed)
+- **Image**: postgres:15-alpine
+
+### 3. Redis (medusa-redis) Health
+- **Container Status**: Running (Up 4 hours)
+- **Health Check**: healthy
+- **Port**: 6379 (exposed)
+- **Image**: redis:7-alpine
+
+### 4. Database Connection Test
+```
+$ docker exec medusa-db pg_isready -U medusa -d medusa
+/var/run/postgresql:5432 - accepting connections
+```
+**Result**: ✓ PostgreSQL is accepting connections
+
+### 5. Redis Connection Test
+```
+$ docker exec medusa-redis redis-cli ping
+PONG
+```
+**Result**: ✓ Redis is responding
+
+## Summary
+| Check | Status |
+|-------|--------|
+| Docker containers running | ✓ PASS |
+| medusa-db (PostgreSQL) healthy | ✓ PASS |
+| medusa-redis (Redis) healthy | ✓ PASS |
+| pg_isready connection test | ✓ PASS |
+| redis-cli ping test | ✓ PASS |
+
+**All 5 verification checks passed.**
+
+## Notes
+- Containers were created using docker-compose.yml and docker-compose.dev.yml configurations
+- PostgreSQL uses the `medusa` user with `medusa` database
+- Redis is configured with AOF persistence (`--appendonly yes`)
+- Both services are on the `medusa-network` Docker bridge network
