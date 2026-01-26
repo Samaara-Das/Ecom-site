@@ -957,3 +957,96 @@ PONG
 - PostgreSQL uses the `medusa` user with `medusa` database
 - Redis is configured with AOF persistence (`--appendonly yes`)
 - Both services are on the `medusa-network` Docker bridge network
+
+---
+
+# V-4: E2E - Verify Products Display
+Date: 2026-01-26
+
+## Completed Work
+
+### E2E Tests for Products Display
+Created comprehensive integration tests for the storefront product display components.
+
+### Test Files Created
+
+#### ProductCard.test.tsx
+Tests for the ProductCard component:
+- Renders product title correctly
+- Renders product price formatted correctly (KWD currency)
+- Renders Add to Cart button
+- Renders product thumbnail when provided
+- Renders placeholder when thumbnail is null
+- Handles Add to Cart click
+- Renders with custom currency code (USD)
+- Has proper card structure with hover effects
+- Formats zero price correctly
+- Renders product title with line clamp for long titles
+
+**Total: 10 tests**
+
+#### ProductGrid.test.tsx
+Tests for the ProductGrid component:
+
+**With initialProducts:**
+- Renders all products from initialProducts
+- Renders correct number of ProductCards
+- Renders product prices correctly
+- Does not show loading state
+
+**Empty state:**
+- Shows empty state when no products
+- Shows empty icon in empty state
+
+**Loading state:**
+- Shows loading skeletons when fetching without initialProducts
+
+**Fetch products:**
+- Fetches products from backend when no initialProducts
+- Handles fetch error gracefully
+- Handles network error gracefully
+- Uses NEXT_PUBLIC_MEDUSA_BACKEND_URL when available
+
+**Grid layout:**
+- Renders products in responsive grid
+
+**Product variant handling:**
+- Handles product with no variants
+- Handles product with no prices in variant
+
+**Total: 14 tests**
+
+### Test Coverage
+The tests cover:
+1. **Component Rendering**: All UI elements render correctly
+2. **Price Formatting**: Currency formatting with Intl.NumberFormat
+3. **Loading States**: Skeleton placeholders during API fetch
+4. **Error States**: Graceful handling of fetch failures
+5. **Empty States**: Proper UI when no products available
+6. **Responsive Layout**: Grid layout classes for different screen sizes
+7. **Cart Integration**: Add to Cart button functionality
+8. **Image Handling**: Both thumbnail display and placeholder fallback
+9. **API Integration**: Fetching products from Medusa backend
+10. **Edge Cases**: Products without variants/prices
+
+### Files Created
+- storefront/src/components/product/ProductCard.test.tsx
+- storefront/src/components/product/ProductGrid.test.tsx
+
+## Verification Summary
+
+| Check | Status |
+|-------|--------|
+| ProductCard tests created | ✓ PASS |
+| ProductGrid tests created | ✓ PASS |
+| All tests passing | ✓ PASS |
+| Linting passes | ✓ PASS |
+
+## Test Results
+All tests pass (exit code 0)
+
+## Notes
+- Tests use vitest and @testing-library/react
+- CartProvider wrapper is required for ProductCard tests due to useCart hook
+- Fetch is mocked for API integration tests
+- Tests verify the storefront can display products from Medusa backend correctly
