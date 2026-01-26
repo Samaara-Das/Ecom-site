@@ -1,8 +1,9 @@
+import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { POST } from '../route'
 
 describe('Customer Registration API', () => {
-  const mockJson = jest.fn()
-  const mockStatus = jest.fn().mockReturnThis()
+  const mockJson = vi.fn()
+  const mockStatus = vi.fn().mockReturnThis()
 
   const createMockResponse = () => ({
     status: mockStatus,
@@ -10,12 +11,12 @@ describe('Customer Registration API', () => {
   })
 
   const mockLogger = {
-    info: jest.fn(),
-    error: jest.fn()
+    info: vi.fn(),
+    error: vi.fn()
   }
 
   const mockCustomerService = {
-    createCustomers: jest.fn()
+    createCustomers: vi.fn()
   }
 
   const createMockRequest = (
@@ -24,14 +25,14 @@ describe('Customer Registration API', () => {
     existingCustomers: unknown[] = []
   ) => {
     const mockQuery = {
-      graph: jest.fn().mockResolvedValue({ data: existingCustomers })
+      graph: vi.fn().mockResolvedValue({ data: existingCustomers })
     }
 
     return {
       body,
       auth_context: authContext,
       scope: {
-        resolve: jest.fn().mockImplementation((service: string) => {
+        resolve: vi.fn().mockImplementation((service: string) => {
           if (service === 'customer') return mockCustomerService
           if (service === 'query') return mockQuery
           if (service === 'logger') return mockLogger
@@ -42,7 +43,7 @@ describe('Customer Registration API', () => {
   }
 
   beforeEach(() => {
-    jest.clearAllMocks()
+    vi.clearAllMocks()
     mockCustomerService.createCustomers.mockResolvedValue({
       id: 'cust_123',
       email: 'test@example.com',

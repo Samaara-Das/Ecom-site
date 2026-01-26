@@ -1,8 +1,9 @@
+import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { GET, POST } from '../route'
 
 describe('Customer Profile API', () => {
-  const mockJson = jest.fn()
-  const mockStatus = jest.fn().mockReturnThis()
+  const mockJson = vi.fn()
+  const mockStatus = vi.fn().mockReturnThis()
 
   const createMockResponse = () => ({
     status: mockStatus,
@@ -10,12 +11,12 @@ describe('Customer Profile API', () => {
   })
 
   const mockLogger = {
-    info: jest.fn(),
-    error: jest.fn()
+    info: vi.fn(),
+    error: vi.fn()
   }
 
   const mockCustomerService = {
-    updateCustomers: jest.fn()
+    updateCustomers: vi.fn()
   }
 
   const mockCustomerData = {
@@ -46,7 +47,7 @@ describe('Customer Profile API', () => {
     customerFound: boolean = true
   ) => {
     const mockQuery = {
-      graph: jest.fn().mockResolvedValue({
+      graph: vi.fn().mockResolvedValue({
         data: customerFound ? [mockCustomerData] : []
       })
     }
@@ -55,7 +56,7 @@ describe('Customer Profile API', () => {
       body,
       auth_context: authContext,
       scope: {
-        resolve: jest.fn().mockImplementation((service: string) => {
+        resolve: vi.fn().mockImplementation((service: string) => {
           if (service === 'customer') return mockCustomerService
           if (service === 'query') return mockQuery
           if (service === 'logger') return mockLogger
@@ -66,7 +67,7 @@ describe('Customer Profile API', () => {
   }
 
   beforeEach(() => {
-    jest.clearAllMocks()
+    vi.clearAllMocks()
     mockCustomerService.updateCustomers.mockResolvedValue(mockCustomerData)
   })
 
@@ -144,7 +145,7 @@ describe('Customer Profile API', () => {
 
     it('should return empty addresses array when customer has no addresses', async () => {
       const mockQueryNoAddresses = {
-        graph: jest.fn().mockResolvedValue({
+        graph: vi.fn().mockResolvedValue({
           data: [{ ...mockCustomerData, addresses: undefined }]
         })
       }
@@ -153,7 +154,7 @@ describe('Customer Profile API', () => {
         body: {},
         auth_context: { actor_id: 'cust_123' },
         scope: {
-          resolve: jest.fn().mockImplementation((service: string) => {
+          resolve: vi.fn().mockImplementation((service: string) => {
             if (service === 'query') return mockQueryNoAddresses
             if (service === 'logger') return mockLogger
             return null

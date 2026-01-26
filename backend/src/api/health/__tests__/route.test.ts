@@ -1,8 +1,9 @@
+import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { GET } from '../route'
 
 describe('Health Check API', () => {
-  const mockJson = jest.fn()
-  const mockStatus = jest.fn().mockReturnThis()
+  const mockJson = vi.fn()
+  const mockStatus = vi.fn().mockReturnThis()
 
   const createMockResponse = () => ({
     status: mockStatus,
@@ -11,7 +12,7 @@ describe('Health Check API', () => {
 
   const createMockRequest = (queryResult: unknown = { data: [{ id: 'test' }] }, shouldThrow = false) => {
     const mockQuery = {
-      graph: jest.fn().mockImplementation(() => {
+      graph: vi.fn().mockImplementation(() => {
         if (shouldThrow) {
           throw new Error('Database connection failed')
         }
@@ -21,13 +22,13 @@ describe('Health Check API', () => {
 
     return {
       scope: {
-        resolve: jest.fn().mockReturnValue(mockQuery)
+        resolve: vi.fn().mockReturnValue(mockQuery)
       }
     }
   }
 
   beforeEach(() => {
-    jest.clearAllMocks()
+    vi.clearAllMocks()
   })
 
   describe('GET /health', () => {
