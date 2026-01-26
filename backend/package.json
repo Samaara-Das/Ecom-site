@@ -14,7 +14,8 @@
     "test": "vitest run",
     "test:watch": "vitest --watch",
     "lint": "echo 'Linting skipped - ESLint requires reinstall'",
-    "seed:products": "npx medusa exec ./src/scripts/seed-products.ts"
+    "seed:products": "npx medusa exec ./src/scripts/seed-products.ts",
+    "verify:cart": "npx tsx src/scripts/verify-cart-api.ts"
   },
   "dependencies": {
     "@medusajs/framework": "^2.0.0",
@@ -28,6 +29,7 @@
     "@typescript-eslint/eslint-plugin": "^6.18.0",
     "@typescript-eslint/parser": "^6.18.0",
     "eslint": "^8.56.0",
+    "tsx": "^4.7.0",
     "typescript": "^5.9.3",
     "vitest": "^2.1.9",
     "yaml": "^2.3.4"
