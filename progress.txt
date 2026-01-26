@@ -898,3 +898,110 @@ Created Medusa client library for connecting to the Medusa backend:
 - storefront/src/app/(admin)/page.tsx
 - storefront/src/lib/utils.ts
 - storefront/src/components/admin/AdminSidebar.test.tsx
+
+---
+
+# V-3: E2E - Verify Storefront Homepage
+Date: 2026-01-26
+
+## Completed Work
+
+### Storefront Homepage Verification
+Verified the storefront homepage using Playwright MCP browser automation. The homepage loads successfully with all expected content.
+
+### Verification Results
+
+#### Page Load Test
+- **URL**: http://localhost:3000
+- **Page Title**: "Kuwait Marketplace"
+- **HTTP Status**: 200 OK
+- **Load Time**: ~4.7 seconds (including compilation)
+
+#### Content Verification
+- **Heading (H1)**: "Kuwait Marketplace" - VISIBLE
+- **Paragraph**: "Multi-vendor marketplace coming soon" - VISIBLE
+- **Main Element**: Present with proper flex layout classes
+
+#### Console Messages
+- **Critical Errors**: None
+- **Non-critical**: favicon.ico 404 (expected, favicon not yet configured)
+
+#### Screenshot
+- Captured full-page screenshot at `.playwright-mcp/storefront-homepage.png`
+- Shows centered content with proper styling
+
+### E2E Test Suite Created
+Created comprehensive Playwright E2E tests for homepage verification:
+
+**File**: `storefront/e2e/homepage.spec.ts`
+
+**Tests included:**
+1. `should load homepage successfully` - Verifies page title
+2. `should display marketplace heading` - Verifies H1 element
+3. `should display coming soon message` - Verifies paragraph text
+4. `should have proper page structure` - Verifies main element with flex classes
+5. `should have no critical console errors` - Checks for JS errors (excludes favicon)
+6. `should be responsive on mobile viewport` - Tests mobile viewport display
+
+### Playwright Configuration
+Created `storefront/playwright.config.ts` with:
+- Test directory: `./e2e`
+- Base URL: `http://localhost:3000`
+- Chromium browser project
+- Web server auto-start configuration
+- Retry logic for CI environments
+
+### Package.json Updates
+Added E2E test scripts:
+- `test:e2e`: Run Playwright tests
+- `test:e2e:ui`: Run Playwright tests with UI
+
+Added dependency:
+- `@playwright/test`: ^1.49.0
+
+## Files Created
+- storefront/playwright.config.ts
+- storefront/e2e/homepage.spec.ts
+
+## Files Modified
+- storefront/package.json (added @playwright/test and e2e scripts)
+
+## Test Results
+
+### Unit Tests (Homepage)
+```
+✓ src/app/page.test.tsx (3 tests) 81ms
+  Home Page
+    ✓ renders the marketplace title
+    ✓ renders the coming soon message
+    ✓ has proper layout structure with main element
+
+Test Files  1 passed (1)
+     Tests  3 passed (3)
+```
+
+### E2E Verification (via Playwright MCP)
+```
+✓ Navigation to http://localhost:3000 - SUCCESS
+✓ Page title "Kuwait Marketplace" - VERIFIED
+✓ Heading "Kuwait Marketplace" - VISIBLE
+✓ Paragraph "Multi-vendor marketplace coming soon" - VISIBLE
+✓ Screenshot captured - SUCCESS
+✓ No critical console errors - VERIFIED
+```
+
+### Lint Results
+- New files (playwright.config.ts, e2e/homepage.spec.ts): No errors
+- Pre-existing files: Some warnings in other components (not related to this task)
+
+## SUCCESS CRITERIA MET
+- ✅ Page loads with content (not blank/error page)
+- ✅ No critical console errors (only favicon.ico 404, which is non-critical)
+- ✅ Screenshot taken successfully
+- ✅ E2E tests written for future regression testing
+
+## Notes
+- Playwright package added to package.json but requires `npm install` and `npx playwright install` to run E2E tests locally
+- The storefront uses Next.js 15.5.9 with React 19
+- Homepage is a simple placeholder page ready for future feature development
+- The dev server must be running on port 3000 for E2E tests to pass
