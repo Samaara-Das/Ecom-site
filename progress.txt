@@ -957,3 +957,119 @@ PONG
 - PostgreSQL uses the `medusa` user with `medusa` database
 - Redis is configured with AOF persistence (`--appendonly yes`)
 - Both services are on the `medusa-network` Docker bridge network
+
+---
+
+# V-5: E2E - Verify Product Detail Page
+Date: 2026-01-26
+
+## Completed Work
+
+### Product Detail Page Implementation
+Created a fully functional product detail page at `/products/[id]` with the following features:
+- Dynamic route using Next.js App Router
+- Fetches product data from Medusa backend API
+- Displays product title, price, description, and image
+- Variant selector for products with multiple variants
+- Add to Cart functionality integrated with CartContext
+- Breadcrumb navigation
+- Continue Shopping button
+- Loading skeleton UI
+- Error handling for missing products and network failures
+
+### ProductCard Navigation
+Updated ProductCard component to link to product detail pages:
+- Added `next/link` import
+- Wrapped product content in Link component
+- Added data-testid attributes for testing
+- Preserves Add to Cart button functionality
+
+### Unit Tests (11 tests, all passing)
+Created comprehensive test suite for ProductDetailPage:
+1. `renders loading state initially` - Verifies loading skeleton appears
+2. `renders product details after loading` - Verifies title, price, description, add-to-cart button
+3. `renders error state when product not found` - Tests 404 handling
+4. `renders error state on fetch failure` - Tests network error handling
+5. `shows variant selector when product has multiple variants` - Tests variant dropdown
+6. `calls addItem when Add to Cart button is clicked` - Tests cart integration
+7. `renders breadcrumb navigation` - Tests navigation breadcrumbs
+8. `renders Continue Shopping button` - Tests home navigation button
+9. `formats price correctly in KWD` - Tests currency formatting
+10. `renders placeholder image when thumbnail is null` - Tests missing image handling
+11. `hides variant selector when product has single variant` - Tests conditional rendering
+
+### E2E Test Documentation
+Created E2E test scenarios document at `storefront/e2e/product-detail.e2e.md`:
+- Navigation from home page to product detail
+- Product detail page element verification
+- Add to cart functionality
+- Variant selection
+- Back navigation
+- Error handling scenarios
+
+## Files Created
+- storefront/src/app/products/[id]/page.tsx (Product detail page component)
+- storefront/src/app/products/[id]/page.test.tsx (Unit tests)
+- storefront/e2e/product-detail.e2e.md (E2E test documentation)
+
+## Files Modified
+- storefront/src/components/product/ProductCard.tsx (Added Link wrapper and test IDs)
+
+## Test Results
+```
+✓ src/app/products/[id]/page.test.tsx (11 tests) 303ms
+
+Test Files  1 passed (1)
+Tests       11 passed (11)
+```
+
+## Linting Results
+ESLint passes with no errors (only pre-existing warning in use-toast.ts)
+
+## Architecture
+
+### Product Detail Page Flow
+```
+1. User clicks product card on home page
+   └── ProductCard links to /products/{id}
+
+2. ProductDetailPage component
+   └── useParams extracts product ID
+   └── useEffect fetches from /store/products/{id}
+
+3. Rendering states:
+   ├── Loading: Skeleton UI with pulse animation
+   ├── Error: Error message with Back to Home button
+   └── Success: Full product details
+
+4. User interactions:
+   ├── Variant selector (if multiple variants)
+   ├── Add to Cart → CartContext.addItem → Cart drawer opens
+   └── Continue Shopping → navigates to /
+```
+
+### Component Structure
+```
+ProductDetailPage
+├── Header (mocked in tests)
+├── CartDrawer (mocked in tests)
+├── main
+│   ├── Breadcrumb navigation
+│   └── Grid (2 columns on md+)
+│       ├── Product image (or placeholder)
+│       └── Product info
+│           ├── Title (h1)
+│           ├── Price (formatted KWD)
+│           ├── Description
+│           ├── Variant selector (conditional)
+│           ├── Add to Cart button
+│           └── Continue Shopping button
+└── Footer (mocked in tests)
+```
+
+## Notes
+- The component uses client-side data fetching with useEffect
+- Price formatting uses Intl.NumberFormat for proper KWD currency display
+- All interactive elements have data-testid attributes for reliable testing
+- Error states provide clear user feedback with navigation options
+- The implementation follows existing patterns from ProductGrid and ProductCard
