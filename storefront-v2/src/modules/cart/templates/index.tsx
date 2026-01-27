@@ -1,4 +1,4 @@
-import ItemsTemplate from "./items"
+import VendorGroupedItems from "./vendor-grouped-items"
 import Summary from "./summary"
 import EmptyCartMessage from "../components/empty-cart-message"
 import SignInPrompt from "../components/sign-in-prompt"
@@ -24,7 +24,7 @@ const CartTemplate = ({
                   <Divider />
                 </>
               )}
-              <ItemsTemplate cart={cart} />
+              <VendorGroupedItems cart={cart} />
             </div>
             <div className="relative">
               <div className="flex flex-col gap-y-8 sticky top-12">

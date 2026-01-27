@@ -26,6 +26,10 @@ export default defineConfig({
     disable: process.env.DISABLE_ADMIN === "true"
   },
   modules: [
+    // Vendor Module for multi-vendor marketplace
+    {
+      resolve: "./src/modules/vendor",
+    },
     // PayPal Payment Provider
     // Uncomment when PAYPAL_CLIENT_ID and PAYPAL_CLIENT_SECRET are configured
     ...(process.env.PAYPAL_CLIENT_ID && process.env.PAYPAL_CLIENT_SECRET
