@@ -26,6 +26,30 @@ export default defineConfig({
     disable: process.env.DISABLE_ADMIN === "true"
   },
   modules: [
+    // PayPal Payment Provider
+    // Uncomment when PAYPAL_CLIENT_ID and PAYPAL_CLIENT_SECRET are configured
+    ...(process.env.PAYPAL_CLIENT_ID && process.env.PAYPAL_CLIENT_SECRET
+      ? [
+          {
+            resolve: "@medusajs/medusa/payment",
+            options: {
+              providers: [
+                {
+                  resolve: "./src/modules/paypal",
+                  id: "paypal",
+                  options: {
+                    client_id: process.env.PAYPAL_CLIENT_ID,
+                    client_secret: process.env.PAYPAL_CLIENT_SECRET,
+                    environment: process.env.PAYPAL_ENVIRONMENT || "sandbox",
+                    autoCapture: process.env.PAYPAL_AUTO_CAPTURE === "true",
+                    webhook_id: process.env.PAYPAL_WEBHOOK_ID,
+                  },
+                },
+              ],
+            },
+          },
+        ]
+      : []),
     // Redis modules for production (uncomment when REDIS_URL is configured)
     // {
     //   resolve: "@medusajs/medusa/cache-redis",

@@ -1,0 +1,75 @@
+{
+  "common": {
+    "loading": "Loading...",
+    "error": "An error occurred",
+    "retry": "Retry",
+    "cancel": "Cancel",
+    "save": "Save",
+    "delete": "Delete",
+    "edit": "Edit",
+    "close": "Close",
+    "search": "Search",
+    "searchPlaceholder": "Search products...",
+    "noResults": "No results found",
+    "viewAll": "View all",
+    "learnMore": "Learn more"
+  },
+  "navigation": {
+    "home": "Home",
+    "store": "Store",
+    "cart": "Cart",
+    "account": "Account",
+    "login": "Log in",
+    "logout": "Log out",
+    "register": "Register"
+  },
+  "product": {
+    "addToCart": "Add to cart",
+    "outOfStock": "Out of stock",
+    "inStock": "In stock",
+    "quantity": "Quantity",
+    "price": "Price",
+    "description": "Description",
+    "details": "Details",
+    "reviews": "Reviews",
+    "relatedProducts": "Related products"
+  },
+  "cart": {
+    "title": "Shopping Cart",
+    "empty": "Your cart is empty",
+    "continueShopping": "Continue shopping",
+    "subtotal": "Subtotal",
+    "shipping": "Shipping",
+    "tax": "Tax",
+    "total": "Total",
+    "checkout": "Checkout",
+    "remove": "Remove",
+    "updateQuantity": "Update quantity"
+  },
+  "checkout": {
+    "title": "Checkout",
+    "shippingAddress": "Shipping address",
+    "billingAddress": "Billing address",
+    "sameAsShipping": "Same as shipping address",
+    "paymentMethod": "Payment method",
+    "orderSummary": "Order summary",
+    "placeOrder": "Place order",
+    "processing": "Processing..."
+  },
+  "account": {
+    "title": "My Account",
+    "overview": "Overview",
+    "orders": "Orders",
+    "addresses": "Addresses",
+    "profile": "Profile",
+    "noOrders": "You have no orders yet"
+  },
+  "footer": {
+    "customerService": "Customer Service",
+    "about": "About Us",
+    "contact": "Contact",
+    "privacy": "Privacy Policy",
+    "terms": "Terms of Service",
+    "copyright": "All rights reserved"
+  }
+}

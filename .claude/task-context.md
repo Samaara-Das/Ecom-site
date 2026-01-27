@@ -1,7 +1,7 @@
 # Task Context Tracker
 
 **Last Updated**: 2026-01-27
-**Current Task**: Demo environment fully functional - all verification tasks complete
+**Current Task**: Implementing Hybrid Approach - Medusa Starter Storefront with existing backend
 
 ---
 
@@ -22,16 +22,73 @@
 - **Fixed storefront console error** - Updated ProductGrid.tsx to handle missing API key gracefully
 
 ### In Progress Tasks
-- None - all demo and verification tasks complete
+- **Hybrid Storefront Migration**: Replace current storefront with Medusa Next.js Starter while keeping backend
+  - ✅ Task #1: Cleaned up 25 Ralphy git worktrees
+  - ✅ Task #2: Cloned Medusa Next.js Starter into `storefront-v2/`
+  - ✅ Task #3: Configured storefront-v2 environment (.env.local, CORS)
+  - ✅ Task #4: Storefront-v2 running and connected to backend
+  - ✅ Task #9: Ported Kuwait branding (store name, hero, footer, metadata)
+  - ✅ Task #10: Configured KWD as default currency
+  - ✅ Task #11: Connected OTP auth UI to backend service
+  - ✅ Task #14: Set up i18n framework (next-intl with EN/AR)
+  - ✅ Task #27: API TEST - Products endpoint verified
+  - ✅ Task #28: API TEST - Cart operations verified
+  - ✅ Task #31: API TEST - Regions and currency APIs verified
+  - ✅ Task #32: Configured stock location for sales channel
+    - Created "Kuwait Warehouse" stock location
+    - Connected to Default Sales Channel
+    - Added Manual fulfillment provider
+    - Created "Kuwait Shipping Zone" service zone
+  - ✅ Task #16: Implemented RTL layout support
+    - HTML dir attribute based on locale
+    - RTL-specific CSS styles in globals.css
+    - Noto Sans Arabic font integration
+    - LocaleSwitcher component in navigation
+  - 🔄 **Swarm Mode Active** - Team: `kuwait-marketplace-v2`
+    - **arabic-translator**: Task #15 (Arabic translations)
+    - **paypal-integration**: Task #13 (PayPal payment provider)
+    - **playwright-verifier**: Tasks #5, #8 (Verification tests)
+    - **api-tester**: Tasks #29, #30 (API tests)
+  - Created `backend/src/scripts/seed-shipping-options.ts` for shipping options
+  - 14 of 32 tasks completed (43.8%)
 
 ### Pending Tasks
-- **Demo Tasks** (`tasks.yaml`): Basic demo features - all marked complete
-- **Verification Tasks** (`tasks-verify.yaml`): V-1 to V-10 - all merged
-- **Post-Demo Tasks** (`tasks-post-demo.yaml`): 50+ tasks for full implementation after demo
+- **Post-Demo Tasks** (`tasks.yaml`): 50+ tasks for full implementation (renamed from tasks-post-demo.yaml)
 
 ---
 
 ## Session History (Chronological Order)
+
+### 2026-01-27: Architecture Decision - Hybrid Storefront Approach
+
+**Goal**: Decide on storefront architecture - continue current vs adopt Medusa Starter
+
+#### Decision Made: Hybrid Approach (Approved)
+After analyzing both perspectives:
+1. **Keep the current backend** - Medusa v2 with custom modules (OTP, admin, 100+ tests)
+2. **Replace storefront with Medusa Next.js Starter** - Production-tested, has checkout/accounts/search
+3. **Port Kuwait-specific customizations** - Branding, KWD currency, RTL prep
+
+#### Rationale
+- Backend has 80-115 hours of custom work worth keeping
+- Storefront only has ~1,000 lines of business logic - easy to replace
+- Starter provides 60-70% of PRD requirements out of the box
+- Custom work (multi-vendor, RTL, vendor portal) needed regardless of approach
+
+#### Actions Taken
+1. Committed unstaged changes (task context, settings, verification status)
+2. Created feature branch: `feature/medusa-starter-storefront`
+3. Deleted `tasks-verify.yaml` and old `tasks.yaml`
+4. Renamed `tasks-post-demo.yaml` to `tasks.yaml`
+
+#### Implementation Plan
+- **Phase 1**: Clone Medusa Starter into `storefront-v2/` (3-5 days)
+- **Phase 2**: Port Kuwait branding, KWD, payment providers (1 week)
+- **Phase 3**: Add Arabic translations and RTL support (1 week)
+- **Phase 4**: Build multi-vendor features (2-3 weeks)
+- **Phase 5**: Swap directories and cleanup (2-3 days)
+
+---
 
 ### 2026-01-27: Branch Merging and Demo Testing Session
 
@@ -141,9 +198,7 @@ Attempted to start services for demo testing:
 - **Medusa Skill**: `.claude/skills/medusa/SKILL.md` - Medusa v2 development guidance
 - **PRD Builder Skill**: `.claude/skills/prd-builder/SKILL.md` - PRD creation templates
 - **Senior Developer Skill**: `.claude/skills/senior-developer/SKILL.md` - Frontend development expertise with TDD
-- **Demo Tasks**: `tasks.yaml` - Tasks completed for demo
-- **Verification Tasks**: `tasks-verify.yaml` - E2E verification tasks (all merged)
-- **Post-Demo Tasks**: `tasks-post-demo.yaml` - Remaining 50+ tasks for full implementation
+- **Post-Demo Tasks**: `tasks.yaml` - Remaining 50+ tasks for full implementation (consolidated)
 
 ---
 
@@ -214,29 +269,31 @@ task-master set-status --id=<id> --status=done          # Mark task complete
 
 | Service | URL | Status |
 |---------|-----|--------|
-| Backend API | http://localhost:9000 | Running |
-| Admin Panel | http://localhost:9000/app | Running (login screen) |
-| Storefront | http://localhost:3000 | Running (mock products) |
-| PostgreSQL | localhost:5432 | Running (Docker) |
-| Redis | localhost:6379 | Running (Docker) |
+| Backend API | http://localhost:9000 | **Needs Docker** |
+| Admin Panel | http://localhost:9000/app | **Needs Docker** |
+| Storefront (old) | http://localhost:3000 | Not running |
+| Storefront-v2 (new) | http://localhost:8000 | Ready (needs backend) |
+| PostgreSQL | localhost:5432 | **Docker Desktop Required** |
+| Redis | localhost:6379 | **Docker Desktop Required** |
 
 ---
 
 ## Next Steps
 
-### Immediate (Demo Ready)
-1. ✅ Admin user created
-2. Log into admin panel and explore
-3. Optionally create publishable API key in admin Settings → API Key Management
-4. Test storefront cart functionality (add to cart, quantity, remove)
-5. Push changes to remote: `git push`
+### Immediate (Hybrid Storefront Migration)
+1. Clone Medusa Next.js Starter into `storefront-v2/`
+2. Connect to existing Medusa backend (port 9000)
+3. Verify products, cart, checkout work
+4. Test Stripe payment flow
+5. Port Kuwait branding from current storefront
 
-### Post-Demo
-1. Review and selectively merge feature branches (OAuth, i18n, vendor module, etc.)
-2. Clean up Ralphy worktrees: `rm -rf .ralphy-worktrees/`
-3. Clean up merged branches: `git branch --merged main | grep ralphy | xargs git branch -d`
-4. Continue with tasks in `tasks-post-demo.yaml`
-5. Configure real services: Medusa Cloud, AWS S3, SendGrid, Stripe
+### After Storefront Migration
+1. Configure KWD as default currency
+2. Add Razorpay and PayPal payment providers
+3. Connect Phone OTP auth to existing backend service
+4. Set up i18n for Arabic translations
+5. Implement RTL layout support
+6. Build multi-vendor features (cart grouping, vendor portal, registration)
 
 ---
 
@@ -246,3 +303,11 @@ task-master set-status --id=<id> --status=done          # Mark task complete
 - **Already merged to main**: 26 (including V-3, V-8, V-9, V-10 from this session)
 - **Unmerged feature branches**: 20 (OAuth, i18n, vendor module, image gallery, etc.)
 - **Worktrees**: 25 in `.ralphy-worktrees/` (can be cleaned up)
+
+---
+
+## Current Git Branch
+
+- **Branch**: `feature/medusa-starter-storefront`
+- **Purpose**: Implement hybrid approach - Medusa Starter storefront with existing backend
+- **Created from**: `main` (commit 83f9009)

@@ -1,0 +1,75 @@
+{
+  "common": {
+    "loading": "جاري التحميل...",
+    "error": "حدث خطأ",
+    "retry": "إعادة المحاولة",
+    "cancel": "إلغاء",
+    "save": "حفظ",
+    "delete": "حذف",
+    "edit": "تعديل",
+    "close": "إغلاق",
+    "search": "بحث",
+    "searchPlaceholder": "البحث عن المنتجات...",
+    "noResults": "لم يتم العثور على نتائج",
+    "viewAll": "عرض الكل",
+    "learnMore": "اعرف المزيد"
+  },
+  "navigation": {
+    "home": "الرئيسية",
+    "store": "المتجر",
+    "cart": "السلة",
+    "account": "الحساب",
+    "login": "تسجيل الدخول",
+    "logout": "تسجيل الخروج",
+    "register": "التسجيل"
+  },
+  "product": {
+    "addToCart": "أضف إلى السلة",
+    "outOfStock": "غير متوفر",
+    "inStock": "متوفر",
+    "quantity": "الكمية",
+    "price": "السعر",
+    "description": "الوصف",
+    "details": "التفاصيل",
+    "reviews": "التقييمات",
+    "relatedProducts": "منتجات ذات صلة"
+  },
+  "cart": {
+    "title": "سلة التسوق",
+    "empty": "سلة التسوق فارغة",
+    "continueShopping": "مواصلة التسوق",
+    "subtotal": "المجموع الفرعي",
+    "shipping": "الشحن",
+    "tax": "الضريبة",
+    "total": "الإجمالي",
+    "checkout": "الدفع",
+    "remove": "إزالة",
+    "updateQuantity": "تحديث الكمية"
+  },
+  "checkout": {
+    "title": "الدفع",
+    "shippingAddress": "عنوان الشحن",
+    "billingAddress": "عنوان الفوترة",
+    "sameAsShipping": "نفس عنوان الشحن",
+    "paymentMethod": "طريقة الدفع",
+    "orderSummary": "ملخص الطلب",
+    "placeOrder": "تأكيد الطلب",
+    "processing": "جاري المعالجة..."
+  },
+  "account": {
+    "title": "حسابي",
+    "overview": "نظرة عامة",
+    "orders": "الطلبات",
+    "addresses": "العناوين",
+    "profile": "الملف الشخصي",
+    "noOrders": "لا توجد لديك طلبات بعد"
+  },
+  "footer": {
+    "customerService": "خدمة العملاء",
+    "about": "من نحن",
+    "contact": "اتصل بنا",
+    "privacy": "سياسة الخصوصية",
+    "terms": "شروط الخدمة",
+    "copyright": "جميع الحقوق محفوظة"
+  }
+}
