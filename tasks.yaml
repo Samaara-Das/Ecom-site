@@ -1,418 +1,261 @@
+# Kuwait Multi-Vendor Marketplace - Post-Demo Tasks
+# Restore these after demo: cat tasks-post-demo.yaml >> tasks.yaml
+# Or run separately: ralphy --yaml tasks-post-demo.yaml --parallel --max-parallel 2
+
 tasks:
-  - title: "DEMO-0: Set Up Local Docker Development Environment"
-    prompt: >
-      Create a docker-compose.yml in the project root for local development
-      with:
+  # ═══════════════════════════════════════════════════════════════════════════
+  # POST-DEMO TASKS - Run these after demo is complete
+  # ═══════════════════════════════════════════════════════════════════════════
 
-
-      1. PostgreSQL 15 service:
-         - Container name: medusa-postgres
-         - Port: 5432:5432
-         - Environment: POSTGRES_USER=medusa, POSTGRES_PASSWORD=medusa, POSTGRES_DB=medusa
-         - Volume: medusa-postgres-data:/var/lib/postgresql/data
-         - Health check with pg_isready
-
-      2. Redis 7 service:
-         - Container name: medusa-redis
-         - Port: 6379:6379
-         - Volume: medusa-redis-data:/data
-         - Health check with redis-cli ping
-
-      3. Named volumes at the bottom
-
-
-      4. Update backend/.env.template with local connection strings:
-         - DATABASE_URL=postgres://medusa:medusa@localhost:5432/medusa
-         - REDIS_URL=redis://localhost:6379
-
-      5. Create backend/.env by copying from .env.template (if not exists)
-
-
-      6. Test that docker-compose up -d works and containers are healthy
-
-
-      DO NOT start Medusa server - just set up Docker infrastructure.
-    completed: true
-    parallel_group: 0
-  - title: "Task 13: Create Product Seeder Script"
-    prompt: >
-      Create a product seeder script for the Medusa backend that populates the
-      database with sample products for demo purposes.
-
-
-      Requirements:
-
-      1. Create backend/src/scripts/seed-products.ts
-
-      2. Seed 10-15 sample products across 3-4 categories:
-         - Electronics (phones, laptops, accessories)
-         - Fashion (clothing, shoes)
-         - Home & Kitchen (appliances, decor)
-      3. Each product should have:
-         - Title, description, handle
-         - At least 2 variants with different prices
-         - Placeholder image URLs (use picsum.photos or similar)
-         - Proper inventory levels
-      4. Add npm script in package.json: "seed:products": "npx ts-node
-      src/scripts/seed-products.ts"
-
-      5. Use Medusa's ProductService to create products
-
-      6. Handle errors gracefully, log progress
-
-
-      Test: npm run seed:products should complete without errors
-    completed: true
+  # Group 1: Foundation
+  - title: "Task 1: Set Up Medusa Starter Template with Medusa Cloud"
+    completed: true  # Already done
     parallel_group: 1
-  - title: "Task 4: Create Next.js 14 Storefront Project"
-    prompt: >
-      Create a Next.js 14 storefront in the 'storefront' directory.
 
-
-      Requirements:
-
-      1. Initialize with: npx create-next-app@latest storefront --typescript
-      --tailwind --eslint --app --src-dir --import-alias "@/*"
-
-      2. Install dependencies:
-         - @medusajs/medusa-js (Medusa client)
-         - @tanstack/react-query (data fetching)
-         - zustand (state management)
-         - clsx, tailwind-merge (styling utilities)
-      3. Configure Medusa client in src/lib/medusa.ts:
-         - Base URL from environment variable NEXT_PUBLIC_MEDUSA_BACKEND_URL
-         - Default to http://localhost:9000
-      4. Set up React Query provider in src/providers/query-provider.tsx
-
-      5. Create basic layout with providers in src/app/layout.tsx
-
-      6. Create placeholder homepage at src/app/page.tsx
-
-      7. Add environment variables to .env.local.example
-
-
-      Test: cd storefront && npm run dev should start on port 3000
-    completed: true
+  # Group 2: Core Config
+  - title: "Task 2: Configure Medusa Cloud Database"
+    completed: false
     parallel_group: 2
-  - title: "Task 5: Set Up Base UI Component Library"
-    prompt: >
-      Set up a base UI component library in the storefront using shadcn/ui.
 
-
-      Requirements:
-
-      1. Initialize shadcn/ui: npx shadcn@latest init
-         - Use default style, zinc color, CSS variables
-      2. Add core components: npx shadcn@latest add button card badge skeleton
-      sheet dialog
-
-      3. Create src/components/ui/ directory structure
-
-      4. Set up Tailwind config for custom colors:
-         - Primary: Kuwait flag colors (green, white, red, black)
-         - Add custom spacing/sizing if needed
-      5. Create a src/lib/utils.ts with cn() helper function
-
-      6. Verify all components render correctly
-
-
-      Test: Import and render a Button component on the homepage
-    completed: true
+  - title: "Task 3: Configure Medusa Cloud Redis"
+    completed: false
     parallel_group: 2
-  - title: "Task 19: Create ProductCard Component"
-    prompt: |
-      Create a ProductCard component for displaying products in a grid.
 
-      Requirements:
-      1. Create src/components/product/ProductCard.tsx
-      2. Props: product object with title, thumbnail, price, handle
-      3. Features:
-         - Image with aspect-ratio container, fallback placeholder
-         - Product title (truncated if too long)
-         - Price display with currency formatting
-         - Hover effects (scale, shadow)
-         - Link to product detail page /products/[handle]
-         - "Add to Cart" button (just UI, functionality later)
-      4. Use shadcn Card component as base
-      5. Responsive: stack on mobile, side-by-side info on desktop
-      6. Create ProductCardSkeleton for loading state
-
-      Test: Render ProductCard with mock data on homepage
-    completed: true
+  - title: "Task 14: Configure AWS S3 for File Storage"
+    completed: false
     parallel_group: 2
-  - title: "Task 26: Implement Multi-Vendor Cart - Backend"
-    prompt: >
-      Implement cart functionality in the Medusa backend for multi-vendor
-      support.
 
-
-      Requirements:
-
-      1. Cart should work with Medusa's built-in cart module
-
-      2. Extend cart to track vendor per line item (for future multi-vendor):
-         - Add metadata field for vendor_id on line items
-      3. Create cart API endpoints if not already provided by Medusa:
-         - POST /store/carts - Create cart
-         - POST /store/carts/:id/line-items - Add item
-         - DELETE /store/carts/:id/line-items/:line_id - Remove item
-         - POST /store/carts/:id/line-items/:line_id - Update quantity
-      4. Ensure cart persists across sessions (use cart_id cookie or
-      localStorage)
-
-      5. Add proper error handling for out-of-stock items
-
-
-      Test: Create cart, add items, retrieve cart via API
-    completed: true
+  - title: "Task 63: Configure SendGrid Email Notifications"
+    completed: false
     parallel_group: 2
-  - title: "Task 65: Build Site Header Component"
-    prompt: |
-      Build a responsive site header component for the storefront.
 
-      Requirements:
-      1. Create src/components/layout/SiteHeader.tsx
-      2. Features:
-         - Logo (text "Kuwait Market" for now) linking to /
-         - Navigation links: Home, Shop, Categories (dropdown placeholder)
-         - Search bar (UI only, functionality later)
-         - Cart icon with item count badge
-         - Mobile hamburger menu
-      3. Sticky header on scroll
-      4. Use shadcn Sheet for mobile menu
-      5. Create CartIcon component that shows item count from cart state
-      6. Integrate with Zustand cart store (create if not exists)
-
-      Test: Header renders on all pages, mobile menu works
-    completed: true
+  - title: "Task 64: Configure Twilio SMS Notifications"
+    completed: true  # Already done
     parallel_group: 2
-  - title: "Task 66: Build Site Footer Component"
-    prompt: |
-      Build a site footer component for the storefront.
 
-      Requirements:
-      1. Create src/components/layout/SiteFooter.tsx
-      2. Sections:
-         - About: Brief description, logo
-         - Quick Links: Home, Shop, About Us, Contact
-         - Customer Service: FAQ, Shipping, Returns, Privacy Policy
-         - Connect: Social media icons (placeholder links)
-      3. Bottom bar: Copyright, payment icons, language switcher (UI only)
-      4. Responsive: stack columns on mobile
-      5. Use consistent styling with header
-
-      Test: Footer renders at bottom of all pages
-    completed: true
-    parallel_group: 2
-  - title: "Task 20: Build Product Grid Component"
-    prompt: |
-      Build a ProductGrid component to display multiple ProductCards.
-
-      Requirements:
-      1. Create src/components/product/ProductGrid.tsx
-      2. Props: products array, loading state, columns (2-4)
-      3. Features:
-         - CSS Grid layout: 2 cols mobile, 3 cols tablet, 4 cols desktop
-         - Loading state shows ProductCardSkeleton grid
-         - Empty state with message
-         - Proper gap spacing
-      4. Create a products data fetching hook: useProducts()
-         - Use React Query to fetch from /store/products
-         - Handle loading, error, success states
-      5. Integrate with Medusa client
-
-      Test: ProductGrid displays products fetched from Medusa API
-    completed: true
+  # Group 3: Modules
+  - title: "Task 6: Implement Customer Email/Password Auth - Backend"
+    completed: false
     parallel_group: 3
-  - title: "Task 27: Build Cart UI - Cart Drawer"
-    prompt: |
-      Build a cart drawer (slide-in panel) for the storefront.
 
-      Requirements:
-      1. Create src/components/cart/CartDrawer.tsx
-      2. Use shadcn Sheet component (slides from right)
-      3. Features:
-         - Header with "Your Cart" title and close button
-         - List of cart items with:
-           - Product image thumbnail
-           - Product title
-           - Quantity selector (+/- buttons)
-           - Price
-           - Remove button
-         - Empty cart state with "Continue Shopping" button
-         - Subtotal at bottom
-         - "Checkout" button (links to /checkout for now)
-      4. Create Zustand cart store: src/stores/cart-store.ts
-         - State: items, isOpen
-         - Actions: addItem, removeItem, updateQuantity, toggleCart
-      5. Sync with Medusa cart API
-      6. Trigger from header cart icon click
-
-      Test: Add item to cart, see it in drawer, update quantity, remove
-    completed: true
+  - title: "Task 12: Configure Medusa Product Module"
+    completed: false
     parallel_group: 3
-  - title: "Task 67: Build Homepage"
-    prompt: |
-      Build the storefront homepage that showcases products.
 
-      Requirements:
-      1. Update src/app/page.tsx
-      2. Sections:
-         - Hero banner with welcome message and CTA
-         - Featured Products grid (use ProductGrid with 4-8 products)
-         - Categories preview (3-4 category cards linking to category pages)
-         - Optional: Newsletter signup form (UI only)
-      3. Use SiteHeader and SiteFooter layout components
-      4. Fetch products using useProducts hook
-      5. Loading states for dynamic content
-      6. Responsive design throughout
-      7. Create src/app/layout.tsx that includes Header and Footer
+  - title: "Task 15: Configure Region and Currency Settings"
+    completed: false
+    parallel_group: 3
 
-      Test: Homepage loads with header, hero, products grid, footer
-    completed: true
+  - title: "Task 23: Build Product Detail Page - Image Gallery"
+    completed: false
+    parallel_group: 3
+
+  - title: "Task 39: Create Vendor Module - Backend"
+    completed: false
+    parallel_group: 3
+
+  - title: "Task 51: Build Admin Dashboard Layout"
+    completed: true  # Already done
+    parallel_group: 3
+
+  - title: "Task 55: Implement i18n Setup"
+    completed: false
+    parallel_group: 3
+
+  # Group 4: Extended Features
+  - title: "Task 9: Implement Social Login - Google OAuth"
+    completed: false
     parallel_group: 4
-  - title: "V-1: Verify Docker Services Running"
-    prompt: |
-      Verify Docker infrastructure is healthy:
-      1. Run `docker ps` to check containers
-      2. Verify medusa-postgres is running and healthy
-      3. Verify medusa-redis is running and healthy
-      4. Test database connection: docker exec medusa-postgres pg_isready
-      5. Test Redis connection: docker exec medusa-redis redis-cli ping
 
-      Report any services that are not healthy.
-    completed: true
+  - title: "Task 10: Implement Phone OTP Auth - Backend"
+    completed: true  # Already done
+    parallel_group: 4
+
+  - title: "Task 16: Create Sales Channel Configuration"
+    completed: false
+    parallel_group: 4
+
+  - title: "Task 17: Configure Inventory Module"
+    completed: false
+    parallel_group: 4
+
+  - title: "Task 24: Build Product Detail Page - Variant Selector"
+    completed: false
+    parallel_group: 4
+
+  - title: "Task 31: Integrate Stripe Payment Provider - Backend"
+    completed: false
+    parallel_group: 4
+
+  - title: "Task 40: Create Vendor-Product Link"
+    completed: false
+    parallel_group: 4
+
+  - title: "Task 41: Build Vendor Registration API"
+    completed: false
+    parallel_group: 4
+
+  - title: "Task 43: Build Vendor Dashboard Layout"
+    completed: false
+    parallel_group: 4
+
+  - title: "Task 49: Build Vendor Payout System - Backend"
+    completed: false
+    parallel_group: 4
+
+  - title: "Task 53: Build Admin Marketplace Settings"
+    completed: false
+    parallel_group: 4
+
+  - title: "Task 54: Build Admin Analytics Dashboard"
+    completed: false
+    parallel_group: 4
+
+  - title: "Task 56: Implement RTL Layout Support"
+    completed: false
+    parallel_group: 4
+
+  - title: "Task 57: Translate UI Strings - English"
+    completed: false
+    parallel_group: 4
+
+  - title: "Task 59: Implement Multi-Currency Display"
+    completed: false
+    parallel_group: 4
+
+  - title: "Task 60: Integrate Meilisearch - Backend"
+    completed: false
+    parallel_group: 4
+
+  # Group 5: More UI
+  - title: "Task 7: Build Customer Auth UI - Login Form"
+    completed: false
+    parallel_group: 5
+
+  - title: "Task 11: Implement Phone OTP Auth - Frontend UI"
+    completed: false
+    parallel_group: 5
+
+  - title: "Task 25: Build Product Detail Page - Full Page"
+    completed: false
+    parallel_group: 5
+
+  - title: "Task 33: Integrate Razorpay Payment Provider"
+    completed: false
+    parallel_group: 5
+
+  - title: "Task 34: Integrate PayPal Payment Provider"
+    completed: false
+    parallel_group: 5
+
+  - title: "Task 42: Build Vendor Registration Form UI"
+    completed: false
+    parallel_group: 5
+
+  - title: "Task 44: Build Vendor Product List"
+    completed: false
+    parallel_group: 5
+
+  - title: "Task 46: Build Vendor Order List"
+    completed: false
+    parallel_group: 5
+
+  - title: "Task 48: Build Vendor Analytics Dashboard"
+    completed: false
+    parallel_group: 5
+
+  - title: "Task 50: Build Vendor Payout UI"
+    completed: false
+    parallel_group: 5
+
+  - title: "Task 52: Build Admin Vendor Approval"
+    completed: false
+    parallel_group: 5
+
+  - title: "Task 58: Translate UI Strings - Arabic"
+    completed: false
+    parallel_group: 5
+
+  - title: "Task 61: Build Search Autocomplete UI"
+    completed: false
+    parallel_group: 5
+
+  # Group 6: Advanced UI
+  - title: "Task 8: Build Customer Auth UI - Register Form"
+    completed: false
+    parallel_group: 6
+
+  - title: "Task 32: Build Checkout - Payment Step with Stripe"
+    completed: false
+    parallel_group: 6
+
+  - title: "Task 45: Build Vendor Product Form"
+    completed: false
+    parallel_group: 6
+
+  - title: "Task 47: Build Vendor Order Processing"
+    completed: false
+    parallel_group: 6
+
+  - title: "Task 62: Build Search Results Page"
+    completed: false
+    parallel_group: 6
+
+  # Group 7: Filters & Pages
+  - title: "Task 21: Build Product Filters Sidebar"
+    completed: false
+    parallel_group: 7
+
+  - title: "Task 28: Build Cart Page"
+    completed: false
+    parallel_group: 7
+
+  - title: "Task 35: Build Payment Method Selector"
+    completed: false
+    parallel_group: 7
+
+  - title: "Task 36: Build Order Confirmation Page"
+    completed: false
+    parallel_group: 7
+
+  # Group 8: Category & Checkout
+  - title: "Task 22: Build Category Page"
+    completed: false
+    parallel_group: 8
+
+  - title: "Task 29: Build Checkout - Address Step"
+    completed: false
+    parallel_group: 8
+
+  - title: "Task 38: Build Customer Order History"
+    completed: false
+    parallel_group: 8
+
+  # Group 9: Shipping
+  - title: "Task 30: Build Checkout - Shipping Step"
+    completed: false
+    parallel_group: 9
+
+  # Group 10: Complete Checkout
+  - title: "Task 37: Build Complete Checkout Flow"
+    completed: false
     parallel_group: 10
-  - title: "V-2: Run All Unit Tests"
-    prompt: |
-      Run all unit tests for backend and storefront:
-      1. cd backend && npm test
-      2. cd storefront && npm test
 
-      All tests must pass. Report any failures with details.
-    completed: true
-    parallel_group: 10
-  - title: "V-3: E2E - Verify Storefront Homepage"
-    prompt: |
-      Use Playwright MCP to verify storefront homepage:
-      1. Navigate to http://localhost:3000
-      2. Wait for page to fully load (wait for network idle)
-      3. Take a screenshot
-      4. Check browser console for errors (should be none)
-      5. Verify page has content (not blank/error page)
-
-      Use playwright/browser_navigate, playwright/browser_snapshot,
-      playwright/browser_console_messages, playwright/browser_take_screenshot
-    completed: true
-    parallel_group: 10
-  - title: "V-4: E2E - Verify Products Display"
-    prompt: |
-      Use Playwright MCP to verify products display on storefront:
-      1. Navigate to http://localhost:3000
-      2. Wait for products to load
-      3. Check that product cards/grid is visible
-      4. Verify at least one product shows: image, title, price
-      5. Check network requests - verify /store/products API was called
-      6. Take screenshot showing products
-
-      Use playwright/browser_navigate, playwright/browser_snapshot,
-      playwright/browser_network_requests, playwright/browser_take_screenshot
+  # Group 11: Security
+  - title: "Task 69: Security Audit"
     completed: false
     parallel_group: 11
-  - title: "V-5: E2E - Verify Product Detail Page"
-    prompt: |
-      Use Playwright MCP to verify product detail page:
-      1. Navigate to http://localhost:3000
-      2. Click on first product to go to detail page
-      3. Wait for page load
-      4. Verify product image displays
-      5. Verify product title and price show
-      6. Verify Add to Cart button exists
-      7. Check network for /store/products/:id API call
-      8. Take screenshot
 
-      Use playwright/browser_navigate, playwright/browser_click,
-      playwright/browser_snapshot, playwright/browser_take_screenshot
+  # Group 12: Dev & Performance
+  - title: "Task 18: Set Up Development Environment Scripts"
     completed: false
-    parallel_group: 11
-  - title: "V-6: E2E - Verify Add to Cart Flow"
-    prompt: >
-      Use Playwright MCP to verify full add-to-cart flow:
-
-      1. Navigate to a product page
-
-      2. Click "Add to Cart" button
-
-      3. Check network requests for cart API call (POST /store/carts)
-
-      4. Verify cart drawer/icon updates with item count
-
-      5. Open cart (click cart icon if drawer)
-
-      6. Verify product appears in cart with correct info
-
-      7. Take screenshot of cart with item
-
-
-      This tests: UI interaction -> API call -> State update -> UI reflects
-      change
-
-
-      Use playwright/browser_navigate, playwright/browser_click,
-
-      playwright/browser_network_requests, playwright/browser_snapshot
-    completed: true
     parallel_group: 12
-  - title: "V-7: E2E - Verify Cart Operations"
-    prompt: |
-      Use Playwright MCP to verify cart operations work:
-      1. Start with item in cart (from V-6 or add one)
-      2. Find quantity controls in cart
-      3. Increase quantity - verify API call and UI update
-      4. Decrease quantity - verify API call and UI update
-      5. Remove item - verify API call
-      6. Verify cart shows empty state
-      7. Take screenshots at each step
 
-      Use playwright/browser_click, playwright/browser_network_requests,
-      playwright/browser_snapshot, playwright/browser_take_screenshot
-    completed: true
+  - title: "Task 68: Performance Optimization"
+    completed: false
     parallel_group: 12
-  - title: "V-8: E2E - Verify Admin Panel Loads"
-    prompt: |
-      Use Playwright MCP to verify admin panel is accessible:
-      1. Navigate to http://localhost:9000/app
-      2. Wait for page load
-      3. Verify login page or dashboard loads (not error)
-      4. Take screenshot
-      5. Check console for errors
 
-      Use playwright/browser_navigate, playwright/browser_snapshot,
-      playwright/browser_console_messages, playwright/browser_take_screenshot
-    completed: true
-    parallel_group: 10
-  - title: "V-9: API - Verify Products Endpoint"
-    prompt: |
-      Verify the products API returns correct data:
-      1. Make GET request to http://localhost:9000/store/products
-      2. Verify 200 status code
-      3. Verify response has products array
-      4. Verify at least 10 products exist (we seeded 13)
-      5. Verify each product has: id, title, handle, variants
-      6. Print sample product structure
-
-      Use curl or fetch to test the API directly.
-    completed: true
-    parallel_group: 10
-  - title: "V-10: API - Verify Cart Creation"
-    prompt: |
-      Verify cart API works correctly:
-      1. POST to http://localhost:9000/store/carts to create cart
-      2. Verify 200/201 response with cart object
-      3. Save cart_id from response
-      4. GET the cart to verify it persists
-      5. Print cart structure
-
-      Use curl to test: curl -X POST http://localhost:9000/store/carts
-    completed: true
-    parallel_group: 10
+  # Group 13: Production
+  - title: "Task 70: Production Deployment with Medusa Cloud"
+    completed: false
+    parallel_group: 13

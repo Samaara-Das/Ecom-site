@@ -8,111 +8,65 @@
  */
 
 import {
-  ContainerRegistrationKeys,
   Modules,
-  FulfillmentEvents,
+  ShippingOptionPriceType,
 } from "@medusajs/framework/utils"
 import type { MedusaContainer } from "@medusajs/framework/types"
-import type { Logger } from "@medusajs/framework/types"
 
-export default async function seedShippingOptions(container: MedusaContainer) {
-  const logger = container.resolve<Logger>(ContainerRegistrationKeys.LOGGER)
+export default async function seedShippingOptions({ container }: { container: MedusaContainer }) {
+  console.log("=== Starting shipping options seed ===")
+
   const fulfillmentModule = container.resolve(Modules.FULFILLMENT)
-  const stockLocationModule = container.resolve(Modules.STOCK_LOCATION)
-  const regionModule = container.resolve(Modules.REGION)
-
-  logger.info("Starting shipping options seed...")
 
   try {
-    // 1. Find the Kuwait Warehouse stock location
-    const stockLocations = await stockLocationModule.listStockLocations({
-      name: "Kuwait Warehouse",
-    })
+    // Use hardcoded service zone ID from admin panel
+    // This was discovered from: /app/settings/locations/sloc_01KFZS8B7T9RK62TBTZCWSPZ6B/fulfillment-set/fuset_01KFZSAPE05D3FHD1AYYZBTHMF/service-zone/serzo_01KFZSE4N7ZG3H194SVYV4M8WZ
+    const SERVICE_ZONE_ID = "serzo_01KFZSE4N7ZG3H194SVYV4M8WZ"
 
-    if (stockLocations.length === 0) {
-      logger.error("Kuwait Warehouse stock location not found. Please create it first via admin panel.")
-      return
-    }
+    console.log(`Using service zone: ${SERVICE_ZONE_ID}`)
 
-    const stockLocation = stockLocations[0]
-    logger.info(`Found stock location: ${stockLocation.name} (${stockLocation.id})`)
-
-    // 2. Find the fulfillment set for this location
-    const fulfillmentSets = await fulfillmentModule.listFulfillmentSets({
-      location_id: stockLocation.id,
-      type: "shipping",
-    })
-
-    if (fulfillmentSets.length === 0) {
-      logger.error("No fulfillment set found for shipping. Please enable shipping in admin panel first.")
-      return
-    }
-
-    const fulfillmentSet = fulfillmentSets[0]
-    logger.info(`Found fulfillment set: ${fulfillmentSet.id}`)
-
-    // 3. Find the Kuwait Shipping Zone service zone
-    const serviceZones = await fulfillmentModule.listServiceZones({
-      fulfillment_set_id: fulfillmentSet.id,
-    })
-
-    if (serviceZones.length === 0) {
-      logger.error("No service zone found. Please create one in admin panel first.")
-      return
-    }
-
-    const serviceZone = serviceZones[0]
-    logger.info(`Found service zone: ${serviceZone.name} (${serviceZone.id})`)
-
-    // 4. Get shipping profiles
+    // Get shipping profiles
     const shippingProfiles = await fulfillmentModule.listShippingProfiles({})
+    console.log(`Found ${shippingProfiles.length} shipping profiles`)
 
     if (shippingProfiles.length === 0) {
-      logger.error("No shipping profiles found.")
+      console.error("No shipping profiles found!")
       return
     }
 
-    const defaultProfile = shippingProfiles.find(p => p.name === "Default Shipping Profile") || shippingProfiles[0]
-    logger.info(`Using shipping profile: ${defaultProfile.name} (${defaultProfile.id})`)
+    const defaultProfile = shippingProfiles[0]
+    console.log(`Using shipping profile: ${defaultProfile.name} (${defaultProfile.id})`)
 
-    // 5. Get the Manual fulfillment provider
+    // Get fulfillment providers
     const fulfillmentProviders = await fulfillmentModule.listFulfillmentProviders({})
-    const manualProvider = fulfillmentProviders.find(p => p.id.includes("manual"))
+    console.log(`Found ${fulfillmentProviders.length} fulfillment providers:`)
+    fulfillmentProviders.forEach(p => console.log(`  - ${p.id}`))
 
+    const manualProvider = fulfillmentProviders.find(p => p.id.includes("manual"))
     if (!manualProvider) {
-      logger.error("Manual fulfillment provider not found.")
+      console.error("Manual fulfillment provider not found!")
       return
     }
+    console.log(`Using provider: ${manualProvider.id}`)
 
-    logger.info(`Using fulfillment provider: ${manualProvider.id}`)
-
-    // 6. Check if shipping options already exist
-    const existingOptions = await fulfillmentModule.listShippingOptions({
-      service_zone_id: serviceZone.id,
-    })
+    // Check existing shipping options
+    const existingOptions = await fulfillmentModule.listShippingOptions({})
+    console.log(`Found ${existingOptions.length} existing shipping options`)
 
     if (existingOptions.length > 0) {
-      logger.info(`Shipping options already exist (${existingOptions.length} found). Skipping creation.`)
-      existingOptions.forEach(opt => {
-        logger.info(`  - ${opt.name} (${opt.id})`)
-      })
+      console.log("Existing shipping options:")
+      existingOptions.forEach(opt => console.log(`  - ${opt.name} (${opt.id})`))
+      console.log("Skipping creation - options already exist.")
       return
     }
 
-    // 7. Get the Kuwait region for pricing
-    const regions = await regionModule.listRegions({
-      name: "Kuwait",
-    })
-
-    const kuwaitRegion = regions.length > 0 ? regions[0] : null
-    logger.info(kuwaitRegion ? `Found Kuwait region: ${kuwaitRegion.id}` : "Kuwait region not found, will use default pricing")
-
-    // 8. Create shipping options
-    const shippingOptionsData = [
-      {
+    // Create Standard Shipping
+    console.log("Creating Standard Shipping...")
+    try {
+      const standard = await fulfillmentModule.createShippingOptions({
         name: "Standard Shipping",
-        price_type: "flat",
-        service_zone_id: serviceZone.id,
+        price_type: ShippingOptionPriceType.FLAT,
+        service_zone_id: SERVICE_ZONE_ID,
         shipping_profile_id: defaultProfile.id,
         provider_id: manualProvider.id,
         type: {
@@ -120,25 +74,23 @@ export default async function seedShippingOptions(container: MedusaContainer) {
           description: "Standard delivery within 3-5 business days",
           code: "standard",
         },
-        data: {
-          id: "manual-fulfillment",
-        },
-        rules: [],
         prices: [
-          {
-            amount: 500, // 5.00 KWD in minor units (fils)
-            currency_code: "kwd",
-          },
-          {
-            amount: 1500, // $15.00 USD
-            currency_code: "usd",
-          },
+          { amount: 500, currency_code: "kwd" },
+          { amount: 1500, currency_code: "usd" },
         ],
-      },
-      {
+      })
+      console.log(`  ✓ Created Standard Shipping: ${standard.id}`)
+    } catch (err: any) {
+      console.error(`  ✗ Failed: ${err.message}`)
+    }
+
+    // Create Express Shipping
+    console.log("Creating Express Shipping...")
+    try {
+      const express = await fulfillmentModule.createShippingOptions({
         name: "Express Shipping",
-        price_type: "flat",
-        service_zone_id: serviceZone.id,
+        price_type: ShippingOptionPriceType.FLAT,
+        service_zone_id: SERVICE_ZONE_ID,
         shipping_profile_id: defaultProfile.id,
         provider_id: manualProvider.id,
         type: {
@@ -146,70 +98,21 @@ export default async function seedShippingOptions(container: MedusaContainer) {
           description: "Express delivery within 1-2 business days",
           code: "express",
         },
-        data: {
-          id: "manual-fulfillment",
-        },
-        rules: [],
         prices: [
-          {
-            amount: 1500, // 15.00 KWD
-            currency_code: "kwd",
-          },
-          {
-            amount: 3500, // $35.00 USD
-            currency_code: "usd",
-          },
+          { amount: 1500, currency_code: "kwd" },
+          { amount: 3500, currency_code: "usd" },
         ],
-      },
-      {
-        name: "Free Shipping (Orders over 50 KWD)",
-        price_type: "flat",
-        service_zone_id: serviceZone.id,
-        shipping_profile_id: defaultProfile.id,
-        provider_id: manualProvider.id,
-        type: {
-          label: "Free",
-          description: "Free shipping for orders over 50 KWD",
-          code: "free",
-        },
-        data: {
-          id: "manual-fulfillment",
-        },
-        rules: [
-          {
-            attribute: "item_total",
-            operator: "gte",
-            value: "15000", // 50 KWD = 15000 fils (minimum for free shipping)
-          },
-        ],
-        prices: [
-          {
-            amount: 0,
-            currency_code: "kwd",
-          },
-          {
-            amount: 0,
-            currency_code: "usd",
-          },
-        ],
-      },
-    ]
-
-    logger.info("Creating shipping options...")
-
-    for (const optionData of shippingOptionsData) {
-      try {
-        const shippingOption = await fulfillmentModule.createShippingOptions(optionData)
-        logger.info(`  ✓ Created: ${optionData.name} (${shippingOption.id})`)
-      } catch (error) {
-        logger.error(`  ✗ Failed to create ${optionData.name}: ${error instanceof Error ? error.message : error}`)
-      }
+      })
+      console.log(`  ✓ Created Express Shipping: ${express.id}`)
+    } catch (err: any) {
+      console.error(`  ✗ Failed: ${err.message}`)
     }
 
-    logger.info("Shipping options seed completed!")
+    console.log("=== Shipping options seed completed ===")
 
-  } catch (error) {
-    logger.error(`Seed failed: ${error instanceof Error ? error.message : error}`)
+  } catch (error: any) {
+    console.error(`Seed failed: ${error.message}`)
+    console.error(error.stack)
     throw error
   }
 }
