@@ -13,7 +13,8 @@
     "test": "vitest run",
     "test:watch": "vitest --watch",
     "lint": "echo 'Linting skipped - ESLint requires reinstall'",
-    "seed:products": "npx medusa exec ./src/scripts/seed-products.ts"
+    "seed:products": "npx medusa exec ./src/scripts/seed-products.ts",
+    "verify:cart": "npx tsx src/scripts/verify-cart-api.ts"
   },
   "dependencies": {
     "@medusajs/framework": "^2.0.0",
