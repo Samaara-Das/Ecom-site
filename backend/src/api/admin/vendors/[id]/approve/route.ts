@@ -4,6 +4,11 @@ import type {
 } from "@medusajs/framework/http"
 import type { Logger } from "@medusajs/framework/types"
 import { VENDOR_MODULE } from "../../../../../modules/vendor"
+import type VendorModuleService from "../../../../../modules/vendor/service"
+
+interface ApproveVendorBody {
+  commission_rate?: number
+}
 
 /**
  * POST /admin/vendors/:id/approve
@@ -17,7 +22,7 @@ export async function POST(
   const vendorId = req.params.id
 
   try {
-    const vendorService = req.scope.resolve(VENDOR_MODULE)
+    const vendorService = req.scope.resolve<VendorModuleService>(VENDOR_MODULE)
 
     // Verify vendor exists
     const existingVendor = await vendorService.retrieveVendor(vendorId)
@@ -36,7 +41,7 @@ export async function POST(
     }
 
     // Optional: set a custom commission rate during approval
-    const { commission_rate } = req.body || {}
+    const { commission_rate } = (req.body || {}) as ApproveVendorBody
     const updateData: Record<string, unknown> = { status: "verified" }
 
     if (commission_rate !== undefined) {

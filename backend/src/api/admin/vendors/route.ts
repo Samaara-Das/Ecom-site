@@ -4,11 +4,29 @@ import type {
 } from "@medusajs/framework/http"
 import type { Logger } from "@medusajs/framework/types"
 import { VENDOR_MODULE } from "../../../modules/vendor"
+import type VendorModuleService from "../../../modules/vendor/service"
 
 interface VendorFilters {
   status?: string | string[]
   limit?: number
   offset?: number
+}
+
+type VendorStatus = "pending" | "verified" | "premium" | "suspended"
+
+interface CreateVendorBody {
+  name: string
+  email: string
+  phone?: string
+  description?: string
+  business_registration?: string
+  commission_rate?: number
+  status?: VendorStatus
+  address_line_1?: string
+  address_line_2?: string
+  city?: string
+  postal_code?: string
+  country_code?: string
 }
 
 /**
@@ -22,7 +40,7 @@ export async function GET(
   const logger = req.scope.resolve<Logger>("logger")
 
   try {
-    const vendorService = req.scope.resolve(VENDOR_MODULE)
+    const vendorService = req.scope.resolve<VendorModuleService>(VENDOR_MODULE)
 
     const { status, limit = 50, offset = 0 } = req.query as VendorFilters
 
@@ -65,7 +83,7 @@ export async function POST(
   const logger = req.scope.resolve<Logger>("logger")
 
   try {
-    const vendorService = req.scope.resolve(VENDOR_MODULE)
+    const vendorService = req.scope.resolve<VendorModuleService>(VENDOR_MODULE)
 
     const {
       name,
@@ -80,7 +98,7 @@ export async function POST(
       city,
       postal_code,
       country_code,
-    } = req.body
+    } = req.body as CreateVendorBody
 
     if (!name || !email) {
       return res.status(400).json({

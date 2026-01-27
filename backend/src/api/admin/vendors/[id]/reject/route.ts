@@ -4,6 +4,11 @@ import type {
 } from "@medusajs/framework/http"
 import type { Logger } from "@medusajs/framework/types"
 import { VENDOR_MODULE } from "../../../../../modules/vendor"
+import type VendorModuleService from "../../../../../modules/vendor/service"
+
+interface RejectVendorBody {
+  reason?: string
+}
 
 /**
  * POST /admin/vendors/:id/reject
@@ -17,7 +22,7 @@ export async function POST(
   const vendorId = req.params.id
 
   try {
-    const vendorService = req.scope.resolve(VENDOR_MODULE)
+    const vendorService = req.scope.resolve<VendorModuleService>(VENDOR_MODULE)
 
     // Verify vendor exists
     const existingVendor = await vendorService.retrieveVendor(vendorId)
@@ -36,7 +41,7 @@ export async function POST(
     }
 
     // Optional: record rejection reason
-    const { reason } = req.body || {}
+    const { reason } = (req.body || {}) as RejectVendorBody
 
     const [vendor] = await vendorService.updateVendors(
       { id: vendorId },

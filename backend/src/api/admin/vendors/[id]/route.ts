@@ -4,6 +4,23 @@ import type {
 } from "@medusajs/framework/http"
 import type { Logger } from "@medusajs/framework/types"
 import { VENDOR_MODULE } from "../../../../modules/vendor"
+import type VendorModuleService from "../../../../modules/vendor/service"
+
+interface UpdateVendorBody {
+  name?: string
+  description?: string
+  phone?: string
+  logo_url?: string
+  status?: string
+  commission_rate?: number
+  business_registration?: string
+  bank_account?: string
+  address_line_1?: string
+  address_line_2?: string
+  city?: string
+  postal_code?: string
+  country_code?: string
+}
 
 /**
  * GET /admin/vendors/:id
@@ -17,7 +34,7 @@ export async function GET(
   const vendorId = req.params.id
 
   try {
-    const vendorService = req.scope.resolve(VENDOR_MODULE)
+    const vendorService = req.scope.resolve<VendorModuleService>(VENDOR_MODULE)
 
     const vendor = await vendorService.retrieveVendor(vendorId)
 
@@ -50,7 +67,7 @@ export async function PATCH(
   const vendorId = req.params.id
 
   try {
-    const vendorService = req.scope.resolve(VENDOR_MODULE)
+    const vendorService = req.scope.resolve<VendorModuleService>(VENDOR_MODULE)
 
     // Verify vendor exists
     const existingVendor = await vendorService.retrieveVendor(vendorId)
@@ -74,7 +91,7 @@ export async function PATCH(
       city,
       postal_code,
       country_code,
-    } = req.body
+    } = req.body as UpdateVendorBody
 
     // Build update data - only include fields that were provided
     const updateData: Record<string, unknown> = {}
@@ -148,7 +165,7 @@ export async function DELETE(
   const vendorId = req.params.id
 
   try {
-    const vendorService = req.scope.resolve(VENDOR_MODULE)
+    const vendorService = req.scope.resolve<VendorModuleService>(VENDOR_MODULE)
 
     // Verify vendor exists
     const existingVendor = await vendorService.retrieveVendor(vendorId)
