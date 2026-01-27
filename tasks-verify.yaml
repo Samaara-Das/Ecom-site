@@ -153,7 +153,7 @@ tasks:
       image, title, price.
 
       If products don't display, check API and frontend code, then retry.
-    completed: false
+    completed: true
     parallel_group: 2
   - title: "V-5: E2E - Verify Product Detail Page"
     prompt: >
@@ -186,7 +186,7 @@ tasks:
       to Cart button.
 
       If navigation fails or content missing, investigate and retry.
-    completed: false
+    completed: true
     parallel_group: 2
   - title: "V-6: E2E - Verify Add to Cart Flow"
     prompt: >

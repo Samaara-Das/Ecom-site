@@ -8,7 +8,17 @@
       "mcp__context7__resolve-library-id",
       "mcp__context7__query-docs",
       "WebFetch(domain:medusajs.com)",
-      "WebFetch(domain:docs.medusajs.com)"
+      "WebFetch(domain:docs.medusajs.com)",
+      "Bash(ls:*)",
+      "Bash(docker ps:*)",
+      "Bash(docker-compose up:*)",
+      "Bash(docker:*)",
+      "Bash(where:*)",
+      "Bash(\"/c/Program Files/Docker/Docker/resources/bin/docker\" ps)",
+      "Bash(echo:*)",
+      "Bash(docker-compose ps:*)",
+      "Bash(npm run dev:*)",
+      "WebSearch"
     ]
   }
 }
