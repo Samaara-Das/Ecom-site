@@ -59,22 +59,35 @@ export function ProductGrid({ initialProducts }: ProductGridProps) {
     async function fetchProducts() {
       try {
         const backendUrl = process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL || "http://localhost:9000";
-        const response = await fetch(`${backendUrl}/store/products`, {
-          headers: {
-            "Content-Type": "application/json",
-          },
-        });
+        const publishableKey = process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY;
+
+        const headers: HeadersInit = {
+          "Content-Type": "application/json",
+        };
+
+        // Add publishable API key if available
+        if (publishableKey) {
+          headers["x-publishable-api-key"] = publishableKey;
+        }
+
+        const response = await fetch(`${backendUrl}/store/products`, { headers });
 
         if (!response.ok) {
+          // If API key is required, fall back to mock products silently for demo
+          const errorData = await response.json().catch(() => ({}));
+          if (errorData.type === "not_allowed" || response.status === 401) {
+            console.info("Using demo products (API key not configured)");
+            setProducts(MOCK_PRODUCTS);
+            return;
+          }
           throw new Error("Failed to fetch products");
         }
 
         const data = await response.json();
-        setProducts(data.products || []);
+        setProducts(data.products?.length ? data.products : MOCK_PRODUCTS);
       } catch (err) {
-        console.error("Error fetching products:", err);
-        // Use mock products when backend is unavailable (development/testing)
-        console.log("Using mock products for development/testing");
+        // Use mock products when backend is unavailable (development/demo)
+        console.info("Using demo products (backend unavailable)");
         setProducts(MOCK_PRODUCTS);
       } finally {
         setLoading(false);
