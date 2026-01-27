@@ -271,13 +271,6 @@ tasks:
       Test: Homepage loads with header, hero, products grid, footer
     completed: true
     parallel_group: 4
-
-  # =============================================================
-  # E2E VERIFICATION TASKS
-  # These tasks verify the demo ecom site works end-to-end
-  # Uses Playwright MCP for browser automation
-  # =============================================================
-
   - title: "V-1: Verify Docker Services Running"
     prompt: |
       Verify Docker infrastructure is healthy:
@@ -290,7 +283,6 @@ tasks:
       Report any services that are not healthy.
     completed: true
     parallel_group: 10
-
   - title: "V-2: Run All Unit Tests"
     prompt: |
       Run all unit tests for backend and storefront:
@@ -300,7 +292,6 @@ tasks:
       All tests must pass. Report any failures with details.
     completed: true
     parallel_group: 10
-
   - title: "V-3: E2E - Verify Storefront Homepage"
     prompt: |
       Use Playwright MCP to verify storefront homepage:
@@ -314,7 +305,6 @@ tasks:
       playwright/browser_console_messages, playwright/browser_take_screenshot
     completed: true
     parallel_group: 10
-
   - title: "V-4: E2E - Verify Products Display"
     prompt: |
       Use Playwright MCP to verify products display on storefront:
@@ -329,7 +319,6 @@ tasks:
       playwright/browser_network_requests, playwright/browser_take_screenshot
     completed: false
     parallel_group: 11
-
   - title: "V-5: E2E - Verify Product Detail Page"
     prompt: |
       Use Playwright MCP to verify product detail page:
@@ -346,25 +335,34 @@ tasks:
       playwright/browser_snapshot, playwright/browser_take_screenshot
     completed: false
     parallel_group: 11
-
   - title: "V-6: E2E - Verify Add to Cart Flow"
-    prompt: |
+    prompt: >
       Use Playwright MCP to verify full add-to-cart flow:
+
       1. Navigate to a product page
+
       2. Click "Add to Cart" button
+
       3. Check network requests for cart API call (POST /store/carts)
+
       4. Verify cart drawer/icon updates with item count
+
       5. Open cart (click cart icon if drawer)
+
       6. Verify product appears in cart with correct info
+
       7. Take screenshot of cart with item
 
-      This tests: UI interaction -> API call -> State update -> UI reflects change
+
+      This tests: UI interaction -> API call -> State update -> UI reflects
+      change
+
 
       Use playwright/browser_navigate, playwright/browser_click,
-      playwright/browser_network_requests, playwright/browser_snapshot
-    completed: false
-    parallel_group: 12
 
+      playwright/browser_network_requests, playwright/browser_snapshot
+    completed: true
+    parallel_group: 12
   - title: "V-7: E2E - Verify Cart Operations"
     prompt: |
       Use Playwright MCP to verify cart operations work:
@@ -378,9 +376,8 @@ tasks:
 
       Use playwright/browser_click, playwright/browser_network_requests,
       playwright/browser_snapshot, playwright/browser_take_screenshot
-    completed: false
+    completed: true
     parallel_group: 12
-
   - title: "V-8: E2E - Verify Admin Panel Loads"
     prompt: |
       Use Playwright MCP to verify admin panel is accessible:
@@ -394,7 +391,6 @@ tasks:
       playwright/browser_console_messages, playwright/browser_take_screenshot
     completed: true
     parallel_group: 10
-
   - title: "V-9: API - Verify Products Endpoint"
     prompt: |
       Verify the products API returns correct data:
@@ -408,7 +404,6 @@ tasks:
       Use curl or fetch to test the API directly.
     completed: true
     parallel_group: 10
-
   - title: "V-10: API - Verify Cart Creation"
     prompt: |
       Verify cart API works correctly:

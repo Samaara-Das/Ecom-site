@@ -4,12 +4,18 @@ export default defineConfig({
   test: {
     globals: true,
     environment: "node",
-    include: ["src/**/*.test.ts", "src/**/__tests__/*.test.ts"],
+    include: [
+      "src/**/*.test.ts",
+      "src/**/__tests__/*.test.ts",
+      "src/e2e/**/*.test.ts",
+    ],
     coverage: {
       provider: "v8",
       reporter: ["text", "json", "html"],
       include: ["src/**/*.ts"],
-      exclude: ["src/**/*.test.ts", "src/**/__tests__/**"],
+      exclude: ["src/**/*.test.ts", "src/**/__tests__/**", "src/e2e/**"],
     },
+    // Longer timeout for E2E tests
+    testTimeout: 30000,
   },
 })
