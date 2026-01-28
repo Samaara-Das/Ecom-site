@@ -43,12 +43,12 @@ export async function POST(
     // Optional: record rejection reason
     const { reason } = (req.body || {}) as RejectVendorBody
 
-    const [vendor] = await vendorService.updateVendors(
+    const vendor = await vendorService.updateVendors(
       { id: vendorId },
       { status: "suspended" }
     )
 
-    logger.info(`Admin rejected vendor: ${vendorId} (${vendor.name})${reason ? ` - Reason: ${reason}` : ""}`)
+    logger.info(`Admin rejected vendor: ${vendorId}${reason ? ` - Reason: ${reason}` : ""}`)
 
     // TODO: Send rejection notification email to vendor with reason
 

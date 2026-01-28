@@ -54,12 +54,12 @@ export async function POST(
       updateData.commission_rate = rate
     }
 
-    const [vendor] = await vendorService.updateVendors(
+    const vendor = await vendorService.updateVendors(
       { id: vendorId },
       updateData
     )
 
-    logger.info(`Admin approved vendor: ${vendorId} (${vendor.name})`)
+    logger.info(`Admin approved vendor: ${vendorId}`)
 
     // TODO: Send approval notification email to vendor
 

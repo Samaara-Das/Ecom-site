@@ -135,7 +135,7 @@ export async function PATCH(
       }
     }
 
-    const [updatedVendor] = await vendorService.updateVendors(
+    const updatedVendor = await vendorService.updateVendors(
       { id: vendorId },
       updateData
     )
