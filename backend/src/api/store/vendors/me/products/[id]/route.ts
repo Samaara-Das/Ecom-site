@@ -159,12 +159,11 @@ export async function PATCH(
     if (images !== undefined) updateData.images = images
     if (categories !== undefined) updateData.categories = categories
 
-    const [updatedProduct] = await productService.updateProducts([
-      {
-        id: productId,
-        ...updateData,
-      },
-    ])
+    const updatedProducts = await productService.updateProducts(
+      { id: productId },
+      updateData
+    )
+    const updatedProduct = Array.isArray(updatedProducts) ? updatedProducts[0] : updatedProducts
 
     logger.info(`Vendor ${vendor.id} updated product: ${productId}`)
 

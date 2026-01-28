@@ -160,7 +160,7 @@ export async function POST(
     const productService = req.scope.resolve(Modules.PRODUCT)
 
     // Create product with vendor_id in metadata
-    const [product] = await productService.createProducts([
+    const [product] = await (productService as any).createProducts([
       {
         title,
         subtitle: subtitle || null,

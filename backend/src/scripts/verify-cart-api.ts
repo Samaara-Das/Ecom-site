@@ -106,7 +106,7 @@ async function verifyCartCreation(cart: CartResponse["cart"]): Promise<boolean> 
   console.log("\n2. Verifying cart creation response...")
 
   // Check cart ID
-  const hasValidId = cart.id && cart.id.startsWith("cart_")
+  const hasValidId = Boolean(cart.id && cart.id.startsWith("cart_"))
   log("Cart ID", hasValidId, hasValidId ? `Valid ID: ${cart.id}` : "Missing or invalid cart ID")
 
   // Check required fields

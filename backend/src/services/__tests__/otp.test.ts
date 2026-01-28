@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest"
-import { OTPService, OTPStore, OTPRecord, OTPConfig } from "../otp"
+import { OTPService, OTPStore, OTPRecord } from "../otp"
 
 describe("OTPService", () => {
   let otpService: OTPService
@@ -289,10 +289,10 @@ describe("OTPService with InMemoryStore", () => {
     expect(sendResult.success).toBe(true)
 
     // Get the OTP from the SMS message
-    const sentMessage = (mockSMSSender as any).mock.calls[0][1]
+    const sentMessage = (mockSMSSender as ReturnType<typeof vi.fn>).mock.calls[0][1] as string
     const otpMatch = sentMessage.match(/\d{6}/)
     expect(otpMatch).not.toBeNull()
-    const otp = otpMatch[0]
+    const otp = otpMatch![0]
 
     // Verify with correct OTP
     const verifyResult = await service.verifyOTP("+96512345678", otp)

@@ -72,8 +72,8 @@ export async function GET(
         id: order.id,
         display_id: order.display_id,
         status: order.status,
-        fulfillment_status: order.fulfillment_status,
-        payment_status: order.payment_status,
+        fulfillment_status: (order as any).fulfillment_status,
+        payment_status: (order as any).payment_status,
         currency_code: order.currency_code,
         total: order.total,
         subtotal: order.subtotal,
@@ -124,7 +124,7 @@ export async function GET(
           country_code: order.billing_address.country_code,
           phone: order.billing_address.phone,
         } : null,
-        fulfillments: order.fulfillments?.map((f: any) => ({
+        fulfillments: (order as any).fulfillments?.map((f: any) => ({
           id: f.id,
           status: f.status,
           tracking_numbers: f.tracking_numbers,

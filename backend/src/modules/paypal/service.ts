@@ -20,19 +20,58 @@ import type {
   GetPaymentStatusInput,
   GetPaymentStatusOutput,
   PaymentSessionStatus,
-  WebhookActionInput,
-  WebhookActionOutput,
+  ProviderWebhookPayload,
+  WebhookActionResult,
 } from "@medusajs/framework/types"
-import {
-  Client,
-  Environment,
-  OrdersController,
-  PaymentsController,
-  CheckoutPaymentIntent,
-  OrderApplicationContextLandingPage,
-  OrderApplicationContextUserAction,
-  type OrderRequest,
-} from "@paypal/paypal-server-sdk"
+
+// Type definitions for @paypal/paypal-server-sdk (may not have declarations)
+interface PayPalClient {
+  clientCredentialsAuthCredentials: {
+    oAuthClientId: string
+    oAuthClientSecret: string
+  }
+  environment: unknown
+}
+
+interface PayPalOrderRequest {
+  intent: string
+  purchaseUnits: Array<{
+    amount: {
+      currencyCode: string
+      value: string
+    }
+    description?: string
+    customId?: string
+  }>
+  applicationContext?: {
+    brandName?: string
+    landingPage?: string
+    userAction?: string
+  }
+}
+
+// Conditionally import PayPal SDK with fallback types
+let Client: any
+let Environment: any
+let OrdersController: any
+let PaymentsController: any
+let CheckoutPaymentIntent: any
+let OrderApplicationContextLandingPage: any
+let OrderApplicationContextUserAction: any
+
+try {
+  const paypalSdk = require("@paypal/paypal-server-sdk")
+  Client = paypalSdk.Client
+  Environment = paypalSdk.Environment
+  OrdersController = paypalSdk.OrdersController
+  PaymentsController = paypalSdk.PaymentsController
+  CheckoutPaymentIntent = paypalSdk.CheckoutPaymentIntent
+  OrderApplicationContextLandingPage = paypalSdk.OrderApplicationContextLandingPage
+  OrderApplicationContextUserAction = paypalSdk.OrderApplicationContextUserAction
+} catch {
+  // PayPal SDK not installed - service will fail at runtime if used
+  console.warn("@paypal/paypal-server-sdk not installed - PayPal payments will not work")
+}
 
 export type PayPalOptions = {
   client_id: string
@@ -51,9 +90,9 @@ class PayPalPaymentProviderService extends AbstractPaymentProvider<PayPalOptions
 
   protected logger_: Logger
   protected options_: PayPalOptions
-  protected client_: Client
-  protected ordersController_: OrdersController
-  protected paymentsController_: PaymentsController
+  protected client_: any
+  protected ordersController_: any
+  protected paymentsController_: any
 
   constructor(container: InjectedDependencies, options: PayPalOptions) {
     super(container, options)
@@ -108,7 +147,7 @@ class PayPalPaymentProviderService extends AbstractPaymentProvider<PayPalOptions
         : CheckoutPaymentIntent.Authorize
 
       // Create PayPal order request
-      const orderRequest: OrderRequest = {
+      const orderRequest: PayPalOrderRequest = {
         intent: intent,
         purchaseUnits: [
           {
@@ -122,8 +161,8 @@ class PayPalPaymentProviderService extends AbstractPaymentProvider<PayPalOptions
         ],
         applicationContext: {
           brandName: "Kuwait Marketplace",
-          landingPage: OrderApplicationContextLandingPage.NoPreference,
-          userAction: OrderApplicationContextUserAction.PayNow,
+          landingPage: OrderApplicationContextLandingPage?.NoPreference,
+          userAction: OrderApplicationContextUserAction?.PayNow,
         },
       }
 
@@ -143,7 +182,7 @@ class PayPalPaymentProviderService extends AbstractPaymentProvider<PayPalOptions
 
       // Extract approval URL from links
       const approvalUrl = order.links?.find(
-        (link) => link.rel === "approve"
+        (link: { rel?: string; href?: string }) => link.rel === "approve"
       )?.href
 
       return {
@@ -460,9 +499,9 @@ class PayPalPaymentProviderService extends AbstractPaymentProvider<PayPalOptions
   }
 
   async getWebhookActionAndData(
-    input: WebhookActionInput
-  ): Promise<WebhookActionOutput> {
-    const { payload } = input
+    input: ProviderWebhookPayload["payload"]
+  ): Promise<WebhookActionResult> {
+    const payload = input?.rawData
 
     // Parse webhook payload
     const event = typeof payload === "string" ? JSON.parse(payload) : payload
@@ -476,7 +515,7 @@ class PayPalPaymentProviderService extends AbstractPaymentProvider<PayPalOptions
           action: "captured",
           data: {
             session_id: event?.resource?.custom_id,
-            capture_id: event?.resource?.id,
+            amount: event?.resource?.amount?.value,
           },
         }
       case "PAYMENT.AUTHORIZATION.CREATED":
@@ -484,28 +523,32 @@ class PayPalPaymentProviderService extends AbstractPaymentProvider<PayPalOptions
           action: "authorized",
           data: {
             session_id: event?.resource?.custom_id,
-            authorization_id: event?.resource?.id,
+            amount: event?.resource?.amount?.value,
           },
         }
       case "PAYMENT.CAPTURE.REFUNDED":
         return {
-          action: "refunded",
+          action: "not_supported",
           data: {
             session_id: event?.resource?.custom_id,
-            refund_id: event?.resource?.id,
+            amount: event?.resource?.amount?.value,
           },
         }
       case "PAYMENT.AUTHORIZATION.VOIDED":
         return {
-          action: "canceled",
+          action: "not_supported",
           data: {
             session_id: event?.resource?.custom_id,
+            amount: event?.resource?.amount?.value,
           },
         }
       default:
         return {
           action: "not_supported",
-          data: {},
+          data: {
+            session_id: "",
+            amount: 0,
+          },
         }
     }
   }

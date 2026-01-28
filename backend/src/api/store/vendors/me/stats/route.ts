@@ -82,9 +82,9 @@ export async function GET(
           totalRevenue += orderVendorRevenue
 
           // Track order status
-          if (order.fulfillment_status === "fulfilled" || order.status === "completed") {
+          if ((order as any).fulfillment_status === "fulfilled" || order.status === "completed") {
             completedOrders++
-          } else if (order.status === "pending" || order.fulfillment_status === "not_fulfilled") {
+          } else if (order.status === "pending" || (order as any).fulfillment_status === "not_fulfilled") {
             pendingOrders++
           }
         }

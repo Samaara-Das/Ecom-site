@@ -1,6 +1,7 @@
 import { ExecArgs, Logger } from "@medusajs/framework/types"
 import { VENDOR_MODULE } from "../modules/vendor"
 import { Modules } from "@medusajs/framework/utils"
+import type VendorModuleService from "../modules/vendor/service"
 
 /**
  * Seed script for demo vendors
@@ -8,14 +9,25 @@ import { Modules } from "@medusajs/framework/utils"
  */
 export default async function seedVendors({ container }: ExecArgs) {
   const logger = container.resolve<Logger>("logger")
-  const vendorService = container.resolve(VENDOR_MODULE)
+  const vendorService = container.resolve<VendorModuleService>(VENDOR_MODULE)
   const linkService = container.resolve("link")
   const productService = container.resolve(Modules.PRODUCT)
 
   logger.info("Seeding demo vendors...")
 
   // Demo vendors for Kuwait Marketplace
-  const vendorData = [
+  const vendorData: Array<{
+    name: string
+    email: string
+    phone: string
+    description: string
+    status: "pending" | "verified" | "premium" | "suspended"
+    business_registration: string
+    city: string
+    postal_code: string
+    country_code: string
+    commission_rate: number
+  }> = [
     {
       name: "Ahmed's Electronics",
       email: "ahmed@electronics.kw",

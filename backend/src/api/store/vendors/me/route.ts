@@ -119,10 +119,11 @@ export async function PATCH(
     if (city !== undefined) updateData.city = city
     if (postal_code !== undefined) updateData.postal_code = postal_code
 
-    const [updatedVendor] = await vendorService.updateVendors(
+    const updatedVendors = await vendorService.updateVendors(
       { id: vendor.id },
       updateData
     )
+    const updatedVendor = Array.isArray(updatedVendors) ? updatedVendors[0] : updatedVendors
 
     logger.info(`Vendor profile updated: ${vendor.id}`)
 
