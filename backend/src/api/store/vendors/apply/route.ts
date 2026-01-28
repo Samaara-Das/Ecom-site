@@ -1,6 +1,7 @@
 import type { MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
 import type { Logger } from "@medusajs/framework/types"
 import { VENDOR_MODULE } from "../../../../modules/vendor"
+import type VendorModuleService from "../../../../modules/vendor/service"
 
 interface VendorApplicationBody {
   name: string
@@ -24,7 +25,7 @@ export async function POST(
   const logger = req.scope.resolve<Logger>("logger")
 
   try {
-    const vendorService = req.scope.resolve(VENDOR_MODULE)
+    const vendorService = req.scope.resolve<VendorModuleService>(VENDOR_MODULE)
 
     const {
       name,
@@ -111,7 +112,7 @@ export async function GET(
       })
     }
 
-    const vendorService = req.scope.resolve(VENDOR_MODULE)
+    const vendorService = req.scope.resolve<VendorModuleService>(VENDOR_MODULE)
     const vendor = await vendorService.findVendorByEmail(email)
 
     if (!vendor) {

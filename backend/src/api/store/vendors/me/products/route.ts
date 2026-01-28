@@ -2,6 +2,7 @@ import type { MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
 import type { Logger } from "@medusajs/framework/types"
 import { Modules } from "@medusajs/framework/utils"
 import { VENDOR_MODULE } from "../../../../../modules/vendor"
+import type VendorModuleService from "../../../../../modules/vendor/service"
 
 /**
  * GET /store/vendors/me/products
@@ -23,7 +24,7 @@ export async function GET(
       })
     }
 
-    const vendorService = req.scope.resolve(VENDOR_MODULE)
+    const vendorService = req.scope.resolve<VendorModuleService>(VENDOR_MODULE)
     const vendor = await vendorService.findVendorByEmail(email)
 
     if (!vendor) {
@@ -122,7 +123,7 @@ export async function POST(
       })
     }
 
-    const vendorService = req.scope.resolve(VENDOR_MODULE)
+    const vendorService = req.scope.resolve<VendorModuleService>(VENDOR_MODULE)
     const vendor = await vendorService.findVendorByEmail(email)
 
     if (!vendor) {
