@@ -1,64 +1,67 @@
 # Task Context Tracker
 
 **Last Updated**: 2026-01-27
-**Current Task**: Implementing Hybrid Approach - Medusa Starter Storefront with existing backend
+**Current Task**: Kuwait Marketplace MVP - Final verification pending
 
 ---
 
 ## Task Progress Summary
 
-### Completed Tasks
-- Created PRD for Kuwait marketplace (`prd.md`)
-- Set up Medusa v2 skill (`.claude/skills/medusa/`)
-- Set up PRD Builder skill (`.claude/skills/prd-builder/`)
-- Added context7 MCP for documentation lookup
-- Set up context preservation system (context-preservation-guide.md, slash commands, task-context.md)
-- **Created Senior Frontend Developer skill** (`.claude/skills/senior-developer/`)
-- **Created 70 atomic tasks in Task Master AI** for Kuwait Marketplace implementation
-- **Fixed backend startup errors and got demo running** (2026-01-26)
-- **Ran Ralphy verification tasks** (V-1 through V-10) with E2E tests
-- **Merged 4 unmerged Ralphy branches** (V-3, V-8, V-9, V-10) on 2026-01-27
-- **Fixed admin panel blank page** - Installed missing `@medusajs/admin-sdk` dependency
-- **Fixed storefront console error** - Updated ProductGrid.tsx to handle missing API key gracefully
+### ✅ Completed (33/35 tasks - 94%)
 
-### In Progress Tasks
-- **Hybrid Storefront Migration**: Replace current storefront with Medusa Next.js Starter while keeping backend
-  - ✅ Task #1: Cleaned up 25 Ralphy git worktrees
-  - ✅ Task #2: Cloned Medusa Next.js Starter into `storefront-v2/`
-  - ✅ Task #3: Configured storefront-v2 environment (.env.local, CORS)
-  - ✅ Task #4: Storefront-v2 running and connected to backend
-  - ✅ Task #9: Ported Kuwait branding (store name, hero, footer, metadata)
-  - ✅ Task #10: Configured KWD as default currency
-  - ✅ Task #11: Connected OTP auth UI to backend service
-  - ✅ Task #14: Set up i18n framework (next-intl with EN/AR)
-  - ✅ Task #27: API TEST - Products endpoint verified
-  - ✅ Task #28: API TEST - Cart operations verified
-  - ✅ Task #31: API TEST - Regions and currency APIs verified
-  - ✅ Task #32: Configured stock location for sales channel
-    - Created "Kuwait Warehouse" stock location
-    - Connected to Default Sales Channel
-    - Added Manual fulfillment provider
-    - Created "Kuwait Shipping Zone" service zone
-  - ✅ Task #16: Implemented RTL layout support
-    - HTML dir attribute based on locale
-    - RTL-specific CSS styles in globals.css
-    - Noto Sans Arabic font integration
-    - LocaleSwitcher component in navigation
-  - 🔄 **Swarm Mode Active** - Team: `kuwait-marketplace-v2`
-    - **arabic-translator**: Task #15 (Arabic translations)
-    - **paypal-integration**: Task #13 (PayPal payment provider)
-    - **playwright-verifier**: Tasks #5, #8 (Verification tests)
-    - **api-tester**: Tasks #29, #30 (API tests)
-  - Created `backend/src/scripts/seed-shipping-options.ts` for shipping options
-  - ✅ Task #33: Verified cart add-to-cart works with shipping options
-  - ✅ Task #6: Cart functionality works end-to-end (API verified)
-  - ✅ Task #5: Homepage loads with products (Playwright verified)
-  - ✅ Task #34: Homepage loads with products (verified)
-  - ✅ Task #35: Product detail page works (verified)
-  - 26 of 35 tasks completed (74%)
+#### Phase 1: Setup & Configuration
+- ✅ Task #1: Cleaned up 25 Ralphy git worktrees
+- ✅ Task #2: Cloned Medusa Next.js Starter into `storefront-v2/`
+- ✅ Task #3: Configured storefront-v2 environment (.env.local, CORS)
+- ✅ Task #4: Storefront-v2 running and connected to backend
 
-### Pending Tasks
-- **Post-Demo Tasks** (`tasks.yaml`): 50+ tasks for full implementation (renamed from tasks-post-demo.yaml)
+#### Phase 2: Kuwait Branding & Localization
+- ✅ Task #9: Ported Kuwait branding (store name, hero, footer, metadata)
+- ✅ Task #10: Configured KWD as default currency
+- ✅ Task #14: Set up i18n framework (next-intl with EN/AR)
+- ✅ Task #15: Added Arabic translations
+- ✅ Task #16: Implemented RTL layout support
+
+#### Phase 3: Authentication & Payments
+- ✅ Task #11: Connected OTP auth UI to backend service
+- ✅ Task #12: Added Razorpay payment provider
+- ✅ Task #13: Added PayPal payment provider
+
+#### Phase 4: Multi-Vendor Marketplace
+- ✅ Task #17: Extend cart to group items by vendor
+- ✅ Task #18: Build vendor registration flow
+- ✅ Task #19: Create vendor dashboard
+- ✅ Task #20: Build vendor product management
+- ✅ Task #21: Build vendor order management
+- ✅ Task #22: Create admin vendor approval system
+
+#### Phase 5: Infrastructure
+- ✅ Task #23: Swap storefront directories (`storefront-v2/` → `storefront/`)
+- ✅ Task #24: Update documentation and CI/CD
+- ✅ Task #32: Configured stock location for sales channel
+
+#### API & Integration Tests
+- ✅ Task #27: API TEST - Products endpoint verified
+- ✅ Task #28: API TEST - Cart operations verified
+- ✅ Task #29: API TEST - Checkout flow APIs
+- ✅ Task #30: API TEST - Customer authentication APIs
+- ✅ Task #31: API TEST - Regions and currency APIs
+- ✅ Task #33: Verified cart add-to-cart with shipping options
+- ✅ Task #34: Verified homepage loads with products
+- ✅ Task #35: Verified product detail page works
+
+#### Playwright Verification
+- ✅ Task #5: VERIFY - Homepage loads with products
+- ✅ Task #6: VERIFY - Cart functionality works end-to-end
+- ✅ Task #7: VERIFY - Checkout flow completes
+- ✅ Task #8: VERIFY - User registration and login
+
+### 🔄 Pending Verification (2 tasks)
+- Task #25: VERIFY - Full E2E test suite passes
+- Task #26: VERIFY - Admin panel functionality (Playwright)
+
+### Post-MVP Tasks
+- **`tasks.yaml`**: 50+ tasks for full production implementation
 
 ---
 
@@ -219,6 +222,9 @@ Attempted to start services for demo testing:
 | Publishable API key | Required for store API | Add `x-publishable-api-key` header or use env var |
 | Ralphy branch naming | Auto-generated format | `ralphy/agent-{N}-{timestamp}-{id}-{task-name}` |
 | Git conflict resolution | progress.txt conflicts | Keep all sections, remove conflict markers |
+| **ALWAYS run lint/tsc** | After writing any code | `npm run lint` and `npx tsc --noEmit` to catch errors early |
+| Custom Input component | Storefront forms | Use `@modules/common/components/input` with `label` prop, not @medusajs/ui Input |
+| Medusa module pattern | Custom modules | Model → Service → Module(name, {service}) → medusa-config.ts |
 
 ---
 
