@@ -1,3 +1,52 @@
+## Project Documentation Reference
+
+**Always consult these docs during development and planning.** Located in `/docs`:
+
+| Document | When to Use |
+|----------|-------------|
+| **PRD.md** | Understanding features, user stories, acceptance criteria, priority levels |
+| **TECHNICAL_SPEC.md** | Architecture decisions, tech stack details, security requirements |
+| **API_REFERENCE.md** | Building/consuming APIs, endpoint signatures, request/response formats |
+| **DATA_MODELS.md** | Database schema, entity relationships, field types, migrations |
+| **INTEGRATION_GUIDE.md** | Setting up Stripe, PayPal, Twilio, S3, Redis; webhook configs |
+| **DEPLOYMENT.md** | Environment setup, Docker, CI/CD, environment variables checklist |
+| **UI_UX_SPEC.md** | Component patterns, layouts, responsive design, RTL/Arabic, accessibility |
+| **IMPLEMENTATION_GUIDE.md** | Code patterns, Medusa module creation, testing, troubleshooting |
+| **ROADMAP.md** | Outstanding issues, planned features, priorities, timeline |
+
+### Quick Reference by Task Type
+
+**Adding a feature?** → PRD.md (requirements) → TECHNICAL_SPEC.md (architecture) → IMPLEMENTATION_GUIDE.md (patterns)
+
+**Building an API endpoint?** → API_REFERENCE.md (existing patterns) → DATA_MODELS.md (schema)
+
+**Working on UI?** → UI_UX_SPEC.md (components, layouts) → IMPLEMENTATION_GUIDE.md (storefront patterns)
+
+**Setting up integrations?** → INTEGRATION_GUIDE.md (step-by-step) → DEPLOYMENT.md (env vars)
+
+**Debugging issues?** → IMPLEMENTATION_GUIDE.md (troubleshooting) → ROADMAP.md (known issues)
+
+**Planning work?** → ROADMAP.md (priorities) → PRD.md (scope)
+
+### Keeping Docs Current
+
+**Update documentation when the project changes.** After significant changes:
+
+| Change Type | Update These Docs |
+|-------------|-------------------|
+| New API endpoint | API_REFERENCE.md |
+| Database schema change | DATA_MODELS.md |
+| New integration added | INTEGRATION_GUIDE.md |
+| New feature implemented | PRD.md, ROADMAP.md |
+| UI component added/changed | UI_UX_SPEC.md |
+| New pattern established | IMPLEMENTATION_GUIDE.md |
+| Bug fixed / issue resolved | ROADMAP.md |
+| Environment config changed | DEPLOYMENT.md |
+
+**Rule**: If you add, remove, or significantly modify something, update the relevant doc before closing the task.
+
+---
+
 ## Context Preservation System
 
 This project uses a context preservation system to maintain continuity across sessions.
