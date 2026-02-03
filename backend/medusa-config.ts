@@ -30,14 +30,29 @@ export default defineConfig({
     {
       resolve: "./src/modules/vendor",
     },
-    // PayPal Payment Provider
-    // Uncomment when PAYPAL_CLIENT_ID and PAYPAL_CLIENT_SECRET are configured
-    ...(process.env.PAYPAL_CLIENT_ID && process.env.PAYPAL_CLIENT_SECRET
-      ? [
-          {
-            resolve: "@medusajs/medusa/payment",
-            options: {
-              providers: [
+    // Payment Providers (Stripe and PayPal)
+    // Stripe is enabled when STRIPE_API_KEY is set
+    // PayPal is enabled when PAYPAL_CLIENT_ID and PAYPAL_CLIENT_SECRET are set
+    {
+      resolve: "@medusajs/medusa/payment",
+      options: {
+        providers: [
+          // Stripe Payment Provider
+          ...(process.env.STRIPE_API_KEY
+            ? [
+                {
+                  resolve: "@medusajs/medusa/payment-stripe",
+                  id: "stripe",
+                  options: {
+                    apiKey: process.env.STRIPE_API_KEY,
+                    webhookSecret: process.env.STRIPE_WEBHOOK_SECRET,
+                  },
+                },
+              ]
+            : []),
+          // PayPal Payment Provider
+          ...(process.env.PAYPAL_CLIENT_ID && process.env.PAYPAL_CLIENT_SECRET
+            ? [
                 {
                   resolve: "./src/modules/paypal",
                   id: "paypal",
@@ -49,11 +64,11 @@ export default defineConfig({
                     webhook_id: process.env.PAYPAL_WEBHOOK_ID,
                   },
                 },
-              ],
-            },
-          },
-        ]
-      : []),
+              ]
+            : []),
+        ],
+      },
+    },
     // Redis modules for production (uncomment when REDIS_URL is configured)
     // {
     //   resolve: "@medusajs/medusa/cache-redis",

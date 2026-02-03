@@ -12,7 +12,7 @@
  */
 
 import { ContainerRegistrationKeys, Modules } from "@medusajs/framework/utils"
-import { createProductsWorkflow } from "@medusajs/medusa/core-flows"
+import { createProductsWorkflow, createInventoryLevelsWorkflow } from "@medusajs/medusa/core-flows"
 
 // Types for our product data structure
 interface ProductVariantData {
@@ -1655,6 +1655,117 @@ export default async function seedProducts({ container }: { container: any }) {
   } else {
     logger.info("All products seeded successfully!")
   }
+
+  // === SEED INVENTORY LEVELS ===
+  // After products are created, we need to create inventory levels
+  // to make products purchasable (show "In Stock")
+  logger.info("")
+  logger.info("=".repeat(50))
+  logger.info("Seeding Inventory Levels")
+  logger.info("=".repeat(50))
+
+  try {
+    // Get stock locations (e.g., "Kuwait Warehouse")
+    const { data: stockLocations } = await query.graph({
+      entity: "stock_location",
+      fields: ["id", "name"],
+    })
+
+    if (!stockLocations || stockLocations.length === 0) {
+      logger.warn("No stock locations found - skipping inventory levels creation")
+      logger.warn("Please create a stock location in the admin panel first")
+    } else {
+      const stockLocation = stockLocations[0]
+      logger.info(`Using stock location: ${stockLocation.name} (${stockLocation.id})`)
+
+      // Get all inventory items (created automatically with product variants)
+      const { data: inventoryItems } = await query.graph({
+        entity: "inventory_item",
+        fields: ["id", "sku"],
+      })
+
+      if (!inventoryItems || inventoryItems.length === 0) {
+        logger.warn("No inventory items found - skipping inventory levels creation")
+      } else {
+        logger.info(`Found ${inventoryItems.length} inventory items to stock`)
+
+        // Get existing inventory levels to avoid duplicates
+        const { data: existingLevels } = await query.graph({
+          entity: "inventory_level",
+          fields: ["id", "inventory_item_id", "location_id"],
+        })
+
+        // Create a set of existing inventory_item_id + location_id combinations
+        const existingLevelKeys = new Set(
+          (existingLevels || []).map(
+            (level: { inventory_item_id: string; location_id: string }) =>
+              `${level.inventory_item_id}:${level.location_id}`
+          )
+        )
+
+        logger.info(`Found ${existingLevels?.length || 0} existing inventory levels`)
+
+        // Create a map of SKU to desired quantity from our product data
+        const skuQuantityMap = new Map<string, number>()
+        for (const product of sampleProducts) {
+          for (const variant of product.variants) {
+            skuQuantityMap.set(variant.sku, variant.inventory_quantity || 75)
+          }
+        }
+
+        // Build inventory levels data, excluding items that already have levels at this location
+        const inventoryLevels = inventoryItems
+          .filter((item) => !existingLevelKeys.has(`${item.id}:${stockLocation.id}`))
+          .map((item) => {
+            // Get the quantity from our map, or default to 75
+            const quantity = skuQuantityMap.get(item.sku) || 75
+            return {
+              inventory_item_id: item.id,
+              location_id: stockLocation.id,
+              stocked_quantity: quantity,
+            }
+          })
+
+        if (inventoryLevels.length === 0) {
+          logger.info("All inventory items already have stock levels - skipping")
+        } else {
+          logger.info(`Creating ${inventoryLevels.length} new inventory levels...`)
+
+          // Use the workflow to create inventory levels
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          await createInventoryLevelsWorkflow(container).run({
+            input: {
+              inventory_levels: inventoryLevels,
+            },
+          } as any)
+
+          logger.info(`✓ Created inventory levels for ${inventoryLevels.length} items`)
+
+          // Log some examples
+          const sampleLevels = inventoryLevels.slice(0, 3)
+          sampleLevels.forEach((level) => {
+            const item = inventoryItems.find((i) => i.id === level.inventory_item_id)
+            logger.info(`  - ${item?.sku || level.inventory_item_id}: ${level.stocked_quantity} units`)
+          })
+          if (inventoryLevels.length > 3) {
+            logger.info(`  ... and ${inventoryLevels.length - 3} more items`)
+          }
+        }
+      }
+    }
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : String(error)
+    logger.error(`Failed to create inventory levels: ${errorMessage}`)
+    if (error instanceof Error && error.stack) {
+      logger.debug(error.stack)
+    }
+  }
+
+  // Final Summary
+  logger.info("")
+  logger.info("=".repeat(50))
+  logger.info("Seeding Complete!")
+  logger.info("=".repeat(50))
 
   // Return summary for potential programmatic use
   return {
