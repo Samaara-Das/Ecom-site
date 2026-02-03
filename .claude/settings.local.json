@@ -21,7 +21,13 @@
       "WebSearch",
       "Bash(git worktree:*)",
       "Bash(curl:*)",
-      "Bash(git add:*)"
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git push)",
+      "Bash(node -e:*)",
+      "Bash(/c/nvm4w/nodejs/npm.cmd install @paypal/paypal-server-sdk)",
+      "Bash(git diff:*)",
+      "Bash(git rm:*)"
     ],
     "deny": [
       "Bash(rm -rf /*)",

@@ -1,7 +1,7 @@
 # Task Context Tracker
 
 **Last Updated**: 2026-01-28
-**Current Task**: Kuwait Marketplace MVP - Final verification pending
+**Current Task**: Storefront fixes - Missing routes, inventory, payment, navigation
 
 ---
 
@@ -249,6 +249,11 @@ Attempted to start services for demo testing:
 | Admin user not created | ✅ Resolved | Admin user created successfully |
 | Publishable API key not configured | Known limitation | Demo uses mock products; configure key for real products |
 | ~20 unmerged feature branches | Deferred | Non-verification branches with features like OAuth, i18n, vendor module |
+| `/kw/account/profile` 404 | **NEW** | Task #1 - Route not implemented |
+| `/kw/account/addresses` 404 | **NEW** | Task #2 - Route not implemented |
+| All products out of stock | **NEW** | Task #3 - Need to seed inventory |
+| Only Manual Payment available | **NEW** | Task #4 - Need Stripe configuration |
+| Navigation auto-redirects | **NEW** | Task #5 - Investigate redirect issues |
 
 ---
 
@@ -306,20 +311,24 @@ task-master set-status --id=<id> --status=done          # Mark task complete
 
 ## Next Steps
 
-### Immediate (Hybrid Storefront Migration)
-1. Clone Medusa Next.js Starter into `storefront-v2/`
-2. Connect to existing Medusa backend (port 9000)
-3. Verify products, cart, checkout work
-4. Test Stripe payment flow
-5. Port Kuwait branding from current storefront
+### Immediate (Storefront Fixes from Verification)
+1. **Task #1**: Implement `/kw/account/profile` route (returns 404)
+2. **Task #2**: Implement `/kw/account/addresses` route (returns 404)
+3. **Task #3**: Seed products with inventory stock (all show "Out of stock")
+4. **Task #4**: Configure Stripe payment provider (only Manual Payment available)
+5. **Task #5**: Investigate and fix navigation redirects
+6. **Task #6**: Verify all fixes with Playwright (blocked by #1-5)
 
-### After Storefront Migration
-1. Configure KWD as default currency
-2. Add Razorpay and PayPal payment providers
-3. Connect Phone OTP auth to existing backend service
-4. Set up i18n for Arabic translations
-5. Implement RTL layout support
-6. Build multi-vendor features (cart grouping, vendor portal, registration)
+### Recommended Execution Strategy
+- **Phase 1**: Single agent investigates Task #5 (redirect issues may affect other tasks)
+- **Phase 2**: 4 background agents in parallel for Tasks #1-4 (independent work)
+- **Phase 3**: Single agent for Task #6 verification
+
+### Post-Fixes
+1. Add PayPal payment provider
+2. Configure real Stripe API keys for production
+3. Add more product inventory variety
+4. Implement full account management features
 
 ---
 
@@ -504,3 +513,70 @@ Admin panel tests fail because port 9000 (backend) is not accessible when Playwr
 #### Progress Update
 - **37 of 37 tasks completed (100%)**
 - Tasks #25 and #26 unblocked - test infrastructure now in place
+
+---
+
+### 2026-01-28: Comprehensive Storefront Verification Session
+
+**Goal**: Run comprehensive feature verification across all storefront pages using Playwright MCP and 4-agent swarm
+
+#### Execution Strategy
+Used a 4-agent swarm running in parallel:
+- **agent-1-nav-store**: Navigation, Layout, Homepage, Store (9 tasks)
+- **agent-2-product-cart**: Product Pages, Cart Functionality (10 tasks)
+- **agent-3-checkout-auth**: Checkout Flow, Authentication (11 tasks)
+- **agent-4-account-vendor**: Account Management, Vendor Portal (9 tasks)
+
+#### Verification Results Summary
+
+| Category | Passed | Failed | Partial | Total |
+|----------|--------|--------|---------|-------|
+| Navigation & Layout | 5 | 0 | 0 | 5 |
+| Homepage & Store | 4 | 0 | 0 | 4 |
+| Product Pages | 3 | 0 | 2 | 5 |
+| Cart Functionality | 5 | 0 | 0 | 5 |
+| Checkout Flow | 5 | 0 | 1 | 6 |
+| Authentication | 4 | 0 | 1 | 5 |
+| Account Management | 2 | **2** | 0 | 4 |
+| Vendor Portal | 5 | 0 | 0 | 5 |
+| **TOTAL** | **33** | **2** | **4** | **39** |
+
+#### Critical Issues Found
+
+1. **`/kw/account/profile` returns 404** - Profile page not implemented
+2. **`/kw/account/addresses` returns 404** - Address book page not implemented
+
+#### Notable Issues (Partial)
+
+1. **All products show "Out of stock"** - Cannot test full add-to-cart flow
+2. **Payment options limited** - Only "Manual Payment" available (no Stripe/PayPal)
+3. **Image gallery non-interactive** - No thumbnail click-to-change functionality
+4. **Frequent auto-navigation** - Site has client-side redirects causing test instability
+
+#### Features Verified Working
+
+- **Navigation**: Header, footer, language toggle (EN/AR), mobile menu
+- **Store**: Product grid, sorting (Latest/Price), pagination
+- **Product Pages**: Title, description, price, images, variant selection
+- **Cart**: Item display, quantity selector, remove button, summary
+- **Checkout**: Shipping form, delivery options, payment selection, order review, place order
+- **Auth**: Login form, phone OTP option, registration form
+- **Vendor Portal**: Become a seller form, auth gates on dashboard/products/orders
+
+#### Screenshots Captured
+Located in `.playwright-mcp/`:
+- `verification-homepage.png`
+- `verification-menu-open.png`
+- `verification-cart.png`
+- `verification-checkout-review.png`
+- `verification-register-form.png`
+- `verification-become-seller.png`
+
+#### Follow-up Tasks Created
+6 new tasks created to address issues found:
+- #1: Implement /kw/account/profile route
+- #2: Implement /kw/account/addresses route
+- #3: Seed products with inventory stock
+- #4: Configure Stripe payment provider
+- #5: Investigate and fix navigation redirects
+- #6: Verify fixes with Playwright (blocked by #1-5)
