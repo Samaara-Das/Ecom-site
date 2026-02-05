@@ -1,0 +1,42 @@
+Notes to discuss in meeting
+
+
+ Development Timeline                                                                                                                                                              
+  - First commit: January 24, 2026                                                                                                                                               
+  - Build completed: January 30, 2026
+  - Total duration: 7 days with 2-4 hours a day
+
+  ---
+  Technologies Used
+
+  Frontend (Storefront)
+
+  - Next.js: v15.3.9 (with Turbopack)
+  - React: v19.0.4
+  - TypeScript: v5.3.2
+  - Tailwind CSS: v3.x
+  - Medusa UI: latest
+  - next-intl: v4.7.0 (i18n/RTL support)
+
+  Backend
+
+  - Medusa: v2.0.0 (headless commerce)
+  - TypeScript: v5.9.3
+  - Twilio: v5.12.0 (SMS/OTP)
+  - PayPal SDK: v1.0.0
+  - Stripe: integrated
+
+  Database & Cache
+
+  - PostgreSQL: 14+
+  - Redis: 7+
+
+  Testing
+
+  - Vitest: v2.1.9 (218 unit tests)
+  - Playwright: v1.48.0 (E2E tests)
+
+ 
+- Layout and UI must be specified
+
+- Please fill out this requirements google doc: https://docs.google.com/document/d/1mYl5vknH3NsCVlCQzbkiteOU7KmAdXn6H8Y_NYZFZJ4/edit?usp=sharing
