@@ -1,0 +1,87 @@
+# Dependencies - NPM/Yarn
+node_modules/
+.pnp/
+.pnp.js
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# Package Manager Cache and Configs
+.yarn/
+.yarnrc.yml
+.npmrc
+
+# Build Outputs
+.next/
+dist/
+build/
+out/
+
+# Environment Files (Sensitive)
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+.env.example
+.env.template
+.env.docker
+
+# Application Cache
+.medusa/
+.cache/
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+npm_install.log
+npm-install.log
+dev-debug.log
+
+# Testing
+coverage/
+.pytest_cache/
+playwright-report/
+test-results/
+
+# IDE and Editors
+.idea/
+.vscode/
+.claude/
+*.swp
+*.swo
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# OS Specific
+.DS_Store
+Thumbs.db
+
+# Version Control
+.git/
+
+# Project-Specific
+.ralphy/
+.ralphy-worktrees/
+
+# Turbo/Build System Cache
+.turbo/
+turbo-build.log
+
+# TypeScript
+*.tsbuildinfo
+
+# Vercel
+.vercel/
+
+# Docker Related
+docker/postgres/
+
+# Misc
+uploads/
