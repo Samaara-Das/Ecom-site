@@ -5,6 +5,7 @@ import { HttpTypes } from "@medusajs/types"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import Thumbnail from "../thumbnail"
 import PreviewPrice from "./price"
+import SocialProofBadge from "@/components/product/SocialProofBadge"
 
 export default async function ProductPreview({
   product,
@@ -45,6 +46,12 @@ export default async function ProductPreview({
             {cheapestPrice && <PreviewPrice price={cheapestPrice} />}
           </div>
         </div>
+        <SocialProofBadge
+          handle={product.handle ?? ""}
+          showOverlayBadges={true}
+          showMetrics={true}
+          className="mt-1"
+        />
       </div>
     </LocalizedClientLink>
   )

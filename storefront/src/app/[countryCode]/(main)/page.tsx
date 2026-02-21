@@ -1,41 +1,60 @@
 import { Metadata } from "next"
 
-import FeaturedProducts from "@modules/home/components/featured-products"
-import Hero from "@modules/home/components/hero"
-import { listCollections } from "@lib/data/collections"
-import { getRegion } from "@lib/data/regions"
+import HeroBannerCarousel from "@/components/home/HeroBannerCarousel"
+import CategoryShortcuts from "@/components/home/CategoryShortcuts"
+import DealTilesGrid from "@/components/home/DealTilesGrid"
+import ProductCarousel from "@/components/home/ProductCarousel"
+import VendorSpotlight from "@/components/home/VendorSpotlight"
 
 export const metadata: Metadata = {
-  title: "Kuwait Marketplace",
+  title: "Kuwait Marketplace — Shop Electronics, Fashion, Beauty & More",
   description:
-    "Discover quality products from trusted vendors across Kuwait. Shop electronics, fashion, home goods, and more.",
+    "Discover quality products from 12+ trusted vendors across Kuwait. Shop Samsung, Apple, Nike, and local Kuwaiti brands. Fast delivery, KWD pricing.",
 }
 
-export default async function Home(props: {
-  params: Promise<{ countryCode: string }>
-}) {
-  const params = await props.params
-
-  const { countryCode } = params
-
-  const region = await getRegion(countryCode)
-
-  const { collections } = await listCollections({
-    fields: "id, handle, title",
-  })
-
-  if (!collections || !region) {
-    return null
-  }
-
+export default async function Home() {
   return (
-    <>
-      <Hero />
-      <div className="py-12">
-        <ul className="flex flex-col gap-x-6">
-          <FeaturedProducts collections={collections} region={region} />
-        </ul>
+    <div className="bg-[#131921] min-h-screen">
+      {/* Section B — Hero Carousel */}
+      <HeroBannerCarousel />
+
+      {/* Section C — Category Shortcuts */}
+      <CategoryShortcuts />
+
+      {/* Section D — Deal Tiles */}
+      <DealTilesGrid />
+
+      {/* Divider */}
+      <div className="max-w-7xl mx-auto px-4">
+        <div className="border-t border-[#2d3748]" />
       </div>
-    </>
+
+      {/* Section E1 — Bestsellers in Electronics */}
+      <ProductCarousel
+        title="Bestsellers in Electronics"
+        category="electronics"
+        seeAllHref="/store"
+      />
+
+      {/* Section E2 — Fashion Picks */}
+      <ProductCarousel
+        title="Fashion Picks"
+        category="fashion"
+        seeAllHref="/store"
+      />
+
+      {/* Section F — Vendor Spotlight */}
+      <VendorSpotlight />
+
+      {/* Section G — Deals of the Day */}
+      <ProductCarousel
+        title="Deals of the Day"
+        category="deals"
+        seeAllHref="/store"
+      />
+
+      {/* Bottom padding */}
+      <div className="pb-16" />
+    </div>
   )
 }
