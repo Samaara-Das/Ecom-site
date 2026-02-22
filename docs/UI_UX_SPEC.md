@@ -1082,11 +1082,63 @@ storefront/src/
 
 ---
 
+## 7. Static Info Pages
+
+Added 2026-02-22. All pages use the dark storefront theme (`bg-[#131921] text-white`) with `max-w-4xl mx-auto px-4 py-12` content container.
+
+| Route | File | Type | Description |
+|-------|------|------|-------------|
+| `/[countryCode]/contact` | `app/[countryCode]/(main)/contact/page.tsx` | `"use client"` | Two-column: contact info card + send-message form with success state |
+| `/[countryCode]/faq` | `app/[countryCode]/(main)/faq/page.tsx` | `"use client"` | Accordion with 10 Q&As (orders, payments, returns, shipping, vendor topics) |
+| `/[countryCode]/shipping` | `app/[countryCode]/(main)/shipping/page.tsx` | Server component | Fee cards + 6-governorate delivery zones table + tracking steps |
+| `/[countryCode]/customer-service` | `app/[countryCode]/(main)/customer-service/page.tsx` | Server component | Hub with stats bar + 4 service cards linking to FAQ/Contact/Shipping/Returns |
+
+### Contact Form Pattern
+
+The contact form (`contact/page.tsx`) uses local `useState` for sent state — no backend call is made. On submit it shows a success screen. This pattern avoids needing a backend email endpoint.
+
+---
+
+## 8. Store Filter Components
+
+Added 2026-02-22. Located at `storefront/src/modules/store/components/refinement-list/`.
+
+All three filters use the existing `FilterRadioGroup` component and set URL search params via `setQueryParams` / `setMultipleQueryParams` from `RefinementList`.
+
+### CategoryFilter
+
+**File**: `refinement-list/category-filter/index.tsx`
+
+Options: All Categories, Electronics, Fashion, Health & Beauty, Food & Grocery, Home & Kitchen, Sports, Kids & Toys
+
+Matches against `product.metadata?.category` (case-insensitive). Selecting a category sets the `category` URL param.
+
+### PriceFilter
+
+**File**: `refinement-list/price-filter/index.tsx`
+
+Options: Any Price, Under KWD 10, KWD 10–50, KWD 50–150, KWD 150–500, Over KWD 500
+
+Encodes min/max as a single `"min:max"` string (e.g. `"10:50"`), then splits on decode and sets both `minPrice` and `maxPrice` URL params in a single `router.push` via `setMultipleQueryParams`.
+
+### RatingFilter
+
+**File**: `refinement-list/rating-filter/index.tsx`
+
+Options: Any Rating, 4★ & Up, 3★ & Up. Sets `rating` URL param. Filtered against `SOCIAL_PROOF_CONFIG[handle].rating`.
+
+### Filter Combining
+
+Filters use AND logic — all active filters must pass for a product to appear. When any filter is active, a "✕ Clear all filters" button appears at the top of `RefinementList`. The URL is shareable/bookmarkable with all filter state preserved.
+
+---
+
 ## Document History
 
 | Version | Date | Author | Changes |
 |---------|------|--------|---------|
 | 1.0 | 2026-01-30 | System | Initial specification |
+| 1.1 | 2026-02-22 | System | Add static info pages (§7) and store filter components (§8) |
 
 ---
 

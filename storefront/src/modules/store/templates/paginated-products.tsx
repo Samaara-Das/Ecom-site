@@ -39,7 +39,7 @@ function applyClientFilters(
       const kwdPrice = p.variants
         ?.flatMap((v) => v.prices ?? [])
         .find((pr) => pr.currency_code === "kwd")
-      if (!kwdPrice) return true
+      if (!kwdPrice) return false
       const amount = kwdPrice.amount / 1000
       return amount >= min && amount <= max
     })
