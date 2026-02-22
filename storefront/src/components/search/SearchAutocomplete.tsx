@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback } from "react"
 import { useRouter, useParams } from "next/navigation"
+import { expandQuery } from "@lib/search-synonyms"
 
 interface Suggestion {
   handle: string
@@ -29,8 +30,36 @@ const FALLBACK_SUGGESTIONS: Suggestion[] = [
 const MEDUSA_URL = process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL || "http://localhost:9000"
 const PUB_KEY = process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY ?? ""
 
+interface MedusaRawProduct {
+  handle: string
+  title: string
+  metadata?: { category?: string }
+  variants?: Array<{ prices?: Array<{ amount: number; currency_code: string }> }>
+  description?: string
+}
+
 interface SearchAutocompleteProps {
   category: string
+}
+
+function formatPrice(
+  prices?: Array<{ amount: number; currency_code: string }>
+): string {
+  if (!prices || prices.length === 0) return ""
+  const kwd = prices.find((p) => p.currency_code === "kwd")
+  if (kwd) {
+    return `KWD ${(kwd.amount / 1000).toFixed(3)}`
+  }
+  return ""
+}
+
+function toSuggestion(p: MedusaRawProduct): Suggestion {
+  return {
+    handle: p.handle,
+    title: p.title,
+    category: (p.metadata?.category as string) ?? "Product",
+    price: formatPrice(p.variants?.[0]?.prices),
+  }
 }
 
 export default function SearchAutocomplete({ category }: SearchAutocompleteProps) {
@@ -54,33 +83,52 @@ export default function SearchAutocomplete({ category }: SearchAutocompleteProps
     setLoading(true)
 
     try {
+      // First: try exact title search via Medusa q= param
       const url = `${MEDUSA_URL}/store/products?q=${encodeURIComponent(q)}&limit=8`
       const res = await fetch(url, {
         headers: { "x-publishable-api-key": PUB_KEY },
         signal: AbortSignal.timeout(2000),
       })
 
-      if (res.ok) {
-        const data = await res.json()
-        const items: Suggestion[] = (data.products ?? []).map(
-          (p: { handle: string; title: string; metadata?: { category?: string }; variants?: Array<{ prices?: Array<{ amount: number; currency_code: string }> }> }) => ({
-            handle: p.handle,
-            title: p.title,
-            category: (p.metadata?.category as string) ?? "Product",
-            price: formatPrice(p.variants?.[0]?.prices),
-          })
-        )
-        setSuggestions(items.slice(0, 8))
-      } else {
-        throw new Error("API unavailable")
+      if (!res.ok) throw new Error("API unavailable")
+
+      const data = await res.json()
+      let items: Suggestion[] = (data.products ?? []).map(toSuggestion)
+
+      // If exact search returned nothing, try semantic expansion
+      if (items.length === 0) {
+        const terms = expandQuery(q)
+        const allRes = await fetch(`${MEDUSA_URL}/store/products?limit=200`, {
+          headers: { "x-publishable-api-key": PUB_KEY },
+          signal: AbortSignal.timeout(3000),
+        })
+        if (allRes.ok) {
+          const allData = await allRes.json()
+          const allProducts: MedusaRawProduct[] = allData.products ?? []
+          items = allProducts
+            .filter((p) => {
+              const title = p.title.toLowerCase()
+              const cat = ((p.metadata?.category as string) ?? "").toLowerCase()
+              const desc = (p.description ?? "").toLowerCase()
+              return terms.some(
+                (t) => title.includes(t) || cat.includes(t) || desc.includes(t)
+              )
+            })
+            .slice(0, 8)
+            .map(toSuggestion)
+        }
       }
+
+      setSuggestions(items.slice(0, 8))
     } catch {
-      // Fallback to local suggestions
-      const lower = q.toLowerCase()
-      const filtered = FALLBACK_SUGGESTIONS.filter(
-        (s) =>
-          s.title.toLowerCase().includes(lower) ||
-          s.category.toLowerCase().includes(lower)
+      // Fallback to local suggestions with synonym expansion
+      const terms = expandQuery(q)
+      const filtered = FALLBACK_SUGGESTIONS.filter((s) =>
+        terms.some(
+          (t) =>
+            s.title.toLowerCase().includes(t) ||
+            s.category.toLowerCase().includes(t)
+        )
       ).slice(0, 8)
       setSuggestions(filtered)
     } finally {
@@ -97,17 +145,6 @@ export default function SearchAutocomplete({ category }: SearchAutocompleteProps
     }
   }, [query, fetchSuggestions])
 
-  function formatPrice(
-    prices?: Array<{ amount: number; currency_code: string }>
-  ): string {
-    if (!prices || prices.length === 0) return ""
-    const kwd = prices.find((p) => p.currency_code === "kwd")
-    if (kwd) {
-      return `KWD ${(kwd.amount / 1000).toFixed(3)}`
-    }
-    return ""
-  }
-
   function navigate(handle: string) {
     setOpen(false)
     setQuery("")
@@ -118,9 +155,9 @@ export default function SearchAutocomplete({ category }: SearchAutocompleteProps
     e.preventDefault()
     if (!query.trim()) return
     setOpen(false)
-    const params = new URLSearchParams({ q: query })
-    if (category && category !== "All") params.set("category", category)
-    router.push(`/${countryCode}/search?${params.toString()}`)
+    const sp = new URLSearchParams({ q: query })
+    if (category && category !== "All") sp.set("category", category)
+    router.push(`/${countryCode}/search?${sp.toString()}`)
   }
 
   return (
@@ -141,7 +178,7 @@ export default function SearchAutocomplete({ category }: SearchAutocompleteProps
         />
         <button
           type="submit"
-          className="bg-[#FF9900] hover:bg-[#e68a00] text-gray-900 font-bold px-4 py-2.5 flex items-center justify-center transition-colors"
+          className="bg-[#FF9900] hover:bg-[#e68a00] text-gray-900 font-bold px-4 py-2.5 flex items-center justify-center transition-colors rounded-r-md"
           aria-label="Search"
           data-testid="search-button"
         >
@@ -149,10 +186,10 @@ export default function SearchAutocomplete({ category }: SearchAutocompleteProps
         </button>
       </form>
 
-      {/* Autocomplete dropdown */}
+      {/* Autocomplete dropdown — z-[100] to escape the sticky nav z-50 context */}
       {open && suggestions.length > 0 && (
         <div
-          className="absolute top-full left-0 right-0 z-50 bg-white border border-gray-200 rounded-b-lg shadow-xl overflow-hidden"
+          className="absolute top-full left-0 right-0 z-[100] bg-white border border-gray-200 rounded-b-lg shadow-xl overflow-hidden"
           data-testid="autocomplete-dropdown"
         >
           {loading && (

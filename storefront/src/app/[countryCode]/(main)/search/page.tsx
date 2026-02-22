@@ -3,6 +3,7 @@ import SearchFilters from "@/components/search/SearchFilters"
 import SearchResultCard, { SearchProduct } from "@/components/search/SearchResultCard"
 import SortDropdown from "@/components/search/SortDropdown"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
+import { expandQuery, scoreMatch } from "@lib/search-synonyms"
 
 const MEDUSA_URL = process.env.MEDUSA_BACKEND_URL ?? "http://localhost:9000"
 const PUB_KEY = process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY ?? ""
@@ -37,9 +38,8 @@ interface MedusaProduct {
 
 async function fetchProducts(query: string): Promise<SearchProduct[]> {
   try {
-    const url = query
-      ? `${MEDUSA_URL}/store/products?q=${encodeURIComponent(query)}&limit=48`
-      : `${MEDUSA_URL}/store/products?limit=48`
+    // Always fetch a broad set; use synonym expansion for client-side relevance
+    const url = `${MEDUSA_URL}/store/products?limit=200`
 
     const res = await fetch(url, {
       headers: { "x-publishable-api-key": PUB_KEY },
@@ -49,7 +49,31 @@ async function fetchProducts(query: string): Promise<SearchProduct[]> {
     if (!res.ok) throw new Error(`API ${res.status}`)
 
     const data = await res.json()
-    return (data.products ?? []).map((p: MedusaProduct) => {
+    const allProducts: MedusaProduct[] = data.products ?? []
+
+    // Apply semantic search with synonym expansion
+    let matched = allProducts
+    if (query.trim()) {
+      const terms = expandQuery(query)
+      const scored = allProducts
+        .map((p) => ({
+          p,
+          score: scoreMatch(
+            {
+              title: p.title,
+              description: p.description,
+              metadata: p.metadata as Record<string, unknown>,
+            },
+            terms
+          ),
+        }))
+        .filter(({ score }) => score > 0)
+        .sort((a, b) => b.score - a.score)
+
+      matched = scored.map(({ p }) => p)
+    }
+
+    return matched.map((p) => {
       const kwdPrice = p.variants?.[0]?.prices?.find(
         (pr) => pr.currency_code === "kwd"
       )
@@ -67,25 +91,13 @@ async function fetchProducts(query: string): Promise<SearchProduct[]> {
   }
 }
 
-function filterProducts(
+function applyFilters(
   products: SearchProduct[],
-  query: string,
   minPrice: number,
   maxPrice: number,
-  rating: number,
   sort: string
 ): SearchProduct[] {
   let filtered = [...products]
-
-  // Query filter (for fallback data)
-  if (query) {
-    const q = query.toLowerCase()
-    filtered = filtered.filter(
-      (p) =>
-        p.title.toLowerCase().includes(q) ||
-        (p.vendor?.toLowerCase().includes(q) ?? false)
-    )
-  }
 
   // Price filter
   if (minPrice > 0 || maxPrice < 99999) {
@@ -135,14 +147,27 @@ export default async function SearchPage({ params, searchParams }: SearchPagePro
   const rating = Number(sp.rating ?? 0)
   const sort = sp.sort ?? ""
 
-  // Try to fetch from backend, fall back to FALLBACK_PRODUCTS
+  // Fetch with semantic expansion; fall back to demo products
   let allProducts = await fetchProducts(query)
   const usingFallback = allProducts.length === 0
   if (usingFallback) {
-    allProducts = FALLBACK_PRODUCTS
+    // Apply synonym filter on fallback products too
+    if (query.trim()) {
+      const terms = expandQuery(query)
+      allProducts = FALLBACK_PRODUCTS.filter((p) =>
+        terms.some(
+          (t) =>
+            p.title.toLowerCase().includes(t) ||
+            (p.vendor?.toLowerCase().includes(t) ?? false)
+        )
+      )
+      if (allProducts.length === 0) allProducts = FALLBACK_PRODUCTS
+    } else {
+      allProducts = FALLBACK_PRODUCTS
+    }
   }
 
-  const filteredProducts = filterProducts(allProducts, query, minPrice, maxPrice, rating, sort)
+  const filteredProducts = applyFilters(allProducts, minPrice, maxPrice, sort)
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-6">

@@ -19,13 +19,14 @@ export default function SearchBar() {
   const [dropdownOpen, setDropdownOpen] = useState(false)
 
   return (
-    <div className="flex w-full max-w-2xl rounded-md overflow-hidden border border-gray-300 focus-within:border-orange-400 transition-colors">
+    // overflow-visible is intentional: allows the autocomplete dropdown to escape the nav bar
+    <div className="relative flex w-full max-w-2xl rounded-md border border-gray-300 focus-within:border-orange-400 transition-colors">
       {/* Category dropdown */}
       <div className="relative flex-shrink-0">
         <button
           onClick={() => setDropdownOpen((v) => !v)}
           onBlur={() => setTimeout(() => setDropdownOpen(false), 150)}
-          className="h-full px-3 bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs font-medium flex items-center gap-1 border-r border-gray-300 whitespace-nowrap transition-colors"
+          className="h-full px-3 bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs font-medium flex items-center gap-1 border-r border-gray-300 whitespace-nowrap transition-colors rounded-l-md"
           data-testid="category-dropdown"
           aria-expanded={dropdownOpen}
           aria-haspopup="listbox"
@@ -36,7 +37,7 @@ export default function SearchBar() {
 
         {dropdownOpen && (
           <div
-            className="absolute top-full left-0 z-50 bg-white border border-gray-200 rounded-b shadow-lg min-w-[160px]"
+            className="absolute top-full left-0 z-[100] bg-white border border-gray-200 rounded-b shadow-lg min-w-[160px]"
             role="listbox"
           >
             {CATEGORIES.map((cat) => (
