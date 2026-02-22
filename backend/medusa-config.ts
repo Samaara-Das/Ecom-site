@@ -17,6 +17,7 @@ export default defineConfig({
       adminCors: process.env.ADMIN_CORS || "http://localhost:9000",
       authCors: process.env.AUTH_CORS || "http://localhost:8000,http://localhost:9000",
       jwtSecret: process.env.JWT_SECRET || "supersecret-jwt-change-in-production",
+      jwtExpiresIn: process.env.JWT_EXPIRES_IN || "30d",
       cookieSecret: process.env.COOKIE_SECRET || "supersecret-cookie-change-in-production"
     },
     workerMode: (process.env.WORKER_MODE as "shared" | "worker" | "server") || "shared"

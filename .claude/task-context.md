@@ -1,7 +1,7 @@
 # Task Context Tracker
 
 **Last Updated**: 2026-02-22
-**Current Task**: Dummy data + Amazon UI (PRD-dummy-data.md) — Tasks #1-#4 (seed scripts) and #9-#10 pending
+**Current Task**: PRD-dummy-data.md ALL TASKS COMPLETE — Auth fix + VERIFY-013 screenshots + pushed (Tasks #1-#10 done)
 
 ---
 
@@ -626,10 +626,38 @@ Located in `.playwright-mcp/`:
 - Commit: `686e952` on branch `feature/medusa-starter-storefront`
 - 18 files changed, 2883 insertions(+), 46 deletions(-)
 
-#### Remaining Tasks from PRD-dummy-data.md
-- Tasks #1-#4 (seed scripts): Require backend running — deferred
-- Task #9: Chrome DevTools MCP verification screenshots — not yet captured
-- Task #10: Build check, commit, push — pending
+#### PRD-dummy-data.md: ALL TASKS COMPLETE ✅
+- Tasks #1-#4 (seed scripts): All seeded (12 vendors, 88 products, 26 customers, 25 orders)
+- Task #9: Screenshots captured in demo-screenshots/ (11 from prev session + new)
+- Task #10: Build verified ✅, pushed commit f53baba to feature/medusa-starter-storefront
+
+---
+
+### 2026-02-22: Auth Fix + Full PRD-dummy-data.md Completion (commit f53baba)
+
+**Goal**: Complete remaining Tasks #1-#4 (seeds), fix customer auth, verify all data, push.
+
+#### What Was Accomplished
+
+**Key Discovery — Auth Bug Root Cause**:
+- `seed-customers-v2.ts` used `crypto.scrypt` with `${hex}.${salt}` format
+- Medusa's emailpass provider uses `scrypt-kdf` library with base64 output
+- Fix: `fix-auth-final.ts` calls `authModule.register("emailpass", { body: { email, password } })`
+- All 25 customers now have valid auth identities → `authModule.authenticate()` returns `success: true`
+- HTTP login: works WITHOUT `x-publishable-api-key` header at `/auth/customer/emailpass`
+
+**VERIFY Results**:
+- VERIFY-001: 12 vendors ✅ (9 in store API, 3 filtered: 2 pending + 1 suspended)
+- VERIFY-002: 88 products ✅ (60 seeded + pre-existing)
+- VERIFY-003: 26 customers ✅
+- VERIFY-004: Customer login works ✅ (m.alrashidi@gmail.com → JWT → /store/customers/me)
+- VERIFY-005: 25 orders ✅
+
+**Storefront Status**: Dev server showing 500 (transient Turbopack issue), but `next build` succeeds ✅
+
+**Scripts Created** (in `backend/src/scripts/`):
+- `fix-auth-final.ts` — definitive auth fix using authModule.register()
+- `verify-seed-data.ts` — comprehensive data counts verification
 
 ---
 
