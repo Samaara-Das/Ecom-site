@@ -1194,4 +1194,46 @@ npm run test:e2e:ui            # Run E2E with UI
 
 ---
 
+## 7. Semantic Search Pattern
+
+Added 2026-02-22.
+
+### Overview
+
+The search system uses a two-pass approach: an exact Medusa `q=` query first, then a client-side synonym-expansion fallback. This ensures fast results for direct matches and good coverage for generic terms ("makeup", "phone").
+
+### Files
+
+| File | Purpose |
+|------|---------|
+| `storefront/src/lib/search-synonyms.ts` | Synonym map + `expandQuery()` + `scoreMatch()` |
+| `storefront/src/app/[countryCode]/(main)/search/page.tsx` | Server component — fetches all products, applies expansion |
+| `storefront/src/components/search/SearchAutocomplete.tsx` | Client component — two-pass autocomplete |
+
+### `expandQuery(query: string): string[]`
+
+Tokenizes the query on whitespace, then expands each token via `SEARCH_SYNONYMS`. Returns a deduplicated array of the original query plus all synonym terms.
+
+```typescript
+expandQuery("phone case")
+// → ["phone case", "phone", "smartphone", "mobile", "iphone", ..., "case"]
+```
+
+Key design: multi-word queries now expand via per-token lookup. Only exact single-token keys are in `SEARCH_SYNONYMS`; the caller always receives the original query string as the first element so direct matches still rank highest.
+
+### `scoreMatch(product, terms): number`
+
+Scores a product against expanded terms: +3 title match, +2 category/vendor match, +1 description match. Used in `search/page.tsx` to sort results by relevance.
+
+### Two-Pass Fetch (SearchAutocomplete)
+
+1. Fetch `GET /store/products?q={rawQuery}&limit=8` — fast Medusa title search.
+2. If 0 results: fetch `GET /store/products?limit=200`, then filter client-side with `expandQuery(rawQuery)`.
+
+### Extending the Synonym Map
+
+Add entries to `SEARCH_SYNONYMS` in `search-synonyms.ts`. Keys should be common user-facing search terms (typically a single word); values are arrays of related technical or brand terms that appear in product titles, categories, or descriptions.
+
+---
+
 *Last updated: January 2026*

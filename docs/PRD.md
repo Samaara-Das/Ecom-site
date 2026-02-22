@@ -1,7 +1,7 @@
 # Kuwait Marketplace - Product Requirements Document
 
-**Version**: 2.0
-**Date**: 2026-01-30
+**Version**: 2.1
+**Date**: 2026-02-22
 **Status**: MVP Complete
 **Platform**: Medusa v2 + Next.js 15
 
@@ -77,6 +77,10 @@ A comprehensive multi-vendor marketplace that:
 - [x] Account management (profile, orders)
 - [x] Language toggle (English/Arabic)
 - [x] RTL layout support for Arabic
+- [x] Category, price range, and rating filters on store page (URL-param state, combinable, shareable)
+- [x] Semantic search with synonym expansion (18 synonym groups; "makeup" → beauty products, "phone" → smartphones)
+- [x] Search autocomplete dropdown with product suggestions
+- [x] Static info pages: Contact Us, FAQ, Shipping Info, Customer Service hub
 
 #### Vendor Features
 - [x] Vendor registration form
