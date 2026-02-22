@@ -8,11 +8,24 @@
  * 2. Create Customer: POST /store/customers (requires registration token)
  * 3. Login: POST /auth/customer/emailpass (returns session token)
  * 4. Authenticated Routes: Pass token in Authorization: Bearer {token}
+ *
+ * Admin Auth Flow:
+ * 1. Login: POST /auth/user/emailpass (returns session token)
+ * 2. Admin Routes: /admin/* are protected by user authentication
  */
 import { defineMiddlewares, authenticate } from "@medusajs/framework/http"
 
 export default defineMiddlewares({
   routes: [
+    // Protect admin vendor routes - requires admin user authentication
+    {
+      matcher: "/admin/vendors",
+      middlewares: [authenticate("user", ["session", "bearer", "api-key"])]
+    },
+    {
+      matcher: "/admin/vendors/*",
+      middlewares: [authenticate("user", ["session", "bearer", "api-key"])]
+    },
     // Protect customer profile routes - requires customer authentication
     {
       matcher: "/store/customers/me",

@@ -64,7 +64,7 @@ describe("seed-products", () => {
       const mockWorkflowRun = vi.fn().mockResolvedValue({
         result: [{ id: "prod_123", title: "Test", handle: "test" }],
       })
-      ;(createProductsWorkflow as ReturnType<typeof vi.fn>).mockReturnValue({
+      ;(createProductsWorkflow as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
         run: mockWorkflowRun,
       })
 
@@ -87,7 +87,7 @@ describe("seed-products", () => {
           result: [{ id: `prod_${createdProducts.length}`, title: product.title, handle: product.handle }],
         }
       })
-      ;(createProductsWorkflow as ReturnType<typeof vi.fn>).mockReturnValue({
+      ;(createProductsWorkflow as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
         run: mockWorkflowRun,
       })
 
@@ -115,7 +115,7 @@ describe("seed-products", () => {
           result: [{ id: `prod_${createdProducts.length}`, title: product.title, handle: product.handle }],
         }
       })
-      ;(createProductsWorkflow as ReturnType<typeof vi.fn>).mockReturnValue({
+      ;(createProductsWorkflow as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
         run: mockWorkflowRun,
       })
 
@@ -139,7 +139,7 @@ describe("seed-products", () => {
           result: [{ id: `prod_${createdProducts.length}`, title: product.title, handle: product.handle }],
         }
       })
-      ;(createProductsWorkflow as ReturnType<typeof vi.fn>).mockReturnValue({
+      ;(createProductsWorkflow as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
         run: mockWorkflowRun,
       })
 
@@ -164,7 +164,7 @@ describe("seed-products", () => {
           result: [{ id: `prod_${createdProducts.length}`, title: product.title, handle: product.handle }],
         }
       })
-      ;(createProductsWorkflow as ReturnType<typeof vi.fn>).mockReturnValue({
+      ;(createProductsWorkflow as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
         run: mockWorkflowRun,
       })
 
@@ -194,7 +194,7 @@ describe("seed-products", () => {
           result: [{ id: `prod_${createdProducts.length}`, title: product.title, handle: product.handle }],
         }
       })
-      ;(createProductsWorkflow as ReturnType<typeof vi.fn>).mockReturnValue({
+      ;(createProductsWorkflow as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
         run: mockWorkflowRun,
       })
 
@@ -231,7 +231,7 @@ describe("seed-products", () => {
           result: [{ id: `prod_${allSkus.length}`, title: product.title, handle: product.handle }],
         }
       })
-      ;(createProductsWorkflow as ReturnType<typeof vi.fn>).mockReturnValue({
+      ;(createProductsWorkflow as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
         run: mockWorkflowRun,
       })
 
@@ -253,7 +253,7 @@ describe("seed-products", () => {
       const mockWorkflowRun = vi.fn().mockResolvedValue({
         result: [{ id: "prod_123", title: "Test", handle: "test" }],
       })
-      ;(createProductsWorkflow as ReturnType<typeof vi.fn>).mockReturnValue({
+      ;(createProductsWorkflow as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
         run: mockWorkflowRun,
       })
 
@@ -282,7 +282,7 @@ describe("seed-products", () => {
           result: [{ id: "prod_123", title: "Test", handle: "test" }],
         }
       })
-      ;(createProductsWorkflow as ReturnType<typeof vi.fn>).mockReturnValue({
+      ;(createProductsWorkflow as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
         run: mockWorkflowRun,
       })
 
@@ -309,7 +309,7 @@ describe("seed-products", () => {
           result: [{ id: `prod_${callCount}`, title: "Test", handle: "test" }],
         }
       })
-      ;(createProductsWorkflow as ReturnType<typeof vi.fn>).mockReturnValue({
+      ;(createProductsWorkflow as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
         run: mockWorkflowRun,
       })
 
@@ -330,7 +330,7 @@ describe("seed-products", () => {
       const mockWorkflowRun = vi.fn().mockResolvedValue({
         result: [{ id: "prod_123", title: "Test Product", handle: "test-product" }],
       })
-      ;(createProductsWorkflow as ReturnType<typeof vi.fn>).mockReturnValue({
+      ;(createProductsWorkflow as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
         run: mockWorkflowRun,
       })
 
@@ -348,7 +348,7 @@ describe("seed-products", () => {
       const mockWorkflowRun = vi.fn().mockResolvedValue({
         result: [{ id: "prod_123", title: "Test", handle: "test" }],
       })
-      ;(createProductsWorkflow as ReturnType<typeof vi.fn>).mockReturnValue({
+      ;(createProductsWorkflow as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
         run: mockWorkflowRun,
       })
 
@@ -368,7 +368,7 @@ describe("seed-products", () => {
       const mockWorkflowRun = vi.fn().mockResolvedValue({
         result: [{ id: "prod_123", title: "Test", handle: "test" }],
       })
-      ;(createProductsWorkflow as ReturnType<typeof vi.fn>).mockReturnValue({
+      ;(createProductsWorkflow as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
         run: mockWorkflowRun,
       })
 
@@ -389,7 +389,7 @@ describe("seed-products", () => {
       const mockWorkflowRun = vi.fn().mockResolvedValue({
         result: [{ id: "prod_123", title: "Test", handle: "test" }],
       })
-      ;(createProductsWorkflow as ReturnType<typeof vi.fn>).mockReturnValue({
+      ;(createProductsWorkflow as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
         run: mockWorkflowRun,
       })
 
@@ -413,7 +413,7 @@ describe("seed-products", () => {
           result: [{ id: `prod_${createdProducts.length}`, title: product.title, handle: product.handle }],
         }
       })
-      ;(createProductsWorkflow as ReturnType<typeof vi.fn>).mockReturnValue({
+      ;(createProductsWorkflow as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
         run: mockWorkflowRun,
       })
 
@@ -438,7 +438,7 @@ describe("seed-products", () => {
           result: [{ id: `prod_${createdProducts.length}`, title: product.title, handle: product.handle }],
         }
       })
-      ;(createProductsWorkflow as ReturnType<typeof vi.fn>).mockReturnValue({
+      ;(createProductsWorkflow as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
         run: mockWorkflowRun,
       })
 
@@ -463,7 +463,7 @@ describe("seed-products", () => {
           result: [{ id: `prod_${createdProducts.length}`, title: product.title, handle: product.handle }],
         }
       })
-      ;(createProductsWorkflow as ReturnType<typeof vi.fn>).mockReturnValue({
+      ;(createProductsWorkflow as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
         run: mockWorkflowRun,
       })
 
@@ -488,7 +488,7 @@ describe("seed-products", () => {
           result: [{ id: `prod_${createdProducts.length}`, title: product.title, handle: product.handle }],
         }
       })
-      ;(createProductsWorkflow as ReturnType<typeof vi.fn>).mockReturnValue({
+      ;(createProductsWorkflow as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
         run: mockWorkflowRun,
       })
 
@@ -512,7 +512,7 @@ describe("seed-products", () => {
           result: [{ id: `prod_${createdProducts.length}`, title: product.title, handle: product.handle }],
         }
       })
-      ;(createProductsWorkflow as ReturnType<typeof vi.fn>).mockReturnValue({
+      ;(createProductsWorkflow as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
         run: mockWorkflowRun,
       })
 

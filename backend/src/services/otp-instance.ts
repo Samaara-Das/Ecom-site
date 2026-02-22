@@ -4,7 +4,7 @@
  * Provides a singleton OTP service instance that can be shared
  * across all OTP-related endpoints.
  */
-import { OTPService, InMemoryOTPStore, OTPStore, OTPConfig } from "./otp"
+import { OTPService, InMemoryOTPStore } from "./otp"
 import { SMSNotificationService } from "./sms-notification"
 
 // Singleton instance
@@ -40,13 +40,16 @@ export function createSMSSender(): (phone: string, message: string) => Promise<b
 
     if (!smsService.isReady()) {
       // In development/test mode, log the OTP instead of failing
+      // eslint-disable-next-line no-console
       console.warn("[OTP] SMS service not configured. Development mode enabled.")
+      // eslint-disable-next-line no-console
       console.log(`[OTP] Would send to ${phone}: ${message}`)
       return true
     }
 
     const result = await smsService.sendSMS({ to: phone, message })
     if (!result.success) {
+      // eslint-disable-next-line no-console
       console.error(`[OTP] SMS send failed:`, result.error)
     }
     return result.success

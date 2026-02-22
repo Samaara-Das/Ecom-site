@@ -5,11 +5,6 @@ type OrderPlacedData = {
   id: string
 }
 
-type FulfillmentCreatedData = {
-  id: string
-  order_id: string
-}
-
 type ShipmentCreatedData = {
   id: string
   fulfillment_id: string

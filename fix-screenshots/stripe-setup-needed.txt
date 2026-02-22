@@ -1,0 +1,25 @@
+Stripe Payment Provider — Setup Instructions
+============================================
+
+Current Status: NOT configured (STRIPE_API_KEY not set in backend/.env)
+
+Manual Payment provider is working and available in checkout.
+Stripe is an optional enhancement that requires API keys.
+
+To enable Stripe payments:
+1. Go to https://dashboard.stripe.com/test/apikeys
+2. Copy your "Secret key" (starts with sk_test_)
+3. Add to backend/.env:
+   STRIPE_API_KEY=sk_test_YOUR_KEY_HERE
+   STRIPE_WEBHOOK_SECRET=whsec_YOUR_WEBHOOK_SECRET_HERE  (optional but recommended)
+4. Restart backend: cd backend && npm run dev
+5. Stripe will then appear as "Credit Card" payment option in checkout.
+
+The backend medusa-config.ts already conditionally loads the Stripe payment
+provider when STRIPE_API_KEY is set — no code changes needed.
+
+For webhook setup (recommended for production):
+1. In Stripe Dashboard → Webhooks → Add endpoint
+2. URL: https://your-domain.com/hooks/payment/stripe
+3. Events: payment_intent.succeeded, payment_intent.payment_failed
+4. Copy the webhook signing secret → STRIPE_WEBHOOK_SECRET in .env

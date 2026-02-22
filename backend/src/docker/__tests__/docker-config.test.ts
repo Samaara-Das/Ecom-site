@@ -1,15 +1,13 @@
 import { describe, it, expect, beforeAll } from 'vitest'
 import { readFileSync, existsSync } from 'node:fs'
-import { join, dirname } from 'node:path'
-import { fileURLToPath } from 'node:url'
+import { join } from 'node:path'
 import { parse as parseYaml } from 'yaml'
 
-// ES Module compatible __dirname
-const __filename = fileURLToPath(import.meta.url)
-const __dirname = dirname(__filename)
+// Use __dirname directly (available in CommonJS mode which TypeScript compiles to)
+const currentDir = __dirname
 
-const projectRoot = join(__dirname, '..', '..', '..', '..')
-const backendRoot = join(__dirname, '..', '..', '..')
+const projectRoot = join(currentDir, '..', '..', '..', '..')
+const backendRoot = join(currentDir, '..', '..', '..')
 
 describe('Docker Configuration', () => {
   describe('Dockerfile', () => {

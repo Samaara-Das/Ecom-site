@@ -1,40 +1,61 @@
-import '@testing-library/jest-dom/vitest';
-import { cleanup } from '@testing-library/react';
-import { afterEach } from 'vitest';
+import "@testing-library/jest-dom"
+import { vi } from "vitest"
 
-// Mock pointer capture methods for Radix UI components
-// These are not implemented in jsdom but are used by Radix UI
-if (typeof Element !== 'undefined') {
-  Element.prototype.hasPointerCapture = Element.prototype.hasPointerCapture || (() => false);
-  Element.prototype.setPointerCapture = Element.prototype.setPointerCapture || (() => {});
-  Element.prototype.releasePointerCapture = Element.prototype.releasePointerCapture || (() => {});
-  Element.prototype.scrollIntoView = Element.prototype.scrollIntoView || (() => {});
-}
+// Mock Next.js router
+vi.mock("next/navigation", () => ({
+  useRouter: () => ({
+    push: vi.fn(),
+    replace: vi.fn(),
+    back: vi.fn(),
+    forward: vi.fn(),
+    refresh: vi.fn(),
+    prefetch: vi.fn(),
+  }),
+  usePathname: () => "/",
+  useSearchParams: () => new URLSearchParams(),
+  useParams: () => ({}),
+}))
 
-// Mock ResizeObserver for components that use it
-if (typeof window !== 'undefined' && !window.ResizeObserver) {
-  window.ResizeObserver = class ResizeObserver {
-    observe() {}
-    unobserve() {}
-    disconnect() {}
-  };
-}
+// Mock next-intl
+vi.mock("next-intl", () => ({
+  useTranslations: () => (key: string) => key,
+  useLocale: () => "en",
+  useMessages: () => ({}),
+  NextIntlClientProvider: ({ children }: { children: React.ReactNode }) =>
+    children,
+}))
 
-// Mock window.matchMedia for responsive components
-if (typeof window !== 'undefined' && !window.matchMedia) {
-  window.matchMedia = (query: string) => ({
-    matches: false,
-    media: query,
-    onchange: null,
-    addListener: () => {},
-    removeListener: () => {},
-    addEventListener: () => {},
-    removeEventListener: () => {},
-    dispatchEvent: () => false,
-  });
-}
+// Mock next/image
+vi.mock("next/image", () => ({
+  default: ({
+    src,
+    alt,
+    ...props
+  }: {
+    src: string
+    alt: string
+    [key: string]: unknown
+  }) => {
+    // eslint-disable-next-line @next/next/no-img-element
+    return <img src={src} alt={alt} {...props} />
+  },
+}))
 
-// Cleanup after each test case
-afterEach(() => {
-  cleanup();
-});
+// Suppress console errors during tests (optional, remove if you want to see them)
+const originalError = console.error
+beforeAll(() => {
+  console.error = (...args: unknown[]) => {
+    // Filter out React 19 specific warnings during tests
+    if (
+      typeof args[0] === "string" &&
+      args[0].includes("ReactDOMTestUtils.act")
+    ) {
+      return
+    }
+    originalError.call(console, ...args)
+  }
+})
+
+afterAll(() => {
+  console.error = originalError
+})

@@ -127,7 +127,7 @@ export class OTPService {
    */
   normalizePhoneNumber(phone: string): string | null {
     // Remove all non-digits except leading +
-    let cleaned = phone.replace(/[^\d+]/g, "")
+    const cleaned = phone.replace(/[^\d+]/g, "")
 
     // Extract digits only for validation
     const digits = cleaned.replace(/\D/g, "")
