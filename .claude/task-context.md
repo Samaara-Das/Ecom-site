@@ -1,7 +1,7 @@
 # Task Context Tracker
 
 **Last Updated**: 2026-02-22
-**Current Task**: IDLE — PRD-dummy-data.md ALL TASKS COMPLETE (10/10). Branch pushed. Ready for next phase.
+**Current Task**: IDLE — Sprint #1 UX Fix tasks (16-19) COMPLETE + merged to main (PR #1). Bug fixes + doc updates committed (59ed8c2). Ready for next phase (tasks #11-15).
 
 ---
 
@@ -63,6 +63,30 @@
 ### ✅ Test Infrastructure (Completed)
 - ✅ Task #25: VERIFY - Full E2E test suite passes (10/14 tests pass)
 - ✅ Task #26: VERIFY - Admin panel functionality (4 tests created, need backend running)
+
+### Sprint #1 UX Fix Tasks (COMPLETE — merged to main PR #1)
+- ✅ Task #16: Vendor registration form — added `x-publishable-api-key` header (was throwing 400)
+- ✅ Task #17: Static info pages — created `/contact`, `/faq`, `/shipping`, `/customer-service`
+- ✅ Task #18: Store filters — `CategoryFilter`, `PriceFilter`, `RatingFilter` + URL param state + "Clear all"
+- ✅ Task #19: Search autocomplete — fixed `overflow-hidden` clipping + z-index; `search-synonyms.ts` synonym expansion
+
+### Sprint #1 Follow-up Bug Fixes (commit 59ed8c2 on feature branch)
+- ✅ `paginated-products.tsx`: `return false` (was `return true`) for products without KWD price
+- ✅ `search-synonyms.ts`: `expandQuery` now tokenizes multi-word queries (e.g. "phone case" expands "phone" synonyms)
+- ✅ `next.config.js`: added `source.unsplash.com` to allowed image hostnames
+
+### Sprint #1 Docs Updated (commit 59ed8c2)
+- ✅ `docs/ROADMAP.md` — added "Recently Resolved" section, new outstanding issues
+- ✅ `docs/PRD.md` — added 4 new features to implemented list
+- ✅ `docs/UI_UX_SPEC.md` — added §7 (static pages) + §8 (store filters)
+- ✅ `docs/IMPLEMENTATION_GUIDE.md` — added §7 (semantic search pattern, `expandQuery`, `scoreMatch`)
+
+### Remaining Tasks (#11-15)
+- ⬜ Task #11: Fix `/kw/account/profile` and `/kw/account/addresses` returning 404
+- ⬜ Task #12: Fix "Out of stock" display — seed inventory for all product variants
+- ⬜ Task #13: Add Stripe test payment provider setup and documentation
+- ⬜ Task #14: Fix navigation auto-redirects in middleware
+- ⬜ Task #15: Verify all fixes with Chrome DevTools MCP
 
 ### Post-MVP Tasks
 - **`tasks.yaml`**: 50+ tasks for full production implementation
@@ -183,6 +207,53 @@ Attempted to start services for demo testing:
 - **Attempted**: `npx medusa user -e email -p password` command (no output due to Windows terminal issues)
 - **Created**: `backend/src/scripts/create-admin.ts` script to create admin user
 - **Status**: PENDING - User needs to run command manually or create user through database
+
+---
+
+### 2026-02-22: Sprint #1 UX Fix Tasks #16-19 + Follow-up
+
+**Goal**: Fix vendor form crash, add static pages, add store filters, fix search autocomplete & relevance.
+
+#### Tasks Completed
+
+**Task #16 — Vendor registration form fix**
+- Added `"x-publishable-api-key": process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY ?? ""` to POST headers in `storefront/src/modules/vendor/components/registration-form/index.tsx`
+- Medusa v2 requires this header on all `/store/` routes
+
+**Task #17 — Static info pages**
+- Created `app/[countryCode]/(main)/contact/page.tsx` — contact form with "Message sent" success state (no backend)
+- Created `app/[countryCode]/(main)/faq/page.tsx` — accordion with 10 Q&As (`"use client"`)
+- Created `app/[countryCode]/(main)/shipping/page.tsx` — delivery zones table (server component)
+- Created `app/[countryCode]/(main)/customer-service/page.tsx` — hub with 4 service cards (server component)
+- All use dark theme `bg-[#131921] text-white`
+
+**Task #18 — Store filters**
+- Created `refinement-list/category-filter/index.tsx` (9 options, sets `category` URL param)
+- Created `refinement-list/price-filter/index.tsx` (6 price buckets, encodes as `"min:max"`, batches two params in one `router.push`)
+- Created `refinement-list/rating-filter/index.tsx` (3 star thresholds)
+- Modified `refinement-list/index.tsx` — added `setMultipleQueryParams`, "Clear all" button, new props
+- Modified `store/templates/index.tsx` — passes filter props to `PaginatedProducts`
+- Modified `store/page.tsx` — reads `category`, `minPrice`, `maxPrice`, `rating` from `searchParams`
+- Modified `paginated-products.tsx` — when filters active: fetches 200 products, applies `applyClientFilters()`, manual pagination
+
+**Task #19 — Search autocomplete + relevance**
+- Created `storefront/src/lib/search-synonyms.ts` — 18 synonym groups, `expandQuery()`, `scoreMatch()`
+- Modified `SearchBar.tsx` — removed `overflow-hidden` (was clipping dropdown), added `rounded-l-md`/`rounded-r-md` to inner elements
+- Modified `SearchAutocomplete.tsx` — two-pass fetch (exact Medusa first, synonym fallback), dropdown `z-[100]`
+- Modified `search/page.tsx` — fetches all 200 products, filters client-side with expanded terms, sorts by relevance score
+
+**PR #1 merged to main** at commit `0f6a280`. Branch `feature/medusa-starter-storefront` retained.
+
+#### Follow-up Bug Fixes (commit 59ed8c2)
+- `paginated-products.tsx:42`: `return false` (was `return true`) — products without KWD price now excluded from price-filtered results
+- `search-synonyms.ts`: `expandQuery` tokenizes multi-word queries; uses `Set` for deduplication
+- `next.config.js`: added `source.unsplash.com` to allowed image hostnames
+
+#### Docs Updated (commit 59ed8c2)
+- `docs/ROADMAP.md` — "Recently Resolved" section + new outstanding issues
+- `docs/PRD.md` — 4 new features added to implemented list
+- `docs/UI_UX_SPEC.md` — §7 static pages, §8 store filter components
+- `docs/IMPLEMENTATION_GUIDE.md` — §7 semantic search pattern
 
 ---
 
