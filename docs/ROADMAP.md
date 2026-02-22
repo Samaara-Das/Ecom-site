@@ -1,7 +1,7 @@
 # Kuwait Marketplace - Project Roadmap
 
-**Document Version**: 1.0
-**Last Updated**: 2026-01-30
+**Document Version**: 1.1
+**Last Updated**: 2026-02-22
 **Current Branch**: `feature/medusa-starter-storefront`
 
 ---
@@ -81,12 +81,23 @@ The Kuwait Marketplace is a multi-vendor e-commerce platform built on Medusa v2,
 
 ## 2. Outstanding Issues
 
+### 2.0 Recently Resolved (2026-02-22)
+
+| Issue | Resolution | PR |
+|-------|-----------|-----|
+| Vendor registration form "Publishable API key required" error | Added `x-publishable-api-key` header to vendor apply POST | #1 |
+| Footer links (Contact Us, FAQ, Shipping Info) returning 404 | Created static pages at `/contact`, `/faq`, `/shipping`, `/customer-service` | #1 |
+| Store sidebar missing category/price/rating filters | Added `CategoryFilter`, `PriceFilter`, `RatingFilter` components; URL param state | #1 |
+| Search autocomplete dropdown not visible | Removed `overflow-hidden` from `SearchBar` wrapper; set `z-[100]` on dropdown | #1 |
+| Searching "makeup" or "phone" returned 0 results | Added `search-synonyms.ts` with 18 synonym groups + two-pass Medusa + client-side search | #1 |
+
 ### 2.1 Critical Issues (Blocking Production)
 
 | Issue | Impact | Priority |
 |-------|--------|----------|
 | `/kw/account/profile` returns 404 | Users cannot view/edit profile | High |
 | `/kw/account/addresses` returns 404 | Users cannot manage shipping addresses | High |
+| `/store/vendors/me` routes unauthenticated | Any caller knowing vendor email can read/write vendor data | High |
 
 ### 2.2 Functional Issues
 
@@ -96,6 +107,7 @@ The Kuwait Marketplace is a multi-vendor e-commerce platform built on Medusa v2,
 | Only Manual Payment available | No real payment processing | Medium |
 | Navigation auto-redirects | Client-side routing instability | Medium |
 | Image gallery non-interactive | No thumbnail click-to-change | Low |
+| `seed-customers-v2.ts` uses wrong password hashing | Fresh deploys require running `fix-auth-final.ts` | Low |
 
 ### 2.3 Technical Debt
 

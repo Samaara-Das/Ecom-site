@@ -21,8 +21,16 @@ export const SEARCH_SYNONYMS: Record<string, string[]> = {
 
 export function expandQuery(query: string): string[] {
   const q = query.toLowerCase().trim()
-  const synonyms = SEARCH_SYNONYMS[q] ?? []
-  return [q, ...synonyms]
+  // Expand each token individually so multi-word queries like "phone case" also benefit
+  const tokens = q.split(/\s+/).filter(Boolean)
+  const expanded = new Set<string>([q])
+  for (const token of tokens) {
+    expanded.add(token)
+    for (const syn of SEARCH_SYNONYMS[token] ?? []) {
+      expanded.add(syn)
+    }
+  }
+  return Array.from(expanded)
 }
 
 /**
