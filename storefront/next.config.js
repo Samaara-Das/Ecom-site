@@ -49,6 +49,10 @@ const nextConfig = {
         protocol: "https",
         hostname: "picsum.photos",
       },
+      {
+        protocol: "https",
+        hostname: "images.unsplash.com",
+      },
       ...(S3_HOSTNAME && S3_PATHNAME
         ? [
             {

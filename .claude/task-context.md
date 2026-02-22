@@ -1,7 +1,7 @@
 # Task Context Tracker
 
-**Last Updated**: 2026-01-28
-**Current Task**: Storefront fixes - Missing routes, inventory, payment, navigation
+**Last Updated**: 2026-02-22
+**Current Task**: Dummy data + Amazon UI (PRD-dummy-data.md) — Tasks #1-#4 (seed scripts) and #9-#10 pending
 
 ---
 
@@ -203,6 +203,8 @@ Attempted to start services for demo testing:
 ## Key Reference Files
 
 - **PRD**: `prd.md` - Product requirements for Kuwait marketplace
+- **Dummy Data PRD**: `PRD-dummy-data.md` - Dummy data + Amazon UI requirements (v1.1, Tasks #1-#10)
+- **Ralph Script**: `ralph-dummy-data.sh` - Autonomous Ralph loop for dummy data tasks (run from separate terminal)
 - **Kuwait PRD**: `docs/PRD-Kuwait-Marketplace.md` - Detailed marketplace requirements
 - **Context Guide**: `context-preservation-guide.md` - Documents the context preservation approach
 - **Project Instructions**: `CLAUDE.md` - Task tool usage and workflow guidelines
@@ -227,6 +229,9 @@ Attempted to start services for demo testing:
 | Ralphy branch naming | Auto-generated format | `ralphy/agent-{N}-{timestamp}-{id}-{task-name}` |
 | Git conflict resolution | progress.txt conflicts | Keep all sections, remove conflict markers |
 | **ALWAYS run lint/tsc** | After writing any code | `npm run lint` and `npx tsc --noEmit` to catch errors early |
+| **Ralph heredoc prompt** | Multi-line claude -p prompts | `PROMPT=$(cat <<'RALPH_PROMPT_EOF' ... RALPH_PROMPT_EOF)` — no escaping needed |
+| **Ralph nested session** | Running claude inside claude | `env -u CLAUDECODE claude --dangerously-skip-permissions ...` |
+| **Chrome DevTools verification** | Visual/functional checks | Use `mcp__chrome-devtools__*` tools, NOT Playwright, for all VERIFY steps |
 | Custom Input component | Storefront forms | Use `@modules/common/components/input` with `label` prop, not @medusajs/ui Input |
 | Medusa module pattern | Custom modules | Model → Service → Module(name, {service}) → medusa-config.ts |
 | Medusa v2 OrderDTO workaround | Access untyped properties | Cast `order as any` for `fulfillment_status`, `payment_status`, `fulfillments` |
@@ -580,3 +585,103 @@ Located in `.playwright-mcp/`:
 - #4: Configure Stripe payment provider
 - #5: Investigate and fix navigation redirects
 - #6: Verify fixes with Playwright (blocked by #1-5)
+
+---
+
+### 2026-02-21: Amazon-Style UI Components Session (PRD-dummy-data.md Tasks #5-#8)
+
+**Goal**: Build frontend components for Kuwait Marketplace demo (backend was not running — skipped Tasks #1-#4)
+
+#### Tasks Completed
+
+**Task #5 — ProductReviews component**
+- Created `storefront/src/components/product/ProductReviews.tsx`
+- Static hardcoded reviews keyed by product category (9 review banks)
+- Star rating breakdown with realistic inflated totals
+- data-testid: `product-reviews-section`, `review-card`, `review-author`, `verified-badge`, `star-rating`
+- Integrated into `storefront/src/modules/products/templates/index.tsx`
+
+**Task #6 — SocialProofBadge component**
+- Created `storefront/src/lib/social-proof-config.ts` — maps 60 product handles to social proof data
+- Created `storefront/src/components/product/SocialProofBadge.tsx` — client component with bestseller/new/discount badges and sold count
+- data-testid: `bestseller-badge`, `new-arrival-badge`, `discount-badge`, `star-rating`, `sold-count`
+- Integrated into `storefront/src/modules/products/components/product-preview/index.tsx`
+
+**Task #7 — Amazon-style homepage**
+- Created 5 home components: HeroBannerCarousel, CategoryShortcuts, DealTilesGrid, ProductCarousel, VendorSpotlight
+- HeroBannerCarousel: 5 banners, auto-rotate 4s, left/right arrows, dot indicators
+- ProductCarousel: horizontal scroll with hardcoded fallback products (electronics/fashion/deals)
+- Updated `storefront/src/app/[countryCode]/(main)/page.tsx` with dark `#131921` Amazon-style layout
+
+**Task #8 — Amazon-style search**
+- Created: SearchAutocomplete (debounced 300ms), SearchBar (category dropdown), SearchFilters (sidebar), SearchResultCard, SortDropdown
+- Created server component `storefront/src/app/[countryCode]/(main)/search/page.tsx` with Medusa API + 12-product fallback
+- Updated `storefront/src/modules/layout/templates/nav/index.tsx` — dark Amazon nav with SearchBar
+
+#### Verification (VERIFY-012)
+- `npm run build` — PASSED (0 errors)
+- `npx tsc --noEmit` — PASSED (only pre-existing errors in src/test/setup.ts, all new files clean)
+
+#### Git Commit
+- Commit: `686e952` on branch `feature/medusa-starter-storefront`
+- 18 files changed, 2883 insertions(+), 46 deletions(-)
+
+#### Remaining Tasks from PRD-dummy-data.md
+- Tasks #1-#4 (seed scripts): Require backend running — deferred
+- Task #9: Chrome DevTools MCP verification screenshots — not yet captured
+- Task #10: Build check, commit, push — pending
+
+---
+
+### 2026-02-22: PRD Creation, Ralph Loop, and Session Wrap-up
+
+**Goal**: Write a comprehensive PRD for dummy data + Amazon-style UI, create tasks, run Ralph autonomously, then compact and update context.
+
+#### What Was Accomplished
+
+**1. PRD-dummy-data.md Created (v1.1)**
+- File: `PRD-dummy-data.md` at project root
+- Section 3.1: 12 vendors with exact names, categories, Kuwait districts, commission rates
+- Section 3.2: 60 products with brand names, variant strategy, KWD pricing, Unsplash photo IDs per category
+- Section 3.3: 25 customers (15 Kuwaiti nationals, 10 expats) with realistic emails/phones/addresses
+- Section 3.4: 25 orders — 12 completed, 6 processing, 4 pending, 3 cancelled
+- Section 3.5: `ProductReviews.tsx` component spec with 9 category-specific review banks
+- Section 3.6: `SocialProofBadge.tsx` spec — Bestseller/New Arrival/Low Stock badges
+- Section 11: Amazon homepage spec — dark `#131921`, 6 sections (sticky nav, HeroBannerCarousel, CategoryShortcuts, DealTilesGrid, ProductCarousel, VendorSpotlight)
+- Section 12: Amazon search spec — SearchBar with category dropdown, SearchAutocomplete (300ms debounce), `/kw/search` results page with sidebar filters + SortDropdown
+- Section 15: VERIFY-001 through VERIFY-013 — all using Chrome DevTools MCP (not Playwright)
+
+**2. Tasks #1-#10 Created Manually via TaskCreate**
+- task-master parse-prd failed (no API keys in shell env)
+- All 10 tasks created directly with `TaskCreate` tool
+
+**3. Ralph Bugs Fixed**
+- **Bug 1 — bash syntax error**: Single quotes inside double-quoted `claude -p "..."` string caused `syntax error near unexpected token '('`. Fix: Rewrote prompt delivery to use heredoc `PROMPT=$(cat <<'RALPH_PROMPT_EOF' ... RALPH_PROMPT_EOF)` — no escaping needed inside heredoc.
+- **Bug 2 — nested Claude Code session**: Error: `Claude Code cannot be launched inside another Claude Code session. To bypass this check, unset the CLAUDECODE environment variable.` Fix: Changed invocation to `env -u CLAUDECODE claude --dangerously-skip-permissions ...` which strips `CLAUDECODE` for just that subprocess.
+
+**4. Ralph Overnight Run**
+- Ralph ran overnight; after both bugs fixed, produced commit `686e952` completing Tasks #5-#8
+- Native TaskList showed all tasks as `[pending]` — manually synced tasks #5-#8 to completed this session
+
+**5. Chrome DevTools MCP Switch**
+- All VERIFY-001 to VERIFY-013 in PRD-dummy-data.md rewritten to use Chrome DevTools MCP tools
+- Screenshots output to `demo-screenshots/` folder
+- Key tools: `mcp__chrome-devtools__navigate_page`, `take_screenshot`, `take_snapshot`, `wait_for`, `evaluate_script`, `fill`, `click`, `list_console_messages`
+
+**6. ralph-dummy-data.sh Final State**
+- Max 20 iterations, `DONE_SIGNAL="RALPH_ALL_DONE"`, logs to `ralph_dummy_logs/`
+- Prompt loads `/medusa` and `/senior-developer` skills, references PRD-dummy-data.md, TaskList
+- Uses heredoc for prompt + `env -u CLAUDECODE claude ...` for subprocess invocation
+- User runs from a separate terminal (not Claude's terminal)
+
+#### Current Task Status
+- ✅ Task #5: ProductReviews component — DONE (commit 686e952)
+- ✅ Task #6: SocialProofBadge + social-proof-config — DONE (commit 686e952)
+- ✅ Task #7: Amazon-style homepage — DONE (commit 686e952)
+- ✅ Task #8: Amazon-style search — DONE (commit 686e952)
+- ⏳ Task #1: Seed 12 vendors — requires backend running
+- ⏳ Task #2: Seed 60 products — requires backend running
+- ⏳ Task #3: Seed 25 customers — requires backend running
+- ⏳ Task #4: Seed 25 orders — requires backend running
+- ⏳ Task #9: Chrome DevTools MCP verifications (13 screenshots to demo-screenshots/)
+- ⏳ Task #10: Build check, commit, push to GitHub
