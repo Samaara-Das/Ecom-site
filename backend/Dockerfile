@@ -3,16 +3,14 @@
 # ============================================
 # Base stage - common dependencies
 # ============================================
-FROM node:20-alpine AS base
+FROM node:20-slim AS base
 
 WORKDIR /app
 
-# Install system dependencies for native modules
-RUN apk add --no-cache \
-    python3 \
-    make \
-    g++ \
-    libc6-compat
+# Install minimal system dependencies
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    python3 make g++ \
+    && rm -rf /var/lib/apt/lists/*
 
 # ============================================
 # Dependencies stage - single npm ci install
@@ -43,13 +41,15 @@ RUN npm run build
 # ============================================
 # Production stage
 # ============================================
-FROM node:20-alpine AS production
+FROM node:20-slim AS production
 
 WORKDIR /app
 
-# Create non-root user for security
-RUN addgroup --system --gid 1001 medusa && \
-    adduser --system --uid 1001 --ingroup medusa medusa
+# Install curl for health check and create non-root user
+RUN apt-get update && apt-get install -y --no-install-recommends curl \
+    && rm -rf /var/lib/apt/lists/* \
+    && groupadd --system --gid 1001 medusa \
+    && useradd --system --uid 1001 --gid medusa medusa
 
 # Copy node_modules from deps stage (reuse — avoids a second npm install)
 COPY --from=deps /app/node_modules ./node_modules
@@ -78,7 +78,7 @@ EXPOSE 9000
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
-    CMD wget --no-verbose --tries=1 --spider http://localhost:9000/health || exit 1
+    CMD curl -f http://localhost:9000/health || exit 1
 
 # Production command: run migrations then start server
 CMD ["./start.sh"]
