@@ -15,12 +15,23 @@ export const convertToLocale = ({
   maximumFractionDigits,
   locale = "en-US",
 }: ConvertToLocaleParams) => {
-  return currency_code && !isEmpty(currency_code)
-    ? new Intl.NumberFormat(locale, {
-        style: "currency",
-        currency: currency_code,
-        minimumFractionDigits,
-        maximumFractionDigits,
-      }).format(amount)
-    : amount.toString()
+  if (!currency_code || isEmpty(currency_code)) {
+    return amount.toString()
+  }
+
+  // Medusa stores amounts as integers in the smallest currency unit (e.g. fils for KWD, cents for USD).
+  // Intl.NumberFormat expects the major unit, so divide by 10^decimalDigits.
+  const decimalDigits = new Intl.NumberFormat(locale, {
+    style: "currency",
+    currency: currency_code,
+  }).resolvedOptions().maximumFractionDigits
+
+  const majorAmount = amount / Math.pow(10, decimalDigits)
+
+  return new Intl.NumberFormat(locale, {
+    style: "currency",
+    currency: currency_code,
+    minimumFractionDigits,
+    maximumFractionDigits,
+  }).format(majorAmount)
 }
