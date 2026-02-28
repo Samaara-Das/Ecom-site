@@ -94,6 +94,10 @@ COPY --from=builder /app/tsconfig.json ./tsconfig.json
 # Copy source files needed at runtime
 COPY --from=builder /app/src ./src
 
+# Copy startup script (runs migrations then starts server)
+COPY --from=builder /app/start.sh ./start.sh
+RUN chmod +x start.sh
+
 # Set ownership to medusa user
 RUN chown -R medusa:medusa /app
 
@@ -107,5 +111,5 @@ EXPOSE 9000
 HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
     CMD wget --no-verbose --tries=1 --spider http://localhost:9000/health || exit 1
 
-# Production command
-CMD ["node", ".medusa/server/index.js"]
+# Production command: run migrations then start server
+CMD ["./start.sh"]
