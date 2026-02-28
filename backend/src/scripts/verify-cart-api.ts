@@ -1,5 +1,5 @@
-// @ts-nocheck
 #!/usr/bin/env npx ts-node
+// @ts-nocheck
 /**
  * Cart API Verification Script (V-10)
  *
