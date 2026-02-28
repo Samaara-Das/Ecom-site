@@ -6,11 +6,7 @@
 FROM node:20-slim AS base
 
 WORKDIR /app
-
-# Install minimal system dependencies
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    python3 make g++ \
-    && rm -rf /var/lib/apt/lists/*
+# node:20-slim (Debian) provides pre-built binaries for all Medusa v2 dependencies
 
 # ============================================
 # Dependencies stage - single npm ci install
@@ -19,8 +15,9 @@ FROM base AS deps
 
 COPY package.json package-lock.json* ./
 
-# Use npm ci (faster than npm install, uses lock file exactly)
-RUN npm ci
+# Use npm ci with BuildKit cache mount (cached between Railway builds)
+RUN --mount=type=cache,id=s/07e69e0e-cb1d-4734-abc1-9b065e8d042f-npm,target=/root/.npm \
+    npm ci
 
 # ============================================
 # Build stage - compile TypeScript and build Medusa
