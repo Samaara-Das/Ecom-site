@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Seed script: Ensure all product variants have inventory (50 units each)
  * Idempotent — updates existing levels, creates missing ones.

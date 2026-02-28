@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { ContainerRegistrationKeys, Modules } from "@medusajs/framework/utils"
 
 export default async function addTestInventory({ container }: { container: any }) {

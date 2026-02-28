@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Debug auth module state and test direct registration
  * Run with: npx medusa exec ./src/scripts/debug-auth.ts

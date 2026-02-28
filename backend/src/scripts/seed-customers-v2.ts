@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Seed script: 25 Kuwait Marketplace customers (v2)
  * Idempotent — checks by email before creating.

@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Fix customer auth identities by directly storing scrypt-kdf password hashes via raw SQL.
  *

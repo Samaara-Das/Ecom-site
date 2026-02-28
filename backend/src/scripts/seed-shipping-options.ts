@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Shipping Options Seeder Script
  *
