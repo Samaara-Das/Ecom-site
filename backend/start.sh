@@ -23,6 +23,7 @@ if [ "${SEED_DEMO_DATA:-false}" = "true" ]; then
   node_modules/.bin/medusa exec ./src/scripts/seed-customers-v2.ts && echo "Customers seeded" || echo "Customer seeding failed (continuing)"
   node_modules/.bin/medusa exec ./src/scripts/seed-orders-v2.ts && echo "Orders seeded" || echo "Order seeding failed (continuing)"
   node_modules/.bin/medusa exec ./src/scripts/fix-auth-prod.ts && echo "Customer auth fixed" || echo "Auth fix failed (continuing)"
+  node_modules/.bin/medusa exec ./src/scripts/seed-inventory.ts && echo "Inventory seeded" || echo "Inventory seeding failed (continuing)"
   echo "=== Demo data seeding complete ==="
 fi
 
