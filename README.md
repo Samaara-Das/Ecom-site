@@ -1,5 +1,8 @@
 # Kuwait Marketplace
 
+**🌐 Live demo:** https://kuwait-marketplace.netlify.app
+
+
 A multi-vendor e-commerce platform built for the Kuwait market. Two-tier architecture: a Medusa v2 backend (commerce engine + admin) and a Next.js 15 storefront, glued together with Docker Compose for local development.
 
 ## Architecture
