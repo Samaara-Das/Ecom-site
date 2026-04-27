@@ -4,6 +4,24 @@ import { NextRequest, NextResponse } from "next/server"
 const BACKEND_URL = process.env.MEDUSA_BACKEND_URL
 const PUBLISHABLE_API_KEY = process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY
 const DEFAULT_REGION = process.env.NEXT_PUBLIC_DEFAULT_REGION || "us"
+const USE_MOCK_DATA = process.env.NEXT_PUBLIC_USE_MOCK_DATA === "true"
+
+// Hard-coded region map used in demo / mock-data mode so middleware can run
+// without a Medusa backend.
+const MOCK_REGION_MAP: Map<string, HttpTypes.StoreRegion> = (() => {
+  const region = {
+    id: "reg_kw_demo",
+    name: "Kuwait",
+    currency_code: "kwd",
+    countries: [{ iso_2: "kw", display_name: "Kuwait" }],
+  } as unknown as HttpTypes.StoreRegion
+  const map = new Map<string, HttpTypes.StoreRegion>()
+  map.set("kw", region)
+  // Provide common defaults so the storefront still resolves a region if a
+  // recruiter lands on /us or similar.
+  map.set("us", region)
+  return map
+})()
 
 const regionMapCache = {
   regionMap: new Map<string, HttpTypes.StoreRegion>(),
@@ -11,6 +29,10 @@ const regionMapCache = {
 }
 
 async function getRegionMap(cacheId: string) {
+  if (USE_MOCK_DATA) {
+    return MOCK_REGION_MAP
+  }
+
   const { regionMap, regionMapUpdated } = regionMapCache
 
   if (!BACKEND_URL) {

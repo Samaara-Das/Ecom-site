@@ -10,6 +10,12 @@ const requiredEnvs = [
 ]
 
 function checkEnvVariables() {
+  // Skip the publishable-key check in mock-data demo builds — the storefront
+  // intercepts every SDK call client-side and never talks to Medusa.
+  if (process.env.NEXT_PUBLIC_USE_MOCK_DATA === "true") {
+    return
+  }
+
   const missingEnvs = requiredEnvs.filter(function (env) {
     return !process.env[env.key]
   })
