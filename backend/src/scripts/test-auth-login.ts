@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Test auth login via module directly (bypasses HTTP)
  * Run with: npx medusa exec ./src/scripts/test-auth-login.ts

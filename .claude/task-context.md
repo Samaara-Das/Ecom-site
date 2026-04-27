@@ -1,7 +1,7 @@
 # Task Context Tracker
 
-**Last Updated**: 2026-02-22
-**Current Task**: IDLE — Sprint #1 UX Fix tasks (16-19) COMPLETE + merged to main (PR #1). Bug fixes + doc updates committed (59ed8c2). Ready for next phase (tasks #11-15).
+**Last Updated**: 2026-03-01
+**Current Task**: INVESTIGATING — Product pages (`/kw/products/*`) returning 500 in production (Vercel). Homepage and store page return 200. API data is correct. Root cause under investigation — most likely candidate is `ProductReviews` Server Component using `Math.random()` at render time.
 
 ---
 
@@ -63,6 +63,13 @@
 ### ✅ Test Infrastructure (Completed)
 - ✅ Task #25: VERIFY - Full E2E test suite passes (10/14 tests pass)
 - ✅ Task #26: VERIFY - Admin panel functionality (4 tests created, need backend running)
+
+### Sprint #2 — Production Deployment Tasks (2026-03-01)
+- ✅ Task #12: Seed inventory — 162 inventory levels created; stock location linked to Default Sales Channel; `inv_qty=45` confirmed in store API
+- ⏳ Task #11: Fix `/kw/account/profile` and `/kw/account/addresses` 404 — deferred, not yet investigated in this sprint
+- ⏳ Task #13: Stripe test payment provider — deferred
+- ⏳ Task #14: Fix middleware redirects — deferred
+- 🔴 BLOCKING BUG: ALL `/kw/products/*` pages return 500 (Next.js Server Component render error)
 
 ### Sprint #1 UX Fix Tasks (COMPLETE — merged to main PR #1)
 - ✅ Task #16: Vendor registration form — added `x-publishable-api-key` header (was throwing 400)
@@ -340,14 +347,14 @@ Attempted to start services for demo testing:
 ### Open Issues
 | Issue | Status | Notes |
 |-------|--------|-------|
-| Admin user not created | ✅ Resolved | Admin user created successfully |
-| Publishable API key not configured | Known limitation | Demo uses mock products; configure key for real products |
-| ~20 unmerged feature branches | Deferred | Non-verification branches with features like OAuth, i18n, vendor module |
-| `/kw/account/profile` 404 | **NEW** | Task #1 - Route not implemented |
-| `/kw/account/addresses` 404 | **NEW** | Task #2 - Route not implemented |
-| All products out of stock | **NEW** | Task #3 - Need to seed inventory |
-| Only Manual Payment available | **NEW** | Task #4 - Need Stripe configuration |
-| Navigation auto-redirects | **NEW** | Task #5 - Investigate redirect issues |
+| Admin user not created | ✅ Resolved | Admin user: admin@kuwait-marketplace.com / AdminPass123! |
+| All products out of stock | ✅ Resolved | Task #12 done — 162 inventory levels at Kuwait Main Warehouse, linked to Default Sales Channel |
+| Customer login "Invalid email or password" | ✅ Resolved | `fix-auth-prod.ts` deletes wrong-format identities, re-registers with scrypt-kdf |
+| **ALL `/kw/products/*` return 500** | 🔴 BLOCKER | Next.js Server Component error. API returns correct data (200). Most likely cause: `ProductReviews` Server Component uses `Math.random()` at render time (should be `"use client"`). Fix: add `"use client"` to `src/components/product/ProductReviews.tsx` and redeploy. |
+| `/kw/account/profile` 404 | Pending Task #11 | Exists in build (ƒ dynamic route). Needs investigation. |
+| `/kw/account/addresses` 404 | Pending Task #11 | Exists in build (ƒ dynamic route). Needs investigation. |
+| Only Manual Payment available | Deferred Task #13 | Stripe setup needed |
+| Navigation auto-redirects | Fixed locally | `middleware.ts` fixed previously (commit 3db2c1e), deployed to Vercel |
 
 ---
 
@@ -390,16 +397,83 @@ task-master set-status --id=<id> --status=done          # Mark task complete
 
 ---
 
+---
+
+### 2026-03-01: Full Production Deployment — Railway + Vercel
+
+**Goal**: Deploy backend to Railway, storefront to Vercel, seed all demo data, verify end-to-end.
+
+#### Production URLs
+- **Backend**: `https://medusa-backend-production-3732.up.railway.app`
+- **Storefront**: `https://storefront-orpin-iota.vercel.app`
+- **Admin**: `https://medusa-backend-production-3732.up.railway.app/app`
+- **Admin credentials**: admin@kuwait-marketplace.com / AdminPass123!
+- **Publishable key**: `pk_ad8b4163ae44594b08f5a2510900275d04bcefc69335600dbf763b77a5e556a5`
+- **Kuwait region ID**: `reg_01KJM1SZ9VPY96J0AGA3C740EA`
+- **Stock location ID**: `sloc_01KJMZ6A42VRM3Y2B95MJQC1YN` (Kuwait Main Warehouse)
+
+#### What Was Accomplished
+
+**Production data (all seeded and verified)**:
+- 60 products with KWD pricing and Unsplash images
+- 12 vendors (TechZone Kuwait, Al-Sayer Electronics, Moda Fashion Kuwait, etc.)
+- 25 customers (demo password: `Demo1234!`)
+- 25 orders (12 completed, 10 pending, 3 canceled)
+- 162 inventory levels at Kuwait Main Warehouse (e.g., Samsung S25U Black = 45 units)
+
+**Key fixes in this session**:
+1. **Customer auth** — `seed-customers-v2.ts` uses `crypto.scrypt` (wrong format). Created `fix-auth-prod.ts` which deletes wrong-format auth identities and re-registers using `authModule.register()` (scrypt-kdf format). Fixed all 25 customers.
+2. **Kuwait region** — `seed-orders-v2.ts` failed "No Kuwait region found". Created region via `POST /admin/regions`. Region ID: `reg_01KJM1SZ9VPY96J0AGA3C740EA`.
+3. **Inventory** — Stock location existed but wasn't linked to Default Sales Channel. Called `POST /admin/stock-locations/{id}/sales-channels` to link. `inv_qty=45` now confirmed in store API with `fields=+variants.inventory_quantity`.
+4. **Vercel build** — `npm ERESOLVE` peer dep conflict (`@types/node@17` vs `vite@5`). Fixed by creating `storefront/.npmrc` with `legacy-peer-deps=true`.
+5. **start.sh** — Added `SEED_DEMO_DATA` conditional pipeline: vendors → products → customers → orders → fix-auth-prod → inventory. All scripts run inside Railway container (private network access).
+
+**Verification results**:
+- ✅ Backend health (`/health` → 200)
+- ✅ Admin auth (token obtained)
+- ✅ 60 products with KWD prices
+- ✅ Store API returns `inv_qty=45` (with `fields=+variants.inventory_quantity`)
+- ✅ 25 customers, all login with Demo1234!
+- ✅ 25 orders
+- ✅ 12 vendors
+- ✅ Kuwait region
+- ✅ Storefront `/kw`, `/kw/store`, `/kw/account` → 200
+- 🔴 `/kw/products/*` → 500 (all product detail pages fail)
+
+**Product page 500 — investigation log**:
+- API call is correct: `GET /store/products?handle=samsung-galaxy-s25-ultra&region_id=...&fields=*variants.calculated_price,+variants.inventory_quantity,*variants.images,+metadata,+tags,` → 200 ✓
+- Error: `⨯ [Error: An error occurred in the Server Components render. The specific message is omitted in production builds...]`
+- Files investigated: `page.tsx` (has null check ordering bug at line 117 — calls `getImagesForVariant(pricedProduct)` before null check — but pricedProduct IS returned), `ProductTemplate`, `ProductInfo`, `ImageGallery`, `ProductActionsWrapper`, `cookies.ts`, `regions.ts`
+- **Most likely cause**: `ProductReviews` (`src/components/product/ProductReviews.tsx`) is a Server Component (no `"use client"`) that calls `Math.random()` at render time. React 19 / Next.js 15.3.9 may be stricter about non-deterministic server renders.
+- **Recommended fix**: Add `"use client"` to `ProductReviews.tsx` → redeploy to Vercel.
+- Secondary candidate: `ProductOnboardingCta` calls `await nextCookies()` at top level (but this should work as it opts into dynamic rendering).
+
+**New files created in this session**:
+- `backend/src/scripts/fix-auth-prod.ts` — deletes wrong-format identities, re-registers 25 customers
+- `storefront/.npmrc` — `legacy-peer-deps=true` for Vercel npm compatibility
+- `backend/start.sh` updated — `SEED_DEMO_DATA` conditional pipeline
+
+---
+
 ## Current Environment Status
 
+### Production (Railway + Vercel)
 | Service | URL | Status |
 |---------|-----|--------|
-| Backend API | http://localhost:9000 | **Needs Docker** |
-| Admin Panel | http://localhost:9000/app | **Needs Docker** |
-| Storefront (old) | http://localhost:3000 | Not running |
-| Storefront-v2 (new) | http://localhost:8000 | Ready (needs backend) |
-| PostgreSQL | localhost:5432 | **Docker Desktop Required** |
-| Redis | localhost:6379 | **Docker Desktop Required** |
+| Backend API | https://medusa-backend-production-3732.up.railway.app | ✅ LIVE |
+| Admin Panel | https://medusa-backend-production-3732.up.railway.app/app | ✅ LIVE |
+| Storefront | https://storefront-orpin-iota.vercel.app | ✅ LIVE (product pages 500) |
+| PostgreSQL | Railway managed | ✅ Seeded |
+| Redis | Railway managed | ✅ Connected |
+
+### Local Dev
+| Service | URL | Status |
+|---------|-----|--------|
+| Backend API | http://localhost:9000 | Needs Docker |
+| Admin Panel | http://localhost:9000/app | Needs Docker |
+| Storefront | http://localhost:8000 | Ready (needs backend) |
+| PostgreSQL | localhost:5432 | Docker Desktop Required |
+| Redis | localhost:6379 | Docker Desktop Required |
 
 ---
 
@@ -802,6 +876,54 @@ Located in `.playwright-mcp/`:
 - ✅ Task #8: Amazon-style search — DONE (commit 686e952)
 - ✅ Task #9: Chrome DevTools MCP verifications — 24 screenshots in `demo-screenshots/` (commit b256492)
 - ✅ Task #10: Build check + push — `npm run build` passes, pushed to `feature/medusa-starter-storefront`
+
+---
+
+### 2026-02-28: Stakeholder Screenshots Session
+
+**Goal**: Retake broken screenshots, add missing pages, capture full Medusa admin panel for stakeholder demo.
+
+#### Storefront Screenshots Fixed/Added
+
+| File | Change | Reason |
+|------|--------|--------|
+| `storefront/03-store-filters.png` | Retaken | Had Jest worker error overlay from dev mode |
+| `storefront/04-product-detail.png` | Retaken | Showed "Out of stock" (stale pre-fix screenshot) |
+| `storefront/04b-product-add-to-cart.png` | New | Variant selected → "Add to cart" visible |
+| `storefront/05-product-reviews.png` | Retaken | Scrolled to Customer Reviews section |
+| `storefront/11-cart-dropdown.png` | Retaken | Used `hover` instead of `click` to show dropdown |
+| `storefront/13-account-login.png` | New | `/kw/account` login page |
+| `storefront/14-contact-page.png` | New | `/kw/contact` form + info |
+| `storefront/15-shipping-page.png` | New | `/kw/shipping` delivery zones |
+| `storefront/16-checkout-page.png` | New | `/kw/checkout?step=address` with order summary |
+
+#### Admin Screenshots Added (all new)
+
+| File | Content |
+|------|---------|
+| `admin/admin-01-orders.png` | 25 orders list + Pending Vendors widget |
+| `admin/admin-02-products.png` | 88 products list |
+| `admin/admin-03-vendors.png` | All 13 vendors with status badges |
+| `admin/admin-04-promotions.png` | Promotions page |
+| `admin/admin-05-inventory.png` | Inventory management |
+| `admin/admin-06-customers.png` | 26 customers list |
+| `admin/admin-07-product-detail.png` | Product edit — variants, options, shipping profile |
+| `admin/admin-08-settings-store.png` | Store settings — KWD currency |
+| `admin/admin-09-locations-shipping.png` | Kuwait Warehouse + shipping profiles |
+| `admin/admin-10-price-lists.png` | Price lists (empty) |
+| `admin/admin-11-vendor-detail.png` | TechZone Kuwait vendor modal (CR, commission editor) |
+| `admin/admin-12-order-detail.png` | Order #25 — line items, totals, customer info |
+
+#### Key Technical Notes
+- Storefront screenshots used **production build** at port 8000 (`next start -p 8000`) — dev mode causes error overlays
+- Admin panel requires backend dev server running — Vite/esbuild compiles admin UI on-the-fly
+- Admin credentials: `dassamaara@gmail.com` / `admin123` (from `backend/src/scripts/create-admin.ts`)
+- Cart dropdown: use `hover` on cart button (not `click` — that navigates to `/kw/cart`)
+- Screenshots organized: `screenshots/storefront/` (21 files) and `screenshots/admin/` (12 files)
+
+#### Git Commits
+- `1d783c8` — add and retake screenshots for stakeholder demo (22 files)
+- `cc3abdc` — organize into `screenshots/storefront/` and `screenshots/admin/` subdirectories
 
 ---
 

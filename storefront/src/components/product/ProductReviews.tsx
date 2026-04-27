@@ -1,3 +1,5 @@
+"use client"
+
 /**
  * ProductReviews — Static review component for Kuwait Marketplace
  * Reviews are hardcoded per product category (no backend review system needed for demo)

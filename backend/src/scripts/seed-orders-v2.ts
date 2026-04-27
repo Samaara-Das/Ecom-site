@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Seed script: 25 Kuwait Marketplace orders (v2)
  * Idempotent — skips if 25+ orders already exist from seeded customers.

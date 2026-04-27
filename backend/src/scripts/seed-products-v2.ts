@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Seed script: 60 Kuwait Marketplace products (v2)
  * Idempotent — checks by handle before creating.

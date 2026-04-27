@@ -1,0 +1,11 @@
+[build]
+builder = "NIXPACKS"
+buildCommand = "npm run build"
+
+[deploy]
+preDeployCommand = "node_modules/.bin/medusa db:migrate"
+startCommand = "node .medusa/server/index.js"
+healthcheckPath = "/health"
+healthcheckTimeout = 300
+restartPolicyType = "on_failure"
+restartPolicyMaxRetries = 3

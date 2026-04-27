@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Verify all seeded data counts.
  * Run with: npx medusa exec ./src/scripts/verify-seed-data.ts

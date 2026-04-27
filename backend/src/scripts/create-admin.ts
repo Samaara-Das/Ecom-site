@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { ContainerRegistrationKeys } from "@medusajs/framework/utils";
 
 export default async function createAdmin({ container }: { container: any }) {

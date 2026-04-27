@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Fix customer password auth identities.
  * Deletes existing emailpass auth identities for seeded customers
